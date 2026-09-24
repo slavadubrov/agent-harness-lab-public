@@ -1,9 +1,11 @@
 # base.yaml with one change: the model.
-# Endpoint: Fireworks. Z.AI's own endpoint accepts only tool_choice=auto, so it cannot
-# force the SGR NextStep call; Fireworks has the same price and supports it.
+# Endpoint: Together. Z.AI's own endpoint accepts only tool_choice=auto, so it cannot
+# force the SGR NextStep call. Fireworks (same price) returned HTTP 429 from OpenRouter's
+# shared upstream pool on 2026-09-24 (reports/article-a1/failed-attempts/). Together has
+# the same price and supports forced tool choice.
 extends: base.yaml
 name: a1-base-glm-5.3-flash
 model:
   id: z-ai/glm-5.3-flash
   settings:
-    provider: {order: [fireworks], allow_fallbacks: false}
+    provider: {order: [together], allow_fallbacks: false}

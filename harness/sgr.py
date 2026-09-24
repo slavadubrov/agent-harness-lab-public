@@ -279,6 +279,18 @@ class SchemaGuidedReasoningMiddleware(AgentMiddleware):
             )
         return ModelResponse(result=[msg])
 
+    def _error_text(self, error: Any, raw: AIMessage | None) -> str:
+        """Keep the last raw output in the error so the trace shows what the model sent."""
+        head = f"No valid NextStep after {1 + self.max_parse_retries} tries: {error}"
+        if raw is None:
+            return head
+        content = raw.content if isinstance(raw.content, str) else json.dumps(raw.content)
+        finish = (raw.response_metadata or {}).get("finish_reason")
+        calls = [c["name"] for c in raw.tool_calls] + [
+            f"invalid:{c.get('name')}" for c in raw.invalid_tool_calls
+        ]
+        return f"{head} | last raw: finish_reason={finish}, tool_calls={calls}, content={content[:500]!r}"
+
     # -- middleware hooks ------------------------------------------------------------
 
     def wrap_model_call(
@@ -290,13 +302,14 @@ class SchemaGuidedReasoningMiddleware(AgentMiddleware):
         runnable = self._runnable(request, schema)
         messages = self._messages(request)
         error: Any = None
+        raw: AIMessage | None = None
         for _ in range(1 + self.max_parse_retries):
             out = runnable.invoke(messages)
             if out.get("parsed") is not None:
                 return self._to_response(out)
-            error = out.get("parsing_error")
-            messages = [*messages, *self._feedback(out["raw"], error)]
-        raise SGRParseError(f"No valid NextStep after {1 + self.max_parse_retries} tries: {error}")
+            error, raw = out.get("parsing_error"), out["raw"]
+            messages = [*messages, *self._feedback(raw, error)]
+        raise SGRParseError(self._error_text(error, raw))
 
     async def awrap_model_call(
         self,
@@ -307,10 +320,11 @@ class SchemaGuidedReasoningMiddleware(AgentMiddleware):
         runnable = self._runnable(request, schema)
         messages = self._messages(request)
         error: Any = None
+        raw: AIMessage | None = None
         for _ in range(1 + self.max_parse_retries):
             out = await runnable.ainvoke(messages)
             if out.get("parsed") is not None:
                 return self._to_response(out)
-            error = out.get("parsing_error")
-            messages = [*messages, *self._feedback(out["raw"], error)]
-        raise SGRParseError(f"No valid NextStep after {1 + self.max_parse_retries} tries: {error}")
+            error, raw = out.get("parsing_error"), out["raw"]
+            messages = [*messages, *self._feedback(raw, error)]
+        raise SGRParseError(self._error_text(error, raw))

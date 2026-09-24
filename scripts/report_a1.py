@@ -25,7 +25,10 @@ REPORT = ROOT / "reports" / "article-a1"
 
 def load_runs() -> list[dict]:
     runs = []
-    for results in sorted(REPORT.glob("*/*/results.jsonl")):
+    paths = sorted(REPORT.glob("custom/*/results.jsonl")) + sorted(
+        REPORT.glob("tau3/*/results.jsonl")
+    )
+    for results in paths:
         run = json.loads((results.parent / "run.json").read_text())
         rows = [json.loads(line) for line in results.read_text().splitlines() if line.strip()]
         runs.append({"dir": results.parent.relative_to(REPORT), "run": run, "rows": rows})
