@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-24T21:06:53Z",
+  "generated_at": "2026-09-24T21:17:53Z",
   "label": "single run",
   "python": "3.12.13",
   "uv": "uv 0.12.1 (Homebrew 2026-07-31 aarch64-apple-darwin)",
@@ -17,7 +17,7 @@
     "litellm": "1.82.6"
   },
   "git": {
-    "sha": "425ff7d428d56cbb82a6bc7610e0de2937cc5a92",
+    "sha": "093e298b2f02800a37c3b2dee04481ec15eb3e03",
     "dirty": true
   },
   "tau2": {
@@ -56,7 +56,7 @@
       "model": "z-ai/glm-5.3-flash",
       "model_provider": {
         "order": [
-          "fireworks"
+          "together"
         ],
         "allow_fallbacks": false
       },
@@ -64,9 +64,9 @@
         "typesafe/jev-1.13-20260917"
       ],
       "user_llm": null,
-      "started_at": "2026-09-24T21:05:50Z",
+      "started_at": "2026-09-24T21:07:52Z",
       "git_at_run": {
-        "sha": "425ff7d428d56cbb82a6bc7610e0de2937cc5a92",
+        "sha": "093e298b2f02800a37c3b2dee04481ec15eb3e03",
         "dirty": true
       }
     },
@@ -111,6 +111,48 @@
         "sha": "425ff7d428d56cbb82a6bc7610e0de2937cc5a92",
         "dirty": true
       }
+    },
+    {
+      "dir": "tau3/a1-base",
+      "env": "tau3",
+      "spec": "a1-base",
+      "spec_source": "harness/spec/base.yaml",
+      "model": "openai/gpt-6-luna",
+      "model_provider": {
+        "order": [
+          "openai"
+        ],
+        "allow_fallbacks": false
+      },
+      "classifier_models": [
+        "typesafe/jev-1.13-20260917"
+      ],
+      "user_llm": "openrouter/openai/gpt-6-luna",
+      "started_at": "2026-09-24T21:12:16Z",
+      "git_at_run": {
+        "sha": "093e298b2f02800a37c3b2dee04481ec15eb3e03",
+        "dirty": true
+      }
+    },
+    {
+      "dir": "tau3/a1-plain",
+      "env": "tau3",
+      "spec": "a1-plain",
+      "spec_source": "harness/spec/plain.yaml",
+      "model": "openai/gpt-6-luna",
+      "model_provider": {
+        "order": [
+          "openai"
+        ],
+        "allow_fallbacks": false
+      },
+      "classifier_models": [],
+      "user_llm": "openrouter/openai/gpt-6-luna",
+      "started_at": "2026-09-24T21:14:27Z",
+      "git_at_run": {
+        "sha": "093e298b2f02800a37c3b2dee04481ec15eb3e03",
+        "dirty": true
+      }
     }
   ],
   "prices_usd_per_token": {
@@ -121,7 +163,7 @@
       "completion": 5e-07,
       "input_cache_read": 1e-08,
       "input_cache_write": 1.25e-07,
-      "fetched_at": "2026-09-24T21:05:27Z",
+      "fetched_at": "2026-09-24T21:14:27Z",
       "source": "https://openrouter.ai/api/v1/models/openai/gpt-6-luna/endpoints"
     },
     "typesafe/jev-1.13@typesafe": {
@@ -131,17 +173,17 @@
       "completion": 0.0,
       "input_cache_read": 0.0,
       "input_cache_write": 0.0,
-      "fetched_at": "2026-09-24T21:05:52Z",
+      "fetched_at": "2026-09-24T21:12:16Z",
       "source": "https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints"
     },
-    "z-ai/glm-5.3-flash@fireworks": {
+    "z-ai/glm-5.3-flash@together": {
       "model_id": "z-ai/glm-5.3-flash",
-      "provider_tag": "fireworks",
+      "provider_tag": "together",
       "prompt": 1.5e-07,
       "completion": 5e-07,
       "input_cache_read": 3e-08,
       "input_cache_write": 0.0,
-      "fetched_at": "2026-09-24T21:05:49Z",
+      "fetched_at": "2026-09-24T21:07:51Z",
       "source": "https://openrouter.ai/api/v1/models/z-ai/glm-5.3-flash/endpoints"
     },
     "xiaomi/mimo-v2.6-flash@xiaomi/fp8": {
@@ -185,23 +227,23 @@
       "spec": "a1-base-glm-5.3-flash",
       "model": "z-ai/glm-5.3-flash",
       "tasks": 12,
-      "passed": 0,
-      "pass_rate": 0.0,
-      "mean_input_tokens": 0,
-      "mean_output_tokens": 0,
-      "mean_usd_per_task": 0.0,
-      "usd_per_solved_task": null,
-      "tokens_per_solved_task": null,
-      "total_usd": 0.0,
-      "mean_latency_s": 0.389,
-      "median_latency_s": 0.3875,
-      "mean_model_calls": 1,
-      "mean_tool_calls": 0,
+      "passed": 12,
+      "pass_rate": 1.0,
+      "mean_input_tokens": 9886.75,
+      "mean_output_tokens": 707.5833333333334,
+      "mean_usd_per_task": 0.0010078508333333334,
+      "usd_per_solved_task": 0.0010078508333333334,
+      "tokens_per_solved_task": 10594.333333333334,
+      "total_usd": 0.01209421,
+      "mean_latency_s": 9.697416666666665,
+      "median_latency_s": 9.3855,
+      "mean_model_calls": 4.5,
+      "mean_tool_calls": 3,
       "summarization_calls": 0,
-      "classifier_calls": 0,
+      "classifier_calls": 6,
       "blocked_tool_calls": 0,
-      "run_errors": 12,
-      "unpriced_calls": 12,
+      "run_errors": 0,
+      "unpriced_calls": 0,
       "user_sim_usd_tau2": null
     },
     {
@@ -251,6 +293,54 @@
       "run_errors": 0,
       "unpriced_calls": 0,
       "user_sim_usd_tau2": null
+    },
+    {
+      "dir": "tau3/a1-base",
+      "spec": "a1-base",
+      "model": "openai/gpt-6-luna",
+      "tasks": 8,
+      "passed": 6,
+      "pass_rate": 0.75,
+      "mean_input_tokens": 62362.125,
+      "mean_output_tokens": 2693.25,
+      "mean_usd_per_task": 0.00238460375,
+      "usd_per_solved_task": 0.0031794716666666664,
+      "tokens_per_solved_task": 86740.5,
+      "total_usd": 0.01907683,
+      "mean_latency_s": 58.990875,
+      "median_latency_s": 53.2945,
+      "mean_model_calls": 11.25,
+      "mean_tool_calls": 6.375,
+      "summarization_calls": 0,
+      "classifier_calls": 0,
+      "blocked_tool_calls": 0,
+      "run_errors": 0,
+      "unpriced_calls": 0,
+      "user_sim_usd_tau2": 0.00453399
+    },
+    {
+      "dir": "tau3/a1-plain",
+      "spec": "a1-plain",
+      "model": "openai/gpt-6-luna",
+      "tasks": 8,
+      "passed": 7,
+      "pass_rate": 0.875,
+      "mean_input_tokens": 55593.75,
+      "mean_output_tokens": 824.625,
+      "mean_usd_per_task": 0.00136229125,
+      "usd_per_solved_task": 0.0015569042857142856,
+      "tokens_per_solved_task": 64478.142857142855,
+      "total_usd": 0.01089833,
+      "mean_latency_s": 38.93,
+      "median_latency_s": 35.202,
+      "mean_model_calls": 11.375,
+      "mean_tool_calls": 6.25,
+      "summarization_calls": 0,
+      "classifier_calls": 0,
+      "blocked_tool_calls": 0,
+      "run_errors": 0,
+      "unpriced_calls": 0,
+      "user_sim_usd_tau2": 0.00470884
     }
   ]
 }

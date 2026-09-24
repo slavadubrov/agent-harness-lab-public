@@ -5,8 +5,9 @@ Companion code for the Edge of Context series **Building and Evaluating Agent Ha
 LangChain harness that does real, stateful work, run on two task environments, with
 single-run baseline numbers.
 
-Results: [`reports/article-a1/README.md`](reports/article-a1/README.md). Every number there
-is a single run; A4 adds repeats.
+Results: [`reports/article-a1/README.md`](reports/article-a1/README.md) (tables) and
+[`reports/article-a1/NOTES.md`](reports/article-a1/NOTES.md) (what they show and do not
+show). Every number there is a single run; A4 adds repeats.
 
 ## Run it
 
@@ -155,5 +156,7 @@ What else had to change:
   as the harness (A3 moves the evidence out of the candidate process).
 - 12 development tasks, no held-out split yet. Single-turn user messages in the custom
   environment.
-- Summarization triggers at 12k tokens; short tasks may never reach it. The report counts
-  how often it ran.
+- Summarization triggers at 12k tokens and did not run in any committed run (largest
+  request: 8,351 tokens). A1 does not show that component working.
+- `langchain-openai` 1.6.5 is pinned and recorded but not imported; the model client is
+  `langchain-openrouter`.

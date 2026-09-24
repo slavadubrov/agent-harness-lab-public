@@ -43,7 +43,10 @@ def git_sha() -> dict[str, str | bool | None]:
         except (subprocess.CalledProcessError, FileNotFoundError):
             return None
 
-    return {"sha": run("rev-parse", "HEAD"), "dirty": bool(run("status", "--porcelain"))}
+    # A run writes its own output under reports/ before this is recorded; that is not a
+    # code change, so reports/ is excluded from the dirty check.
+    status = run("status", "--porcelain", "--", ".", ":(exclude)reports")
+    return {"sha": run("rev-parse", "HEAD"), "dirty": bool(status)}
 
 
 def now() -> str:
