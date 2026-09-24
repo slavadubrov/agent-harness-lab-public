@@ -1,0 +1,43 @@
+[project]
+name = "agent-harness-lab"
+version = "0.1.0"
+description = "Companion code for the Edge of Context series on agent harnesses (Series A)."
+readme = "README.md"
+requires-python = "==3.12.*"
+dependencies = [
+    "langchain==1.4.2",
+    "langgraph==1.2.12",
+    "langchain-mcp-adapters==0.3.2",
+    "langchain-openai==1.6.5",
+    "langchain-openrouter==0.2.9",
+    "pyyaml>=6.0.2",
+    "python-dotenv>=1.0.0",
+    # τ³-bench (package name tau2), pinned to commit b7ea907 (v1.0.1 + 46 commits).
+    "tau2 @ git+https://github.com/sierra-research/tau2-bench@b7ea9074c1cba482b30687fecdb5c8425fd6f619",
+    "langchain-typesafe[experimental]==0.0.1a3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "ruff>=0.16.9",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".cache", "build"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["harness", "envs", "evaluator"]

@@ -1,0 +1,20 @@
+# base.yaml without Schema-Guided Reasoning and without the TypeSafe Jev guard:
+# native tool calling and only the three stock A1 middleware components.
+# Used to measure what SGR + Jev change on the same tasks and model.
+extends: base.yaml
+name: a1-plain
+description: create_agent with native tool calling and the three stock A1 middleware components.
+middleware:
+  - type: SummarizationMiddleware
+    model: null
+    trigger: [tokens, 12000]
+    keep: [messages, 20]
+  - type: ModelCallLimitMiddleware
+    run_limit: 20
+    thread_limit: 60
+    exit_behavior: end
+  - type: ToolRetryMiddleware
+    max_retries: 2
+    on_failure: continue
+    initial_delay: 0.5
+    backoff_factor: 2.0

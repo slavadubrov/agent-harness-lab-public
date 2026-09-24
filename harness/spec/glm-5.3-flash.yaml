@@ -1,0 +1,9 @@
+# base.yaml with one change: the model.
+# Endpoint: Fireworks. Z.AI's own endpoint accepts only tool_choice=auto, so it cannot
+# force the SGR NextStep call; Fireworks has the same price and supports it.
+extends: base.yaml
+name: a1-base-glm-5.3-flash
+model:
+  id: z-ai/glm-5.3-flash
+  settings:
+    provider: {order: [fireworks], allow_fallbacks: false}

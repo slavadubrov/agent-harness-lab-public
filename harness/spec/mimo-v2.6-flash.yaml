@@ -1,0 +1,7 @@
+# base.yaml with one change: the model.
+extends: base.yaml
+name: a1-base-mimo-v2.6-flash
+model:
+  id: xiaomi/mimo-v2.6-flash
+  settings:
+    provider: {order: [xiaomi/fp8], allow_fallbacks: false}
