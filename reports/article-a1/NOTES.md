@@ -45,7 +45,8 @@ Custom environment, 12 development tasks, run on 2026-09-24:
 - **τ³ failures are missing writes.** base failed tasks 9 and 26: the agent made no
   write. plain failed task 27: it transferred to a human instead of doing the exchange.
   Task 5 failed in an earlier smoke run of a1-base (not committed) and passed in the
-  committed run. That is a reminder that one run per task is not a result.
+  committed run. A clean-clone rerun of a1-base (`clean-clone-check/`) also passed 6/8,
+  but it failed tasks 9 and 17 instead of 9 and 26. One run per task is not a result.
 - **Summarization never ran**, in either environment. The largest single τ³ model
   request was 8,351 input tokens; the trigger is 12k. The call limits never ended a run.
 - **Tool-side middleware does not run under τ³.** `ToolRetryMiddleware` and the Jev
@@ -65,5 +66,7 @@ Custom environment, 12 development tasks, run on 2026-09-24:
 - `git.dirty: true` in these run records only means that the run's own output files
   under `reports/` were not yet committed when it was recorded. From the next run on,
   `reports/` is excluded from that check (`harness/runinfo.py`).
+- `clean-clone-check/` holds the rerun from a fresh clone at `27b81c1` (custom 12/12,
+  τ³ 6/8). It is not in the summary tables.
 - The first GLM attempt (Fireworks endpoint, HTTP 429 from OpenRouter's shared upstream
   pool) is kept in `failed-attempts/` and is not in the summary.
