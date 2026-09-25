@@ -1,0 +1,60 @@
+# Example workflow spec (not measured in A1; A2 measures workflows).
+# Jev routes the request, then one of three agents runs. Each agent is base.yaml with a
+# smaller tool set; everything else about the agent comes from base.yaml.
+kind: workflow
+name: support-router
+description: TypeSafe Jev Choice routing to specialised A1 agents.
+engine: {name: langgraph}
+state_schema: harness.states:SupportRequest
+context_schema: envs.custom.tools:AccountContext
+
+nodes:
+  route:
+    type: classifier
+    model: typesafe/jev-1.13-20260917
+    instructions: Which team should handle this customer request?
+    choices:
+      refund: Refunds, returns, damaged or missing items, money back.
+      account: Address changes and account preferences (email, SMS, language, billing).
+      other: Anything else.
+    input: "{request}"
+    output: route
+    confidence_output: route_confidence
+  refunds:
+    type: agent
+    agent:
+      spec: harness/spec/base.yaml
+      override:
+        name: support-router/refunds
+        tools: {include: [look_up_account, list_orders, issue_refund, lookup_policy, search_faq]}
+    message: "{request}"
+    output: answer
+  account:
+    type: agent
+    agent:
+      spec: harness/spec/base.yaml
+      override:
+        name: support-router/account
+        tools: {include: [look_up_account, update_address, set_preference, lookup_policy, search_faq]}
+    message: "{request}"
+    output: answer
+  general:
+    type: agent
+    agent:
+      spec: harness/spec/base.yaml
+      override:
+        name: support-router/general
+        tools: {include: [lookup_policy, search_faq]}
+    message: "{request}"
+    output: answer
+
+edges:
+  - [START, route]
+  - [refunds, END]
+  - [account, END]
+  - [general, END]
+conditional_edges:
+  - source: route
+    field: route
+    routes: {refund: refunds, account: account}
+    default: general

@@ -1,0 +1,39 @@
+kind: workflow
+name: echo-workflow
+state_schema: tests.fakes:SupportState
+context_schema: envs.custom.tools:AccountContext
+nodes:
+  triage:
+    type: function
+    ref: tests.fakes:keyword_triage
+  lookup:
+    type: tool
+    tools:
+      functions: [envs.custom.tools:TOOLS]
+      include: [list_orders]
+    tool: list_orders
+    args: {account_id: account_id}
+    output: orders
+  refunds:
+    type: agent
+    agent:
+      spec: tests/fixtures/echo-agent.yaml
+      override: {name: refunds-agent, model: {kwargs: {prefix: refunds}}}
+    message: "Refund request: {request}"
+    output: answer
+  other:
+    type: agent
+    agent:
+      spec: tests/fixtures/echo-agent.yaml
+      override: {model: {kwargs: {prefix: other}}}
+    message: "{request}"
+    output: answer
+edges:
+  - [START, triage]
+  - [lookup, refunds]
+  - [refunds, END]
+  - [other, END]
+conditional_edges:
+  - source: triage
+    field: route
+    routes: {refund: lookup, other: other}

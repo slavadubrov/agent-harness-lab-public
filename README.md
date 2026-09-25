@@ -34,7 +34,10 @@ These names stay stable for A2–A6 and Series B and C.
 | `harness/agent.py` | `build_harness(spec)` → `create_agent(model, tools, system_prompt, middleware, checkpointer)` |
 | `harness/spec/base.yaml` | The A1 harness: model id and settings, tool sources, system prompt, middleware list and settings |
 | `harness/spec/*.yaml` | Variants that `extends: base.yaml` and change one thing (model, or middleware list) |
-| `harness/spec.py` | Pydantic schema for spec files (`extra="forbid"`: an unknown key is an error) |
+| `harness/spec.py` | Pydantic schema for agent and workflow spec files (`extra="forbid"`: an unknown key is an error) |
+| `harness/workflow.py` | `build_workflow(spec)`: agents, models, classifiers, tools and functions as one graph (for A2) |
+| `harness/spec/workflows/` | Workflow spec files (`kind: workflow`) |
+| `harness/states.py` | Typed workflow states referenced by workflow specs |
 | `harness/sgr.py` | Schema-Guided Reasoning middleware (typed structured output per model step) |
 | `harness/typesafe_guard.py` | TypeSafe Jev write guard (`langchain-typesafe` `AutoModeMiddleware`) |
 | `harness/accounting.py` | Token, dollar, latency and call recorder (LangChain callback) |
@@ -75,6 +78,76 @@ may touch: model, settings, components, code paths. `base.yaml` contains:
 
 `plain.yaml` is the same harness without SGR and without Jev: native tool calling with the
 three stock middleware components. It exists to measure what those two components change.
+
+## Configuration
+
+Everything a harness change may touch is in YAML under `harness/spec/`. Each file is
+validated by `harness/spec.py` (Pydantic, unknown keys are errors). `extends:` and
+`override:` deep-merge (dicts merge, lists replace). References to code use
+`package.module:attribute`.
+
+**Tools** (`tools:`), any mix, loaded in order:
+
+```yaml
+tools:
+  functions: [envs.custom.tools:TOOLS]            # @tool objects, lists, or plain functions
+  mcp_servers:                                    # stdio, streamable_http, sse or websocket
+    policy: {transport: stdio, command: python, args: [-m, envs.custom.policy_mcp]}
+  sources:
+    - {type: factory, ref: langchain_tavily:TavilySearch, kwargs: {max_results: 3}}  # LangChain tool with args
+    - {type: factory, ref: my_pkg.kits:SQLKit, kwargs: {uri: "sqlite:///x.db"}}      # toolkit: .get_tools()
+    - {type: import, ref: my_pkg.utils:add}         # plain function, wrapped with @tool
+    - {type: provider, spec: {type: web_search}}     # provider built-in tool, run by the provider
+  include: [look_up_account, lookup_policy]          # optional filters by tool name
+  exclude: []
+  context_schema: envs.custom.tools:AccountContext   # typed ToolRuntime context
+```
+
+A LangChain tool package (for example `langchain-tavily`) must be added with `uv add`
+first; A1 installs none.
+
+**Middleware** (`middleware:`) has typed entries for the A1 components
+(`SummarizationMiddleware`, `ModelCallLimitMiddleware`, `ToolRetryMiddleware`,
+`TypeSafeAutoMode`, `SchemaGuidedReasoning`) and an `import` entry for any other
+`AgentMiddleware`, including LangChain's other built-ins:
+
+```yaml
+  - {type: import, ref: langchain.agents.middleware:ToolCallLimitMiddleware, kwargs: {run_limit: 10}}
+  - {type: import, ref: langchain.agents.middleware:LLMToolSelectorMiddleware, kwargs: {model: $harness_model}}
+```
+
+**Model** (`model:`): `provider: openrouter` (ChatOpenRouter with pinned endpoint and
+price lookup) or `provider: import` with `ref`/`kwargs` for any LangChain chat model
+class (no price lookup; its calls are reported as unpriced).
+
+## Workflows (prepared for A2, not measured in A1)
+
+A workflow spec (`kind: workflow`) names a typed state, nodes, edges and conditional
+edges. `build_workflow(spec)` builds it; `load_any(path)` loads either kind.
+
+| node `type` | What it does |
+|---|---|
+| `agent` | Runs an agent spec (optionally with `override:`) through `build_harness`, inside the node: a message template filled from the state goes in, the final text goes to one state field |
+| `structured` | One structured-output model call: prompt template in, Pydantic object out, fields mapped to state |
+| `classifier` | A TypeSafe Jev `Choice` question; writes the label and confidence |
+| `tool` | Calls one tool directly, with no model; arguments come from state fields |
+| `function` | Plain Python `ref(state, ctx) -> dict` |
+| `workflow` | Another workflow spec as one node, with input and output field mappings |
+
+Conditional edges route on a state field (`field:`) or a router function (`router:`),
+with an optional `default:`. The engine is configurable: `engine: {name: langgraph}`
+(built in, `StateGraph`), or `engine: {ref: "module:Class"}` for another runtime, for
+example a fork of LangGraph. Node builders produce plain async callables
+`node(state, ctx) -> dict`. An engine only wires them: it implements
+`compile(built: BuiltWorkflow)` and returns an object with `ainvoke(input, config,
+context)`. `tests/fakes.py:SequentialEngine` is a 20-line example.
+
+`harness/spec/workflows/support-router.yaml` is an example: Jev routes the request to
+one of three agents, and each agent is `base.yaml` with a smaller tool set.
+`tests/test_config_harness.py` builds and runs config-defined workflows offline with a
+fake model: routing between agents, a tool node, a nested workflow and a custom engine.
+One live request through `support-router.yaml` ran end to end on 2026-09-24 as a smoke
+check. There are no workflow results; A2 measures workflows.
 
 ### Adaptations that were needed (and why)
 

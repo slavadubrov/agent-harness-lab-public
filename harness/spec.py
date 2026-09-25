@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Annotated, Any, Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SPEC = REPO_ROOT / "harness" / "spec" / "base.yaml"
@@ -37,22 +37,99 @@ class ModelSettings(_Strict):
 
 
 class ModelSpec(_Strict):
-    provider: Literal["openrouter"] = "openrouter"
+    """The chat model.
+
+    provider "openrouter": ChatOpenRouter(model=id, **settings).
+    provider "import": call ``ref`` ("module:callable") with ``kwargs``; it must return a
+    LangChain BaseChatModel. Use it for any other LangChain chat model class or a test
+    double. Such models have no price lookup; their calls are reported as unpriced.
+    """
+
+    provider: Literal["openrouter", "import"] = "openrouter"
     id: str
     settings: ModelSettings = ModelSettings()
+    ref: str | None = None
+    kwargs: dict[str, Any] = {}
+
+    @model_validator(mode="after")
+    def _ref_for_import(self) -> ModelSpec:
+        if self.provider == "import" and not self.ref:
+            raise ValueError("model.provider 'import' needs model.ref ('module:callable')")
+        return self
 
 
 class McpServerSpec(_Strict):
-    transport: Literal["stdio"] = "stdio"
-    # "python" is resolved to the interpreter that runs the harness.
-    command: str
+    transport: Literal["stdio", "streamable_http", "sse", "websocket"] = "stdio"
+    # stdio: "python" is resolved to the interpreter that runs the harness.
+    command: str | None = None
     args: list[str] = []
+    env: dict[str, str] | None = None
+    # streamable_http / sse / websocket
+    url: str | None = None
+    headers: dict[str, str] | None = None
+
+    @model_validator(mode="after")
+    def _transport_fields(self) -> McpServerSpec:
+        if self.transport == "stdio" and not self.command:
+            raise ValueError("stdio MCP server needs 'command'")
+        if self.transport != "stdio" and not self.url:
+            raise ValueError(f"{self.transport} MCP server needs 'url'")
+        return self
+
+
+class ImportToolSource(_Strict):
+    """``ref`` resolves to a BaseTool, a list of BaseTools, or a plain callable.
+
+    A plain callable is wrapped with ``langchain.tools.tool``, so its signature and
+    docstring become the tool schema.
+    """
+
+    type: Literal["import"]
+    ref: str
+
+
+class FactoryToolSource(_Strict):
+    """Call ``ref(**kwargs)``. For LangChain tools that need arguments and for toolkits.
+
+    The result may be a BaseTool, a list of BaseTools, or an object with ``get_tools()``
+    (a LangChain toolkit). Example: ``{type: factory, ref: langchain_tavily:TavilySearch,
+    kwargs: {max_results: 3}}``.
+    """
+
+    type: Literal["factory"]
+    ref: str
+    kwargs: dict[str, Any] = {}
+
+
+class McpToolSource(_Strict):
+    type: Literal["mcp"]
+    name: str
+    server: McpServerSpec
+
+
+class ProviderToolSource(_Strict):
+    """A provider built-in tool passed to create_agent as a dict (run by the provider)."""
+
+    type: Literal["provider"]
+    spec: dict[str, Any]
+
+
+ToolSourceSpec = Annotated[
+    ImportToolSource | FactoryToolSource | McpToolSource | ProviderToolSource,
+    Field(discriminator="type"),
+]
 
 
 class ToolsSpec(_Strict):
-    # Import paths "package.module:attribute" of LangChain @tool objects (or lists of them).
+    # A1 shorthand: import paths "package.module:attribute" (same as {type: import}).
     functions: list[str] = []
+    # A1 shorthand: named MCP servers (same as {type: mcp}).
     mcp_servers: dict[str, McpServerSpec] = {}
+    # General form: any mix of import, factory, mcp and provider sources.
+    sources: list[ToolSourceSpec] = []
+    # Filters applied after loading, by tool name. include=None keeps every tool.
+    include: list[str] | None = None
+    exclude: list[str] = []
     # Import path of the typed runtime context the tools read (ToolRuntime[Context]).
     context_schema: str | None = None
 
@@ -111,17 +188,36 @@ class TypeSafeAutoModeSpec(_Strict):
     timeout_s: float = 30.0
 
 
+class ImportMiddlewareSpec(_Strict):
+    """Any AgentMiddleware by import path, e.g. LangChain's other built-ins.
+
+    ``ref(**kwargs)`` must return an AgentMiddleware. A kwargs value of the string
+    "$harness_model" is replaced by the harness chat model instance (for middleware that
+    takes a model, such as LLMToolSelectorMiddleware).
+    Example: ``{type: import, ref: langchain.agents.middleware:ToolCallLimitMiddleware,
+    kwargs: {run_limit: 10}}``.
+    """
+
+    type: Literal["import"]
+    ref: str
+    kwargs: dict[str, Any] = {}
+
+
 MiddlewareSpec = Annotated[
     SummarizationSpec
     | ToolRetrySpec
     | ModelCallLimitSpec
     | SchemaGuidedReasoningSpec
-    | TypeSafeAutoModeSpec,
+    | TypeSafeAutoModeSpec
+    | ImportMiddlewareSpec,
     Field(discriminator="type"),
 ]
 
 
 class HarnessSpec(_Strict):
+    """One agent: create_agent(model, tools, system_prompt, middleware, checkpointer)."""
+
+    kind: Literal["agent"] = "agent"
     name: str
     description: str = ""
     model: ModelSpec
@@ -151,10 +247,182 @@ def _load_raw(path: Path) -> dict[str, Any]:
     return _deep_merge(_load_raw((path.parent / parent).resolve()), raw)
 
 
-def load_spec(path: str | Path = DEFAULT_SPEC) -> HarnessSpec:
+def _resolve(path: str | Path) -> Path:
     path = Path(path)
-    if not path.is_absolute():
-        path = (REPO_ROOT / path).resolve()
+    return path if path.is_absolute() else (REPO_ROOT / path).resolve()
+
+
+def load_spec(
+    path: str | Path = DEFAULT_SPEC, override: dict[str, Any] | None = None
+) -> HarnessSpec:
+    """Load an agent spec. ``override`` is deep-merged last, like one more ``extends`` level."""
+    path = _resolve(path)
+    data = _load_raw(path)
+    if override:
+        data = _deep_merge(data, override)
+    data["source"] = str(path.relative_to(REPO_ROOT)) + (" +override" if override else "")
+    return HarnessSpec.model_validate(data)
+
+
+# ---------------------------------------------------------------------------------------
+# Workflow specs (A2): several agents, tools, models and functions wired as one graph.
+# ---------------------------------------------------------------------------------------
+
+START, END = "START", "END"
+
+
+class AgentRef(_Strict):
+    """An agent spec file, optionally changed in place for this node."""
+
+    spec: str
+    override: dict[str, Any] = {}
+
+
+class AgentNodeSpec(_Strict):
+    """Run one agent inside a node (pattern 2: typed state in, typed field out).
+
+    ``message`` is a template filled from the state (``{field}``). The agent's final text
+    goes to state field ``output``. Its inner messages stay out of the workflow state.
+    """
+
+    type: Literal["agent"]
+    agent: AgentRef
+    message: str
+    output: str
+
+
+class StructuredNodeSpec(_Strict):
+    """One structured-output model call: prompt template in, Pydantic object out.
+
+    ``writes`` maps state fields to fields of the ``output_schema`` object.
+    """
+
+    type: Literal["structured"]
+    model: ModelSpec
+    output_schema: str
+    prompt: str
+    writes: dict[str, str]
+    method: Literal["function_calling", "json_schema"] = "function_calling"
+
+
+class ClassifierNodeSpec(_Strict):
+    """A TypeSafe Jev ``Choice`` question. Writes the chosen label (and confidence)."""
+
+    type: Literal["classifier"]
+    model: str = "typesafe/jev-1.13-20260917"
+    endpoint: Literal["openrouter-decisions", "typesafe"] = "openrouter-decisions"
+    price_model_id: str = "typesafe/jev-1.13"
+    price_provider_tag: str = "typesafe"
+    instructions: str
+    choices: dict[str, str]
+    input: str
+    output: str
+    confidence_output: str | None = None
+    timeout_s: float = 30.0
+
+
+class ToolNodeSpec(_Strict):
+    """Call one tool directly, with no model. Arguments come from state fields."""
+
+    type: Literal["tool"]
+    tools: ToolsSpec
+    tool: str
+    args: dict[str, str]  # tool argument -> state field
+    output: str
+
+
+class FunctionNodeSpec(_Strict):
+    """Plain Python: ``ref(state, ctx, **kwargs)`` returns a dict of state updates."""
+
+    type: Literal["function"]
+    ref: str
+    kwargs: dict[str, Any] = {}
+
+
+class SubworkflowNodeSpec(_Strict):
+    """Run another workflow spec as one node. ``inputs``: child field -> parent field;
+    ``outputs``: parent field -> child field."""
+
+    type: Literal["workflow"]
+    spec: str
+    inputs: dict[str, str]
+    outputs: dict[str, str]
+
+
+NodeSpec = Annotated[
+    AgentNodeSpec
+    | StructuredNodeSpec
+    | ClassifierNodeSpec
+    | ToolNodeSpec
+    | FunctionNodeSpec
+    | SubworkflowNodeSpec,
+    Field(discriminator="type"),
+]
+
+
+class ConditionalEdgeSpec(_Strict):
+    """Route on a state field value (``field``) or on a router function (``router``).
+
+    (Not ``on:``: YAML 1.1 reads the key ``on`` as the boolean true.)
+    """
+
+    source: str
+    field: str | None = None
+    router: str | None = None
+    routes: dict[str, str]
+    default: str | None = None
+
+    @model_validator(mode="after")
+    def _one_router(self) -> ConditionalEdgeSpec:
+        if (self.field is None) == (self.router is None):
+            raise ValueError("conditional edge needs exactly one of 'field' or 'router'")
+        return self
+
+
+class EngineSpec(_Strict):
+    """Which graph runtime wires the nodes. ``langgraph`` is built in. ``ref`` names any
+    other engine ("module:Class"), for example a fork of LangGraph."""
+
+    name: str = "langgraph"
+    ref: str | None = None
+    kwargs: dict[str, Any] = {}
+
+
+class WorkflowSpec(_Strict):
+    kind: Literal["workflow"]
+    name: str
+    description: str = ""
+    engine: EngineSpec = EngineSpec()
+    # Import paths of the typed workflow state (Pydantic model or TypedDict) and context.
+    state_schema: str
+    context_schema: str | None = None
+    nodes: dict[str, NodeSpec]
+    edges: list[tuple[str, str]] = []
+    conditional_edges: list[ConditionalEdgeSpec] = []
+    checkpointer: Literal["memory", "none"] = "memory"
+    source: str | None = None
+
+    @model_validator(mode="after")
+    def _known_nodes(self) -> WorkflowSpec:
+        known = set(self.nodes) | {START, END}
+        refs = [n for e in self.edges for n in e]
+        for ce in self.conditional_edges:
+            refs += [ce.source, *ce.routes.values()] + ([ce.default] if ce.default else [])
+        if unknown := sorted(set(refs) - known):
+            raise ValueError(f"edges refer to unknown nodes: {unknown}")
+        if START not in {s for s, _ in self.edges}:
+            raise ValueError("workflow needs an edge from START")
+        return self
+
+
+def load_workflow_spec(path: str | Path) -> WorkflowSpec:
+    path = _resolve(path)
     data = _load_raw(path)
     data["source"] = str(path.relative_to(REPO_ROOT))
-    return HarnessSpec.model_validate(data)
+    return WorkflowSpec.model_validate(data)
+
+
+def load_any(path: str | Path) -> HarnessSpec | WorkflowSpec:
+    """Load an agent or a workflow spec, by its ``kind`` key (default: agent)."""
+    kind = _load_raw(_resolve(path)).get("kind", "agent")
+    return load_workflow_spec(path) if kind == "workflow" else load_spec(path)

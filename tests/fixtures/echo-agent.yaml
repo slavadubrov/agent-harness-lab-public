@@ -1,0 +1,13 @@
+kind: agent
+name: echo-agent
+model:
+  provider: import
+  id: fake/echo
+  ref: tests.fakes:EchoChatModel
+  kwargs: {prefix: echo}
+system_prompt: You are a test agent.
+middleware:
+  - type: import
+    ref: langchain.agents.middleware:ModelCallLimitMiddleware
+    kwargs: {run_limit: 3}
+checkpointer: memory

@@ -1,0 +1,13 @@
+kind: workflow
+name: outer
+state_schema: tests.fakes:SupportState
+context_schema: envs.custom.tools:AccountContext
+nodes:
+  inner:
+    type: workflow
+    spec: tests/fixtures/echo-workflow.yaml
+    inputs: {request: request, account_id: account_id}
+    outputs: {answer: answer, route: route}
+edges:
+  - [START, inner]
+  - [inner, END]
