@@ -86,6 +86,10 @@ validated by `harness/spec.py` (Pydantic, unknown keys are errors). `extends:` a
 `override:` deep-merge (dicts merge, lists replace). References to code use
 `package.module:attribute`.
 
+A spec is code: it imports any `module:attribute` and can start any MCP server command.
+Load only spec files you would run as Python. Do not put secrets in a spec: `run.json`
+stores the full spec, and `reports/` is committed.
+
 **Tools** (`tools:`), any mix, loaded in order:
 
 ```yaml
@@ -154,9 +158,10 @@ check. There are no workflow results; A2 measures workflows.
 - `ChatOpenRouter(timeout=...)` takes **milliseconds**. The spec field is `timeout_ms`.
 - SGR binds `NextStep` with `tool_choice="required"`, not with its name. Xiaomi's endpoint
   rejects a named tool choice. With one bound tool, `required` forces the same call.
-- `glm-5.3-flash` runs on the Fireworks endpoint. Z.AI's own endpoint accepts only
-  `tool_choice="auto"`, so it cannot force the `NextStep` call. Both endpoints charge the
-  same price.
+- `glm-5.3-flash` runs on the Together endpoint. Z.AI's own endpoint accepts only
+  `tool_choice="auto"`, so it cannot force the `NextStep` call. Fireworks returned HTTP 429
+  from OpenRouter's shared upstream pool (`reports/article-a1/failed-attempts/`). Together
+  and Fireworks charge the same price.
 - MiMo returns the nested `action` object as a JSON-encoded string. If validation fails,
   SGR decodes string-encoded JSON once and validates again. The trace marks each such
   step `sgr_coerced: true`.

@@ -2,7 +2,9 @@
 SHELL := /bin/bash
 UV ?= uv
 SPEC ?= harness/spec/base.yaml
-SPEC_NAME = $(shell $(UV) run --quiet python -c "from harness.spec import load_spec; print(load_spec('$(SPEC)').name)")
+# The spec path goes in through sys.argv, never into the Python source.
+SPEC_PY = $(UV) run --quiet python -c "import sys; from harness.spec import load_spec; s = load_spec(sys.argv[1]); print($(1))" '$(SPEC)'
+SPEC_NAME = $(shell $(call SPEC_PY,s.name))
 
 TAU2_COMMIT := b7ea9074c1cba482b30687fecdb5c8425fd6f619
 TAU2_DIR := .cache/tau2-bench
@@ -59,12 +61,13 @@ tau3-data:
 
 a1-tau3: sync tau3-data
 	$(eval NAME := $(SPEC_NAME))
+	$(if $(NAME),,$(error could not read the spec name from $(SPEC)))
 	$(eval IDS := $(shell $(UV) run --quiet python -m envs.tau3.subset))
 	$(eval SAVE := a1-retail-$(NAME))
 	$(eval TRACES := build/tau3/$(NAME)/traces.jsonl)
-	rm -rf $(TAU2_DATA_DIR)/simulations/$(SAVE) build/tau3/$(NAME)
+	rm -rf "$(TAU2_DATA_DIR)/simulations/$(SAVE)" "build/tau3/$(NAME)"
 	$(UV) run python -m envs.tau3.cli run --domain retail --agent langchain_harness \
-	  --agent-llm "$$($(UV) run --quiet python -c "from harness.spec import load_spec; print(load_spec('$(SPEC)').model.id)")" \
+	  --agent-llm "$$($(call SPEC_PY,s.model.id))" \
 	  --agent-llm-args '{"spec":"$(SPEC)","trace_path":"$(TRACES)"}' \
 	  --user-llm $(USER_LLM) --user-llm-args '$(USER_LLM_ARGS)' \
 	  --task-split-name test --task-ids $(IDS) --num-trials 1 \

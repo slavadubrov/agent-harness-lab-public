@@ -46,7 +46,7 @@ def git_sha() -> dict[str, str | bool | None]:
     # A run writes its own output under reports/ before this is recorded; that is not a
     # code change, so reports/ is excluded from the dirty check.
     status = run("status", "--porcelain", "--", ".", ":(exclude)reports")
-    return {"sha": run("rev-parse", "HEAD"), "dirty": bool(status)}
+    return {"sha": run("rev-parse", "HEAD"), "dirty": None if status is None else bool(status)}
 
 
 def now() -> str:

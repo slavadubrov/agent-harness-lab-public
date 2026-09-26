@@ -35,6 +35,12 @@ def load_runs() -> list[dict]:
     return runs
 
 
+def _proposed(row: dict) -> int:
+    """Tool calls the model asked for. custom rows also count executed calls (tool_calls),
+    which leave out calls Jev blocked; τ³ rows count proposed calls in tool_calls."""
+    return row.get("proposed_tool_calls", row["tool_calls"])
+
+
 def summarize(rows: list[dict]) -> dict:
     n = len(rows)
     solved = sum(r["passed"] for r in rows)
@@ -55,7 +61,7 @@ def summarize(rows: list[dict]) -> dict:
         "mean_latency_s": statistics.mean(lat),
         "median_latency_s": statistics.median(lat),
         "mean_model_calls": statistics.mean(r["model_calls"] for r in rows),
-        "mean_tool_calls": statistics.mean(r["tool_calls"] for r in rows),
+        "mean_tool_calls": statistics.mean(_proposed(r) for r in rows),
         "summarization_calls": sum(r.get("summarization_calls", 0) for r in rows),
         "classifier_calls": sum(r.get("classifier_calls", 0) for r in rows),
         "blocked_tool_calls": sum(r.get("blocked_tool_calls", 0) for r in rows),
@@ -102,7 +108,7 @@ def build() -> None:
         "## Summary (single run)",
         "",
         "| env | spec | model | pass | pass rate | mean in tok | mean out tok | mean $/task "
-        "| $/solved task | mean latency s | mean model calls | mean tool calls |",
+        "| $/solved task | mean latency s | mean model calls | mean proposed tool calls |",
         "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     summaries = []
@@ -141,7 +147,8 @@ def build() -> None:
             "",
             f"Files: `{r['dir']}/`",
             "",
-            "| task | result | reason | in tok | out tok | $ | latency s | model calls | tool calls |",
+            "| task | result | reason | in tok | out tok | $ | latency s | model calls "
+            "| proposed tool calls |",
             "|---|---|---|---|---|---|---|---|---|",
         ]
         for row in r["rows"]:
@@ -149,7 +156,7 @@ def build() -> None:
                 f"| {row['task_id']} | {'pass' if row['passed'] else 'FAIL'} "
                 f"| {md_escape(row['reason'])[:300]} | {row['input_tokens']} | {row['output_tokens']} "
                 f"| {fmt_usd(row['dollars'])} | {row['latency_s']:.1f} | {row['model_calls']} "
-                f"| {row['tool_calls']} |"
+                f"| {_proposed(row)} |"
             )
 
     (REPORT / "README.md").write_text("\n".join(lines) + "\n")

@@ -110,6 +110,9 @@ def issue_refund(
     """Issue a refund on an order. This writes to the database and cannot be undone."""
     con = _db(runtime)
     try:
+        # Take the write lock before reading the remainder, so two parallel refund calls
+        # cannot both pass the check.
+        con.execute("BEGIN IMMEDIATE")
         order = con.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
         if order is None:
             return {"error": f"No order {order_id}."}
@@ -144,11 +147,13 @@ def update_address(
     try:
         if _account(con, account_id) is None:
             return {"error": f"No account {account_id}."}
-        con.execute(
+        cur = con.execute(
             "UPDATE addresses SET line1 = ?, city = ?, postal_code = ?, country = ? "
             "WHERE account_id = ? AND kind = ?",
             (line1, city, postal_code, country.upper(), account_id, kind),
         )
+        if cur.rowcount == 0:
+            return {"error": f"Account {account_id} has no {kind} address."}
         con.commit()
         return {"account_id": account_id, "kind": kind, "updated": True}
     finally:

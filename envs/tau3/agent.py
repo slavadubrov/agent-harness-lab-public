@@ -181,7 +181,7 @@ class LangChainHarnessAgent(HalfDuplexAgent[HarnessAgentState]):
                 generation_time_seconds=latency,
             )
         else:
-            text = last.content if isinstance(last.content, str) else str(last.content)
+            text = last.text
             reply = AssistantMessage(
                 role="assistant",
                 content=text or "(empty)",

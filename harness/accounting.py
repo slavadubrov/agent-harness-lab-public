@@ -88,6 +88,15 @@ class ModelCall:
     latency_s: float
     response_id: str | None
     error: str | None = None
+    # The request raised (for example HTTP 429): no response, no tokens.
+    failed: bool = False
+
+
+def error_text(error: BaseException) -> str:
+    """Type, status and message only. ``repr`` of an HTTP error holds the response body and
+    headers (account user id, cookies), and traces are committed."""
+    status = getattr(error, "status_code", None)
+    return f"{type(error).__name__}{f' (HTTP {status})' if status else ''}: {error}"
 
 
 @dataclass
@@ -105,12 +114,31 @@ class Totals:
     dollars: float = 0.0
     openrouter_cost: float = 0.0
     model_calls: int = 0
+    failed_calls: int = 0
     agent_model_calls: int = 0
     summarization_calls: int = 0
     classifier_calls: int = 0
     tool_calls: int = 0
     model_latency_s: float = 0.0
     unpriced_calls: int = 0
+
+
+def _failed_call(kind: str, node: str | None, latency: float, error: BaseException) -> ModelCall:
+    return ModelCall(
+        kind=kind,
+        node=node,
+        model=None,
+        input_tokens=0,
+        output_tokens=0,
+        reasoning_tokens=0,
+        cache_read_tokens=0,
+        dollars=None,
+        openrouter_cost=None,
+        latency_s=latency,
+        response_id=None,
+        error=error_text(error),
+        failed=True,
+    )
 
 
 class UsageRecorder(BaseCallbackHandler):
@@ -184,9 +212,7 @@ class UsageRecorder(BaseCallbackHandler):
     def on_llm_error(self, error, *, run_id, **kw):
         latency, node = self._stop(run_id)
         with self._lock:
-            self.model_calls.append(
-                ModelCall("chat", node, None, 0, 0, 0, 0, None, None, latency, None, repr(error))
-            )
+            self.model_calls.append(_failed_call("chat", node, latency, error))
 
     # -- Jev classifier (a Runnable traced with run_type="llm", so it reports as a chain) --
 
@@ -229,11 +255,7 @@ class UsageRecorder(BaseCallbackHandler):
             return
         latency, node = self._stop(run_id)
         with self._lock:
-            self.model_calls.append(
-                ModelCall(
-                    "classifier", node, None, 0, 0, 0, 0, None, None, latency, None, repr(error)
-                )
-            )
+            self.model_calls.append(_failed_call("classifier", node, latency, error))
 
     # -- tools -------------------------------------------------------------------------
 
@@ -248,7 +270,7 @@ class UsageRecorder(BaseCallbackHandler):
     def on_tool_error(self, error, *, run_id, **kw):
         latency, name = self._stop(run_id)
         with self._lock:
-            self.tool_calls.append(ToolCall(name or "?", latency, repr(error)))
+            self.tool_calls.append(ToolCall(name or "?", latency, error_text(error)))
 
     # -- aggregation -------------------------------------------------------------------
 
@@ -262,6 +284,9 @@ class UsageRecorder(BaseCallbackHandler):
             tc = list(self.tool_calls[since[1] :])
         t = Totals()
         for c in mc:
+            if c.failed:
+                t.failed_calls += 1
+                continue
             t.input_tokens += c.input_tokens
             t.output_tokens += c.output_tokens
             t.reasoning_tokens += c.reasoning_tokens

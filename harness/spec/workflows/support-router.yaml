@@ -25,7 +25,7 @@ nodes:
     agent:
       spec: harness/spec/base.yaml
       override:
-        name: support-router/refunds
+        name: support-router-refunds
         tools: {include: [look_up_account, list_orders, issue_refund, lookup_policy, search_faq]}
     message: "{request}"
     output: answer
@@ -34,7 +34,7 @@ nodes:
     agent:
       spec: harness/spec/base.yaml
       override:
-        name: support-router/account
+        name: support-router-account
         tools: {include: [look_up_account, update_address, set_preference, lookup_policy, search_faq]}
     message: "{request}"
     output: answer
@@ -43,7 +43,7 @@ nodes:
     agent:
       spec: harness/spec/base.yaml
       override:
-        name: support-router/general
+        name: support-router-general
         tools: {include: [lookup_policy, search_faq]}
     message: "{request}"
     output: answer

@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Annotated, Any, Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SPEC = REPO_ROOT / "harness" / "spec" / "base.yaml"
@@ -23,6 +23,10 @@ DEFAULT_SPEC = REPO_ROOT / "harness" / "spec" / "base.yaml"
 
 class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
+
+
+# Spec names become directory names (reports/.../<name>) and Makefile arguments to rm -rf.
+SpecName = Annotated[str, StringConstraints(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$")]
 
 
 class ModelSettings(_Strict):
@@ -74,6 +78,8 @@ class McpServerSpec(_Strict):
             raise ValueError("stdio MCP server needs 'command'")
         if self.transport != "stdio" and not self.url:
             raise ValueError(f"{self.transport} MCP server needs 'url'")
+        if self.transport == "websocket" and self.headers:
+            raise ValueError("websocket MCP transport does not take 'headers'")
         return self
 
 
@@ -218,7 +224,7 @@ class HarnessSpec(_Strict):
     """One agent: create_agent(model, tools, system_prompt, middleware, checkpointer)."""
 
     kind: Literal["agent"] = "agent"
-    name: str
+    name: SpecName
     description: str = ""
     model: ModelSpec
     system_prompt: str
@@ -227,6 +233,16 @@ class HarnessSpec(_Strict):
     checkpointer: Literal["memory", "none"] = "memory"
     # Filled by load_spec; not part of the YAML.
     source: str | None = None
+
+    @model_validator(mode="after")
+    def _summarizer_needs_openrouter(self) -> HarnessSpec:
+        named = any(isinstance(m, SummarizationSpec) and m.model for m in self.middleware)
+        if named and self.model.provider != "openrouter":
+            raise ValueError(
+                "SummarizationMiddleware.model names an OpenRouter model id; with "
+                "model.provider 'import' leave it null (use the harness model)"
+            )
+        return self
 
 
 def _deep_merge(base: dict[str, Any], child: dict[str, Any]) -> dict[str, Any]:
@@ -252,6 +268,10 @@ def _resolve(path: str | Path) -> Path:
     return path if path.is_absolute() else (REPO_ROOT / path).resolve()
 
 
+def _source(path: Path) -> str:
+    return str(path.relative_to(REPO_ROOT)) if path.is_relative_to(REPO_ROOT) else str(path)
+
+
 def load_spec(
     path: str | Path = DEFAULT_SPEC, override: dict[str, Any] | None = None
 ) -> HarnessSpec:
@@ -260,7 +280,7 @@ def load_spec(
     data = _load_raw(path)
     if override:
         data = _deep_merge(data, override)
-    data["source"] = str(path.relative_to(REPO_ROOT)) + (" +override" if override else "")
+    data["source"] = _source(path) + (" +override" if override else "")
     return HarnessSpec.model_validate(data)
 
 
@@ -272,7 +292,10 @@ START, END = "START", "END"
 
 
 class AgentRef(_Strict):
-    """An agent spec file, optionally changed in place for this node."""
+    """An agent spec file, optionally changed in place for this node.
+
+    ``spec`` (here and in workflow nodes) is relative to the repo root. ``extends:`` inside
+    a spec file is relative to that file."""
 
     spec: str
     override: dict[str, Any] = {}
@@ -390,7 +413,7 @@ class EngineSpec(_Strict):
 
 class WorkflowSpec(_Strict):
     kind: Literal["workflow"]
-    name: str
+    name: SpecName
     description: str = ""
     engine: EngineSpec = EngineSpec()
     # Import paths of the typed workflow state (Pydantic model or TypedDict) and context.
@@ -418,7 +441,7 @@ class WorkflowSpec(_Strict):
 def load_workflow_spec(path: str | Path) -> WorkflowSpec:
     path = _resolve(path)
     data = _load_raw(path)
-    data["source"] = str(path.relative_to(REPO_ROOT))
+    data["source"] = _source(path)
     return WorkflowSpec.model_validate(data)
 
 

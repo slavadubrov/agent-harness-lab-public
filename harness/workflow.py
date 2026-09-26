@@ -17,6 +17,7 @@ edges. Building happens in two steps, so the graph runtime can be swapped:
 from __future__ import annotations
 
 import inspect
+import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any, Protocol
@@ -57,7 +58,7 @@ from harness.spec import (
     load_spec,
     load_workflow_spec,
 )
-from harness.typesafe_guard import OpenRouterJevClassifier
+from harness.typesafe_guard import jev_classifier
 
 # ---------------------------------------------------------------------------------------
 # Engine-neutral pieces
@@ -70,10 +71,13 @@ class NodeContext:
 
     context: Any
     config: RunnableConfig
+    thread_id: str = field(init=False)
 
-    @property
-    def thread_id(self) -> str:
-        return str((self.config.get("configurable") or {}).get("thread_id", "workflow"))
+    def __post_init__(self) -> None:
+        # No thread_id from the caller: a fresh one per node call, so the agent checkpoints
+        # of two runs never mix.
+        given = (self.config.get("configurable") or {}).get("thread_id")
+        self.thread_id = str(given) if given else f"workflow-{uuid.uuid4()}"
 
 
 NodeFn = Callable[[Any, NodeContext], Awaitable[dict[str, Any]]]
@@ -119,7 +123,7 @@ def _final_text(messages: list[Any]) -> str:
     )
     if last is None:
         return ""
-    return last.content if isinstance(last.content, str) else str(last.content)
+    return last.text
 
 
 # ---------------------------------------------------------------------------------------
@@ -155,23 +159,13 @@ async def _structured_node(name: str, n: StructuredNodeSpec) -> NodeFn:
         out = await runnable.ainvoke(
             fill(n.prompt, state), config={"callbacks": ctx.config.get("callbacks")}
         )
-        return {state_key: getattr(out, out_key) for state_key, out_key in n.writes.items()}
+        return {state_key: get_field(out, out_key) for state_key, out_key in n.writes.items()}
 
     return run
 
 
 async def _classifier_node(name: str, n: ClassifierNodeSpec) -> NodeFn:
-    import os
-
-    from langchain_typesafe import TypeSafeClassifier
-
-    classifier = (
-        OpenRouterJevClassifier(
-            model=n.model, api_key=os.environ["OPENROUTER_API_KEY"], timeout=n.timeout_s
-        )
-        if n.endpoint == "openrouter-decisions"
-        else TypeSafeClassifier(model=n.model, timeout=n.timeout_s)
-    )
+    classifier = jev_classifier(n.model, n.endpoint, n.timeout_s)
     question = Choice(instructions=n.instructions, criteria=n.choices)
 
     async def run(state: Any, ctx: NodeContext) -> dict[str, Any]:

@@ -132,6 +132,12 @@ def test_spec_typos_fail():
         )
 
 
+@pytest.mark.parametrize("name", ["x ~", "a/b", "../x", ""])
+def test_unsafe_spec_names_fail(name):
+    with pytest.raises(ValidationError):
+        HarnessSpec.model_validate({"name": name, "model": {"id": "m"}, "system_prompt": "x"})
+
+
 # -- workflows -------------------------------------------------------------------------
 
 

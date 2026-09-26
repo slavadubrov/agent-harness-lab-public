@@ -96,6 +96,7 @@ async def run_task(agent, task: Task, seed: Path, workdir: Path, prices) -> tupl
         "openrouter_billed_cost": round(totals.openrouter_cost, 8),
         "latency_s": round(latency, 3),
         "model_calls": totals.model_calls,
+        "failed_model_calls": totals.failed_calls,
         "agent_model_calls": totals.agent_model_calls,
         "summarization_calls": totals.summarization_calls,
         "classifier_calls": totals.classifier_calls,
@@ -104,7 +105,7 @@ async def run_task(agent, task: Task, seed: Path, workdir: Path, prices) -> tupl
         "write_tool_calls_proposed": sum(c["name"] in WRITE_TOOLS for c in proposed),
         "blocked_tool_calls": _blocked(messages),
         "unpriced_calls": totals.unpriced_calls,
-        "final_answer": final.content if final else None,
+        "final_answer": final.text if final else None,
     }
     trace = {
         "env": "custom",
@@ -122,10 +123,16 @@ async def main_async(args) -> int:
     load_api_key()
     spec = load_spec(args.spec)
     prices = spec_prices(spec)
-    tasks = [t for t in TASKS if not args.tasks or t.id in args.tasks.split(",")]
-    out = (Path(args.out) if args.out else REPORTS / spec.name).resolve()
-    out.mkdir(parents=True, exist_ok=True)
+    wanted = args.tasks.split(",") if args.tasks else [t.id for t in TASKS]
+    if unknown := set(wanted) - {t.id for t in TASKS}:
+        raise SystemExit(f"unknown task ids: {sorted(unknown)}")
+    tasks = [t for t in TASKS if t.id in wanted]
     run_dir = BUILD / f"{spec.name}-{time.strftime('%Y%m%d-%H%M%S')}"
+    # A --tasks run is partial: it writes to build/ unless --out says otherwise, so it
+    # never replaces the committed full-run files in reports/.
+    default_out = run_dir if args.tasks else REPORTS / spec.name
+    out = (Path(args.out) if args.out else default_out).resolve()
+    out.mkdir(parents=True, exist_ok=True)
     seed = create_seed(run_dir / "seed.sqlite")
 
     agent = await build_harness(spec)
@@ -177,7 +184,7 @@ async def main_async(args) -> int:
     for r in rows:
         if not r["passed"]:
             print(f"  FAIL {r['task_id']}: {r['reason']}")
-    print(f"wrote {out.relative_to(REPO_ROOT)}")
+    print(f"wrote {out}")
     return 0
 
 

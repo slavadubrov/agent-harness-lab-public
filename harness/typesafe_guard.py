@@ -19,6 +19,7 @@ not the harness, so the guard never fires there.
 
 from __future__ import annotations
 
+import os
 from collections.abc import Sequence
 
 from langchain_core.tools import BaseTool
@@ -35,6 +36,15 @@ class OpenRouterJevClassifier(TypeSafeClassifier):
     @property
     def _endpoint(self) -> str:  # type: ignore[override]
         return OPENROUTER_DECISIONS_URL
+
+
+def jev_classifier(model: str, endpoint: str, timeout_s: float) -> TypeSafeClassifier:
+    """``endpoint``: "openrouter-decisions" (OpenRouter key) or "typesafe" (TypeSafe key)."""
+    if endpoint == "openrouter-decisions":
+        return OpenRouterJevClassifier(
+            model=model, api_key=os.environ["OPENROUTER_API_KEY"], timeout=timeout_s
+        )
+    return TypeSafeClassifier(model=model, timeout=timeout_s)
 
 
 class JevAutoModeMiddleware(AutoModeMiddleware):

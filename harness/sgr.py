@@ -61,6 +61,8 @@ def _json_type(prop: dict[str, Any]) -> Any:
         inner = options[0] if len(options) == 1 else reduce(operator.or_, options)
         return inner | None if nullable else inner
     t = prop.get("type")
+    if isinstance(t, list):  # {"type": ["string", "null"]}, as zod-built MCP servers publish
+        return _json_type({"anyOf": [{**prop, "type": x} for x in t]})
     if t in _SIMPLE:
         return _SIMPLE[t]
     if t == "array":
@@ -145,6 +147,17 @@ def _decode_json_strings(value: Any) -> Any:
         except json.JSONDecodeError:
             return value
     return value
+
+
+def _tool_args(args: BaseModel) -> dict[str, Any]:
+    """Drop None only from optional fields, where it means "not given". A required
+    ``x: str | None`` keeps the null the model chose."""
+    fields = type(args).model_fields
+    return {
+        k: v
+        for k, v in args.model_dump(mode="json").items()
+        if v is not None or fields[k].is_required()
+    }
 
 
 class _ToolCallParser:
@@ -269,7 +282,7 @@ class SchemaGuidedReasoningMiddleware(AgentMiddleware):
                 tool_calls=[
                     {
                         "name": action.tool,
-                        "args": action.args.model_dump(mode="json", exclude_none=True),
+                        "args": _tool_args(action.args),
                         "id": call_id,
                         "type": "tool_call",
                     }

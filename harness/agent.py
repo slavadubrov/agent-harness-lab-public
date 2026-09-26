@@ -11,7 +11,6 @@ those environment-owned things. It cannot change the model, prompt or middleware
 
 from __future__ import annotations
 
-import os
 import sys
 from dataclasses import dataclass
 from typing import Any
@@ -28,7 +27,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.tools import BaseTool
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openrouter import ChatOpenRouter
-from langchain_typesafe import NoulCriteria, TypeSafeClassifier
+from langchain_typesafe import NoulCriteria
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph.state import CompiledStateGraph
 
@@ -52,7 +51,7 @@ from harness.spec import (
     ToolsSpec,
     TypeSafeAutoModeSpec,
 )
-from harness.typesafe_guard import JevAutoModeMiddleware, OpenRouterJevClassifier
+from harness.typesafe_guard import JevAutoModeMiddleware, jev_classifier
 
 
 @dataclass(frozen=True)
@@ -92,6 +91,8 @@ def _as_tools(obj: Any, ref: str) -> list[BaseTool]:
     """Normalize what a tool source returned into a list of BaseTools."""
     if isinstance(obj, BaseTool):
         return [obj]
+    if isinstance(obj, type):
+        raise TypeError(f"{ref} is a class; use a {{type: factory}} source to construct it")
     if isinstance(obj, (list, tuple)):
         return [t for item in obj for t in _as_tools(item, ref)]
     if hasattr(obj, "get_tools"):  # LangChain toolkit
@@ -154,14 +155,6 @@ async def load_tools(tools_spec: HarnessSpec | ToolsSpec) -> list[BaseTool | dic
     return tools
 
 
-def _classifier(m: TypeSafeAutoModeSpec) -> TypeSafeClassifier:
-    if m.endpoint == "openrouter-decisions":
-        return OpenRouterJevClassifier(
-            model=m.model, api_key=os.environ["OPENROUTER_API_KEY"], timeout=m.timeout_s
-        )
-    return TypeSafeClassifier(model=m.model, timeout=m.timeout_s)
-
-
 def build_middleware(spec: HarnessSpec, model: BaseChatModel) -> list[AgentMiddleware]:
     out: list[AgentMiddleware] = []
     for m in spec.middleware:
@@ -210,7 +203,7 @@ def build_middleware(spec: HarnessSpec, model: BaseChatModel) -> list[AgentMiddl
                     tools=m.tools,
                     instructions=m.instructions,
                     criteria=criteria,
-                    classifier=_classifier(m),
+                    classifier=jev_classifier(m.model, m.endpoint, m.timeout_s),
                 )
             )
         elif isinstance(m, ImportMiddlewareSpec):

@@ -79,6 +79,7 @@ def main() -> None:
                 "openrouter_billed_cost": round(tot.get("openrouter_cost", 0.0), 8),
                 "latency_s": round(sim.get("duration") or 0.0, 3),
                 "model_calls": tot.get("model_calls", 0),
+                "failed_model_calls": tot.get("failed_calls", 0),
                 "agent_model_calls": tot.get("agent_model_calls", 0),
                 "summarization_calls": tot.get("summarization_calls", 0),
                 "classifier_calls": tot.get("classifier_calls", 0),
