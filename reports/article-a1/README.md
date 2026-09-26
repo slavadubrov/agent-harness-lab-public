@@ -2,13 +2,13 @@
 
 **Every number in this directory is a single run** (one trial per task). Article A4 adds repeated trials and variance. Do not read differences between rows as effects without repeats.
 
-Generated 2026-09-24T21:17:53Z by `scripts/report_a1.py` from the `results.jsonl` and `run.json` files next to this README. Raw traces (all messages and every model and tool call, failed runs included) are in each `traces.jsonl`.
+Generated 2026-09-26T10:31:24Z by `scripts/report_a1.py` from the `results.jsonl` and `run.json` files next to this README. Raw traces (all messages and every model and tool call, failed runs included) are in each `traces.jsonl`.
 
 Tokens are the provider-reported usage of each response (`usage_metadata`). Dollars are tokens × the per-token price of the pinned OpenRouter endpoint (see `versions.json`), including the Jev classifier calls. `openrouter_billed_cost` in the rows is OpenRouter's own billed cost for the chat calls and is a cross-check. τ³ latency is tau2's simulation duration and includes the user simulator.
 
 ## Summary (single run)
 
-| env | spec | model | pass | pass rate | mean in tok | mean out tok | mean $/task | $/solved task | mean latency s | mean model calls | mean tool calls |
+| env | spec | model | pass | pass rate | mean in tok | mean out tok | mean $/task | $/solved task | mean latency s | mean model calls | mean proposed tool calls |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | custom | a1-base | `openai/gpt-6-luna` | 12/12 | 100% | 6373 | 684 | $0.00073 | $0.00073 | 11.9 | 4.6 | 3.1 |
 | custom | a1-base-glm-5.3-flash | `z-ai/glm-5.3-flash` | 12/12 | 100% | 9887 | 708 | $0.00101 | $0.00101 | 9.7 | 4.5 | 3.0 |
@@ -30,7 +30,7 @@ Tokens are the provider-reported usage of each response (`usage_metadata`). Doll
 
 Files: `custom/a1-base/`
 
-| task | result | reason | in tok | out tok | $ | latency s | model calls | tool calls |
+| task | result | reason | in tok | out tok | $ | latency s | model calls | proposed tool calls |
 |---|---|---|---|---|---|---|---|---|
 | refund-full-damaged | pass | one refund O-1001/4800 | 9608 | 912 | $0.00095 | 14.5 | 6 | 4 |
 | refund-partial-missing-item | pass | one refund O-1002/1500 | 9630 | 831 | $0.00092 | 13.8 | 6 | 4 |
@@ -49,7 +49,7 @@ Files: `custom/a1-base/`
 
 Files: `custom/a1-base-glm-5.3-flash/`
 
-| task | result | reason | in tok | out tok | $ | latency s | model calls | tool calls |
+| task | result | reason | in tok | out tok | $ | latency s | model calls | proposed tool calls |
 |---|---|---|---|---|---|---|---|---|
 | refund-full-damaged | pass | one refund O-1001/4800 | 14098 | 898 | $0.00126 | 12.5 | 6 | 4 |
 | refund-partial-missing-item | pass | one refund O-1002/1500 | 14124 | 935 | $0.00128 | 13.2 | 6 | 4 |
@@ -68,7 +68,7 @@ Files: `custom/a1-base-glm-5.3-flash/`
 
 Files: `custom/a1-base-mimo-v2.6-flash/`
 
-| task | result | reason | in tok | out tok | $ | latency s | model calls | tool calls |
+| task | result | reason | in tok | out tok | $ | latency s | model calls | proposed tool calls |
 |---|---|---|---|---|---|---|---|---|
 | refund-full-damaged | FAIL | run error (SGRParseError: No valid NextStep after 2 tries: no NextStep tool call in the response); state check: expected 1 new refund, found 0: [] | 13810 | 1123 | $0.00055 | 15.9 | 6 | 2 |
 | refund-partial-missing-item | pass | one refund O-1002/1500 | 28422 | 2011 | $0.00141 | 23.1 | 11 | 4 |
@@ -87,7 +87,7 @@ Files: `custom/a1-base-mimo-v2.6-flash/`
 
 Files: `custom/a1-plain/`
 
-| task | result | reason | in tok | out tok | $ | latency s | model calls | tool calls |
+| task | result | reason | in tok | out tok | $ | latency s | model calls | proposed tool calls |
 |---|---|---|---|---|---|---|---|---|
 | refund-full-damaged | pass | one refund O-1001/4800 | 5020 | 156 | $0.00020 | 6.1 | 4 | 5 |
 | refund-partial-missing-item | pass | one refund O-1002/1500 | 5039 | 157 | $0.00038 | 5.9 | 4 | 5 |
@@ -106,7 +106,7 @@ Files: `custom/a1-plain/`
 
 Files: `tau3/a1-base/`
 
-| task | result | reason | in tok | out tok | $ | latency s | model calls | tool calls |
+| task | result | reason | in tok | out tok | $ | latency s | model calls | proposed tool calls |
 |---|---|---|---|---|---|---|---|---|
 | 9 | FAIL | reward=0.0; db_match=False; breakdown={'DB': 0.0, 'NL_ASSERTION': 1.0}; termination=user_stop | 21850 | 1076 | $0.00086 | 30.6 | 5 | 1 |
 | 17 | pass | reward=1.0; db_match=True; breakdown={'DB': 1.0, 'NL_ASSERTION': 1.0}; termination=user_stop | 28311 | 1283 | $0.00115 | 42.7 | 6 | 3 |
@@ -121,7 +121,7 @@ Files: `tau3/a1-base/`
 
 Files: `tau3/a1-plain/`
 
-| task | result | reason | in tok | out tok | $ | latency s | model calls | tool calls |
+| task | result | reason | in tok | out tok | $ | latency s | model calls | proposed tool calls |
 |---|---|---|---|---|---|---|---|---|
 | 17 | pass | reward=1.0; db_match=True; breakdown={'DB': 1.0, 'NL_ASSERTION': 1.0}; termination=user_stop | 28227 | 361 | $0.00065 | 18.3 | 7 | 4 |
 | 12 | pass | reward=1.0; db_match=True; breakdown={'DB': 1.0, 'NL_ASSERTION': 1.0}; termination=user_stop | 38486 | 602 | $0.00088 | 29.1 | 9 | 5 |

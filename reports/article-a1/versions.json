@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-24T21:17:53Z",
+  "generated_at": "2026-09-26T10:31:24Z",
   "label": "single run",
   "python": "3.12.13",
   "uv": "uv 0.12.1 (Homebrew 2026-07-31 aarch64-apple-darwin)",
@@ -17,8 +17,8 @@
     "litellm": "1.82.6"
   },
   "git": {
-    "sha": "093e298b2f02800a37c3b2dee04481ec15eb3e03",
-    "dirty": true
+    "sha": "f368c0b97de414eb422921f79f5aca2eedef1f69",
+    "dirty": false
   },
   "tau2": {
     "repo": "sierra-research/tau2-bench",
