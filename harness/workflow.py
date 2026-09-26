@@ -306,10 +306,6 @@ class LangGraphEngine:
 ENGINES: dict[str, Callable[..., WorkflowEngine]] = {"langgraph": LangGraphEngine}
 
 
-def register_engine(name: str, factory: Callable[..., WorkflowEngine]) -> None:
-    ENGINES[name] = factory
-
-
 def get_engine(spec: WorkflowSpec) -> WorkflowEngine:
     if spec.engine.ref:
         return import_ref(spec.engine.ref)(**spec.engine.kwargs)
