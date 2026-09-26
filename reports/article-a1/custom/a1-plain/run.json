@@ -1,9 +1,10 @@
 {
   "env": "custom",
   "label": "single run",
-  "started_at": "2026-09-24T21:05:27Z",
-  "finished_at": "2026-09-24T21:05:49Z",
+  "started_at": "2026-09-26T10:51:39Z",
+  "finished_at": "2026-09-26T10:51:55Z",
   "spec": {
+    "kind": "agent",
     "name": "a1-plain",
     "description": "create_agent with native tool calling and the three stock A1 middleware components.",
     "model": {
@@ -23,7 +24,9 @@
         },
         "timeout_ms": 120000,
         "max_retries": 2
-      }
+      },
+      "ref": null,
+      "kwargs": {}
     },
     "system_prompt": "You are a customer-support agent for an online shop. You help one customer per\nconversation with their account, orders, refunds, addresses and preferences.\n\nRules:\n- Read the policy that applies before any change. Use the policy lookup tools when\n  they are available; otherwise use the <policy> section below.\n- Act only on the customer's own account. Identify it first.\n- Make a change only when the customer asked for it and the policy allows it.\n- If information is missing, ask the customer. Do not guess values.\n- If the policy does not allow a request, do not make any change. Explain why.\n- Take one step at a time. When the work is done, reply to the customer briefly.\n",
     "tools": {
@@ -37,9 +40,15 @@
           "args": [
             "-m",
             "envs.custom.policy_mcp"
-          ]
+          ],
+          "env": null,
+          "url": null,
+          "headers": null
         }
       },
+      "sources": [],
+      "include": null,
+      "exclude": [],
       "context_schema": "envs.custom.tools:AccountContext"
     },
     "middleware": [
@@ -80,7 +89,7 @@
       "completion": 5e-07,
       "input_cache_read": 1e-08,
       "input_cache_write": 1.25e-07,
-      "fetched_at": "2026-09-24T21:05:27Z",
+      "fetched_at": "2026-09-26T10:51:38Z",
       "source": "https://openrouter.ai/api/v1/models/openai/gpt-6-luna/endpoints"
     }
   ],
@@ -98,8 +107,8 @@
     "litellm": "1.82.6"
   },
   "git": {
-    "sha": "425ff7d428d56cbb82a6bc7610e0de2937cc5a92",
-    "dirty": true
+    "sha": "bb6b8da47d04fd6a319f27508bee021519595b64",
+    "dirty": false
   },
   "tasks": [
     "refund-full-damaged",
