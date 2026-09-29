@@ -90,7 +90,8 @@ def build() -> None:
     lines = [
         "# Article A1 results",
         "",
-        "One run per task; A4 adds repeats. Notes: [`NOTES.md`](NOTES.md).",
+        "One run per task, so small differences between rows are not measured effects. "
+        "Summary: [`NOTES.md`](NOTES.md).",
         "",
         f"Generated {now()} by `scripts/report_a1.py`. Each run directory has `results.jsonl`, "
         "`run.json` (spec, versions, git commit) and `traces.jsonl` (every message, model call "

@@ -8,7 +8,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage
 from langchain_core.outputs import ChatGeneration, ChatResult
 from langchain_core.tools import tool
-from pydantic import BaseModel
+from pydantic import BaseModel, PrivateAttr
 
 from harness.workflow import BuiltWorkflow, NodeContext
 
@@ -29,6 +29,45 @@ class EchoChatModel(BaseChatModel):
             usage_metadata={"input_tokens": 3, "output_tokens": 2, "total_tokens": 5},
             response_metadata={"model_name": f"fake/{self.prefix}"},
         )
+        return ChatResult(generations=[ChatGeneration(message=msg)])
+
+    def bind_tools(self, tools, **kwargs):
+        return self
+
+
+def act(tool: str, **args: Any) -> dict[str, Any]:
+    """One SGR action: a tool call, or ``act("reply_to_user", message=...)``."""
+    return {
+        "tool": tool,
+        **({"message": args["message"]} if tool == "reply_to_user" else {"args": args}),
+    }
+
+
+class ScriptedChatModel(BaseChatModel):
+    """Returns one scripted SGR ``NextStep`` per call, as the forced NextStep tool call."""
+
+    steps: list[dict[str, Any]]
+    _i: int = PrivateAttr(default=0)
+
+    @property
+    def _llm_type(self) -> str:
+        return "scripted"
+
+    def _generate(self, messages, stop=None, run_manager=None, **kwargs) -> ChatResult:
+        step = {
+            "current_state": "test",
+            "policy_check": "test",
+            "missing_information": [],
+            "plan_remaining_steps": ["next"],
+            "action": self.steps[self._i],
+        }
+        msg = AIMessage(
+            content="",
+            tool_calls=[{"name": "NextStep", "args": step, "id": f"call-{self._i}"}],
+            usage_metadata={"input_tokens": 10, "output_tokens": 5, "total_tokens": 15},
+            response_metadata={"model_name": "fake/scripted"},
+        )
+        self._i += 1
         return ChatResult(generations=[ChatGeneration(message=msg)])
 
     def bind_tools(self, tools, **kwargs):

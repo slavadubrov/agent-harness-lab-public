@@ -1,6 +1,6 @@
 # Article A1 results
 
-One run per task; A4 adds repeats. Notes: [`NOTES.md`](NOTES.md).
+One run per task, so small differences between rows are not measured effects. Summary: [`NOTES.md`](NOTES.md).
 
 Generated 2026-09-26T11:32:22Z by `scripts/report_a1.py`. Each run directory has `results.jsonl`, `run.json` (spec, versions, git commit) and `traces.jsonl` (every message, model call and tool call).
 
