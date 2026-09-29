@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json
 import operator
+import uuid
 from collections.abc import Awaitable, Callable, Sequence
 from functools import reduce
 from typing import Any, Literal
@@ -275,7 +276,10 @@ class SchemaGuidedReasoningMiddleware(AgentMiddleware):
                 response_metadata=meta,
             )
         else:
-            call_id = (raw.tool_calls[0]["id"] if raw.tool_calls else None) or f"call_{raw.id}"
+            # json_schema mode has no tool call id; raw.id can be None, so never reuse one.
+            call_id = (raw.tool_calls[0]["id"] if raw.tool_calls else None) or (
+                f"call_{uuid.uuid4().hex}"
+            )
             msg = AIMessage(
                 content="",
                 id=raw.id,
