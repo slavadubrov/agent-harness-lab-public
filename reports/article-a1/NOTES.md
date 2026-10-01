@@ -1,7 +1,7 @@
-# A1 notes: what the committed runs show and what they do not
+# What the saved runs show and what they do not
 
 All numbers are from the files in this directory, **single run** (one trial per task).
-Differences between rows are observations, not measured effects. A4 adds repeats.
+Differences between rows are observations, not measured effects.
 
 ## What was measured
 
@@ -59,14 +59,16 @@ Custom environment, 12 development tasks, run on 2026-09-24:
 
 ## Provenance notes
 
-- The custom a1-base, a1-plain and MiMo runs used code at commit `425ff7d`. GLM and both
-  τ³ runs used `093e298`. Between the two commits the harness changed in one place: the
+- The runs were made in a private copy of this repository. The `git.commit` values in
+  `run.json` are hashes from that copy; the commits named below are the same code here.
+- The custom a1-base, a1-plain and MiMo runs used code at commit `7c3006e`. GLM and both
+  τ³ runs used `40f8acf`. Between the two commits the harness changed in one place: the
   text of `SGRParseError`, which now includes the raw model output (a diagnostics change
   only). The GLM spec's endpoint also changed (see `failed-attempts/`).
 - `git.dirty: true` in these run records only means that the run's own output files
   under `reports/` were not yet committed when it was recorded. From the next run on,
   `reports/` is excluded from that check (`harness/runinfo.py`).
-- `clean-clone-check/` holds the rerun from a fresh clone at `27b81c1` (custom 12/12,
+- `clean-clone-check/` holds the rerun from a fresh clone at `9517977` (custom 12/12,
   τ³ 6/8). It is not in the summary tables.
 - The first GLM attempt (Fireworks endpoint, HTTP 429 from OpenRouter's shared upstream
   pool) is kept in `failed-attempts/` and is not in the summary.

@@ -1,6 +1,6 @@
 # Article A1 results
 
-**Every number in this directory is a single run** (one trial per task). Article A4 adds repeated trials and variance. Do not read differences between rows as effects without repeats.
+One run per task, so small differences between rows are not measured effects. Summary: [`NOTES.md`](NOTES.md).
 
 Generated 2026-09-26T10:31:24Z by `scripts/report_a1.py` from the `results.jsonl` and `run.json` files next to this README. Raw traces (all messages and every model and tool call, failed runs included) are in each `traces.jsonl`.
 

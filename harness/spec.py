@@ -285,7 +285,7 @@ def load_spec(
 
 
 # ---------------------------------------------------------------------------------------
-# Workflow specs (A2): several agents, tools, models and functions wired as one graph.
+# Workflow specs: several agents, tools, models and functions wired as one graph.
 # ---------------------------------------------------------------------------------------
 
 START, END = "START", "END"

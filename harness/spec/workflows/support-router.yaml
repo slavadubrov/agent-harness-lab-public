@@ -1,4 +1,4 @@
-# Example workflow spec (not measured in A1; A2 measures workflows).
+# Example workflow spec. The saved runs do not measure it.
 # Jev routes the request, then one of three agents runs. Each agent is base.yaml with a
 # smaller tool set; everything else about the agent comes from base.yaml.
 kind: workflow

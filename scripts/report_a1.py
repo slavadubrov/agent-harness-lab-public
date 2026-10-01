@@ -90,20 +90,15 @@ def build() -> None:
     lines = [
         "# Article A1 results",
         "",
-        "**Every number in this directory is a single run** (one trial per task). "
-        "Article A4 adds repeated trials and variance. Do not read differences between rows "
-        "as effects without repeats.",
+        "One run per task, so small differences between rows are not measured effects. "
+        "Summary: [`NOTES.md`](NOTES.md).",
         "",
-        f"Generated {now()} by `scripts/report_a1.py` from the `results.jsonl` and `run.json` "
-        "files next to this README. Raw traces (all messages and every model and tool call, "
-        "failed runs included) are in each `traces.jsonl`.",
+        f"Generated {now()} by `scripts/report_a1.py`. Each run directory has `results.jsonl`, "
+        "`run.json` (spec, versions, git commit) and `traces.jsonl` (every message, model call "
+        "and tool call).",
         "",
-        "Tokens are the provider-reported usage of each response (`usage_metadata`). "
-        "Dollars are tokens × the per-token price of the pinned OpenRouter endpoint "
-        "(see `versions.json`), including the Jev classifier calls. "
-        "`openrouter_billed_cost` in the rows is OpenRouter's own billed cost for the chat "
-        "calls and is a cross-check. τ³ latency is tau2's simulation duration and includes "
-        "the user simulator.",
+        "Tokens are provider-reported usage. Dollars are tokens × the pinned endpoint price "
+        "(`versions.json`), Jev calls included. τ³ latency includes the user simulator.",
         "",
         "## Summary (single run)",
         "",
