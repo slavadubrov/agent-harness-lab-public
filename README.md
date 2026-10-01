@@ -74,7 +74,7 @@ Each row is a single run per task, so small differences between rows are not mea
 effects.
 
 The article quotes the runs saved at tag
-[`v0.1.1-a1`](https://github.com/slavadubrov/agent-harness-lab-public/tree/v0.1.1-a1/reports/article-a1).
+[`v0.1.2-a1`](https://github.com/slavadubrov/agent-harness-lab-public/tree/v0.1.2-a1/reports/article-a1).
 
 ## More detail
 

@@ -7,7 +7,7 @@ OpenRouter endpoint. OpenRouter's own billed cost per chat call
 (``response_metadata["cost"]``) is recorded next to it as a cross-check.
 
 This recorder is a LangChain callback, so it runs inside the harness process. That is
-fine for A1 baselines; A3 moves the evidence to an evaluator-owned proxy.
+fine for these baselines; a later part of the series moves it to a separate evaluator.
 """
 
 from __future__ import annotations
