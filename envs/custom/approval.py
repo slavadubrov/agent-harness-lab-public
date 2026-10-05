@@ -126,3 +126,11 @@ def reply(state: CaseState, ctx: NodeContext) -> dict[str, Any]:
                 "and did not approve it. No refund was issued."
             )
     return {"reply": " ".join(lines) or state.answer}
+
+
+def ask_to_clarify(state: Any, ctx: NodeContext) -> dict[str, Any]:
+    """The clarify route of support-router-clarify.yaml: ask instead of guessing."""
+    return {
+        "answer": "I can help with that. To make sure I handle it correctly, could you tell "
+        "me which one thing you need first, and the order it concerns?"
+    }

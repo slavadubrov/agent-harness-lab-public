@@ -198,16 +198,17 @@ def test_route_score_counts_clarifications_as_right_only_for_unclear_requests():
         {"label": "account", "choice": "account", "confidence": 0.3},
         {"label": "unclear", "choice": "refund", "confidence": 0.3},
         {"label": "unclear", "choice": "refund", "confidence": 0.9},
+        {"label": "unclear", "choice": "unclear", "confidence": 0.9},
     ]
     assert score(rows, 0.0) == {
         "right_route": 2,
         "wrong_route": 3,
-        "clarify_needed": 0,
+        "clarify_needed": 1,
         "clarify_not_needed": 0,
     }
     assert score(rows, 0.5) == {
         "right_route": 1,
         "wrong_route": 2,
-        "clarify_needed": 1,
+        "clarify_needed": 2,
         "clarify_not_needed": 1,
     }

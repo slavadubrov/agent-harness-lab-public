@@ -68,10 +68,11 @@ THRESHOLDS = [0.0, 0.5, 0.8]
 
 
 def score(rows: list[dict[str, Any]], threshold: float) -> dict[str, int]:
-    """Route when confidence >= threshold; otherwise ask a clarifying question."""
+    """Route when confidence >= threshold; otherwise ask a clarifying question. A router
+    with an ``unclear`` choice asks whenever it picks that choice."""
     s = {"right_route": 0, "wrong_route": 0, "clarify_needed": 0, "clarify_not_needed": 0}
     for r in rows:
-        routed = (r["confidence"] or 0.0) >= threshold
+        routed = r["choice"] != "unclear" and (r["confidence"] or 0.0) >= threshold
         if r["label"] == "unclear":
             s["clarify_needed" if not routed else "wrong_route"] += 1
         elif not routed:
