@@ -1,0 +1,185 @@
+{
+  "env": "custom",
+  "label": "single run",
+  "suite": "a2",
+  "started_at": "2026-10-05T21:00:39Z",
+  "finished_at": "2026-10-05T21:01:08Z",
+  "spec": {
+    "kind": "workflow",
+    "name": "a2-router",
+    "description": "TypeSafe Jev Choice routing to plain agents with narrower tool sets.",
+    "engine": {
+      "name": "langgraph",
+      "ref": null,
+      "kwargs": {}
+    },
+    "state_schema": "harness.states:SupportRequest",
+    "context_schema": "envs.custom.tools:AccountContext",
+    "nodes": {
+      "route": {
+        "type": "classifier",
+        "model": "typesafe/jev-1.13-20260917",
+        "endpoint": "openrouter-decisions",
+        "price_model_id": "typesafe/jev-1.13",
+        "price_provider_tag": "typesafe",
+        "instructions": "Which team should handle this customer request?",
+        "choices": {
+          "refund": "Refunds, returns, damaged or missing items, money back.",
+          "account": "Address changes and account preferences (email, SMS, language, billing).",
+          "other": "Anything else."
+        },
+        "input": "{request}",
+        "output": "route",
+        "confidence_output": "route_confidence",
+        "probabilities_output": "route_probabilities",
+        "timeout_s": 30.0
+      },
+      "refunds": {
+        "type": "agent",
+        "agent": {
+          "spec": "harness/spec/plain.yaml",
+          "override": {
+            "name": "support-router-refunds",
+            "tools": {
+              "include": [
+                "look_up_account",
+                "list_orders",
+                "issue_refund",
+                "lookup_policy",
+                "search_faq"
+              ]
+            }
+          }
+        },
+        "message": "{request}",
+        "output": "answer"
+      },
+      "account": {
+        "type": "agent",
+        "agent": {
+          "spec": "harness/spec/plain.yaml",
+          "override": {
+            "name": "support-router-account",
+            "tools": {
+              "include": [
+                "look_up_account",
+                "update_address",
+                "set_preference",
+                "lookup_policy",
+                "search_faq"
+              ]
+            }
+          }
+        },
+        "message": "{request}",
+        "output": "answer"
+      },
+      "general": {
+        "type": "agent",
+        "agent": {
+          "spec": "harness/spec/plain.yaml",
+          "override": {
+            "name": "support-router-general",
+            "tools": {
+              "include": [
+                "lookup_policy",
+                "search_faq"
+              ]
+            }
+          }
+        },
+        "message": "{request}",
+        "output": "answer"
+      }
+    },
+    "edges": [
+      [
+        "START",
+        "route"
+      ],
+      [
+        "refunds",
+        "END"
+      ],
+      [
+        "account",
+        "END"
+      ],
+      [
+        "general",
+        "END"
+      ]
+    ],
+    "conditional_edges": [
+      {
+        "source": "route",
+        "field": "route",
+        "router": null,
+        "routes": {
+          "refund": "refunds",
+          "account": "account"
+        },
+        "default": "general"
+      }
+    ],
+    "checkpointer": "memory",
+    "source": "harness/spec/workflows/support-router.yaml"
+  },
+  "prices_usd_per_token": [
+    {
+      "model_id": "typesafe/jev-1.13",
+      "provider_tag": "typesafe",
+      "prompt": 4.2e-08,
+      "completion": 0.0,
+      "input_cache_read": 0.0,
+      "input_cache_write": 0.0,
+      "fetched_at": "2026-10-05T21:00:38Z",
+      "source": "https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints"
+    },
+    {
+      "model_id": "openai/gpt-6-luna",
+      "provider_tag": "openai",
+      "prompt": 1e-07,
+      "completion": 5e-07,
+      "input_cache_read": 1e-08,
+      "input_cache_write": 1.25e-07,
+      "fetched_at": "2026-10-05T21:00:38Z",
+      "source": "https://openrouter.ai/api/v1/models/openai/gpt-6-luna/endpoints"
+    }
+  ],
+  "packages": {
+    "langchain": "1.4.2",
+    "langchain-core": "1.6.5",
+    "langgraph": "1.2.12",
+    "langchain-mcp-adapters": "0.3.2",
+    "langchain-openai": "1.6.5",
+    "langchain-openrouter": "0.2.9",
+    "langchain-typesafe": "0.0.1a3",
+    "mcp": "1.30.0",
+    "pydantic": "2.12.5",
+    "tau2": "1.0.1",
+    "litellm": "1.82.6"
+  },
+  "git": {
+    "sha": "6fe743393613ef7fa0612f0f37ad10848a0a3393",
+    "dirty": false
+  },
+  "tasks": [
+    "refund-full-damaged",
+    "refund-partial-missing-item",
+    "refund-outside-window",
+    "refund-over-agent-limit",
+    "refund-not-delivered",
+    "refund-already-refunded",
+    "refund-other-customers-order",
+    "address-update-shipping",
+    "address-missing-fields",
+    "address-suspended-account",
+    "preferences-two-changes",
+    "preferences-one-unsupported",
+    "refund-over-limit-approved",
+    "refund-over-limit-rejected",
+    "refund-partial-lost-response",
+    "refund-over-limit-approved-lost-response"
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "env": "custom",
+  "label": "single run",
+  "suite": "a2",
+  "started_at": "2026-10-05T21:00:13Z",
+  "finished_at": "2026-10-05T21:00:37Z",
+  "spec": {
+    "kind": "workflow",
+    "name": "a2-workflow",
+    "description": "Plain agent, then a supervisor approval step and a refund step in code.",
+    "engine": {
+      "name": "langgraph",
+      "ref": null,
+      "kwargs": {}
+    },
+    "state_schema": "envs.custom.approval:CaseState",
+    "context_schema": "envs.custom.tools:AccountContext",
+    "nodes": {
+      "agent": {
+        "type": "agent",
+        "agent": {
+          "spec": "harness/spec/plain.yaml",
+          "override": {}
+        },
+        "message": "{request}",
+        "output": "answer"
+      },
+      "find_held": {
+        "type": "function",
+        "ref": "envs.custom.approval:find_held",
+        "kwargs": {},
+        "retry": null
+      },
+      "approval": {
+        "type": "function",
+        "ref": "envs.custom.approval:wait_for_supervisor",
+        "kwargs": {},
+        "retry": null
+      },
+      "issue": {
+        "type": "function",
+        "ref": "envs.custom.approval:issue_approved",
+        "kwargs": {},
+        "retry": {
+          "max_attempts": 3,
+          "initial_interval": 0.5,
+          "retry_on": [
+            "builtins:ConnectionError"
+          ]
+        }
+      },
+      "reply": {
+        "type": "function",
+        "ref": "envs.custom.approval:reply",
+        "kwargs": {},
+        "retry": null
+      }
+    },
+    "edges": [
+      [
+        "START",
+        "agent"
+      ],
+      [
+        "agent",
+        "find_held"
+      ],
+      [
+        "approval",
+        "issue"
+      ],
+      [
+        "issue",
+        "reply"
+      ],
+      [
+        "reply",
+        "END"
+      ]
+    ],
+    "conditional_edges": [
+      {
+        "source": "find_held",
+        "field": "next_step",
+        "router": null,
+        "routes": {
+          "approval": "approval"
+        },
+        "default": "END"
+      }
+    ],
+    "checkpointer": "memory",
+    "source": "harness/spec/workflows/refund-approval.yaml"
+  },
+  "prices_usd_per_token": [
+    {
+      "model_id": "openai/gpt-6-luna",
+      "provider_tag": "openai",
+      "prompt": 1e-07,
+      "completion": 5e-07,
+      "input_cache_read": 1e-08,
+      "input_cache_write": 1.25e-07,
+      "fetched_at": "2026-10-05T21:00:13Z",
+      "source": "https://openrouter.ai/api/v1/models/openai/gpt-6-luna/endpoints"
+    }
+  ],
+  "packages": {
+    "langchain": "1.4.2",
+    "langchain-core": "1.6.5",
+    "langgraph": "1.2.12",
+    "langchain-mcp-adapters": "0.3.2",
+    "langchain-openai": "1.6.5",
+    "langchain-openrouter": "0.2.9",
+    "langchain-typesafe": "0.0.1a3",
+    "mcp": "1.30.0",
+    "pydantic": "2.12.5",
+    "tau2": "1.0.1",
+    "litellm": "1.82.6"
+  },
+  "git": {
+    "sha": "6fe743393613ef7fa0612f0f37ad10848a0a3393",
+    "dirty": false
+  },
+  "tasks": [
+    "refund-full-damaged",
+    "refund-partial-missing-item",
+    "refund-outside-window",
+    "refund-over-agent-limit",
+    "refund-not-delivered",
+    "refund-already-refunded",
+    "refund-other-customers-order",
+    "address-update-shipping",
+    "address-missing-fields",
+    "address-suspended-account",
+    "preferences-two-changes",
+    "preferences-one-unsupported",
+    "refund-over-limit-approved",
+    "refund-over-limit-rejected",
+    "refund-partial-lost-response",
+    "refund-over-limit-approved-lost-response"
+  ]
+}

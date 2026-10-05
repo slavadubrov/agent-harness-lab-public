@@ -44,9 +44,10 @@ model has no pinned endpoint (`model_price` in `harness/agent.py`).
 | `lookup_policy`, `search_faq` | reads | MCP server over stdio, [`envs/custom/policy_mcp.py`](../envs/custom/policy_mcp.py) |
 
 The write tools check that the order or account exists and that a refund does not
-exceed what is left on the order. They do not check ownership, refund windows, limits
-or account status. The agent must read the policy and apply it. The tasks measure
-whether it does.
+exceed what is left on the order. They do not check ownership, refund windows or account
+status. The agent must read the policy and apply it. The tasks measure whether it does.
+`issue_refund` goes through the refund service, which holds refunds above $200 for a
+supervisor and issues each refund once ([environments.md](environments.md#the-refund-service)).
 
 ## Where each middleware component runs
 

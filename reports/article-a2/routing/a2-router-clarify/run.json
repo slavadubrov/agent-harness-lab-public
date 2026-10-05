@@ -1,0 +1,192 @@
+{
+  "label": "single run",
+  "started_at": "2026-10-05T21:03:41Z",
+  "finished_at": "2026-10-05T21:03:43Z",
+  "spec": {
+    "kind": "workflow",
+    "name": "a2-router-clarify",
+    "description": "Jev routing with an explicit route for requests no single specialist fits.",
+    "engine": {
+      "name": "langgraph",
+      "ref": null,
+      "kwargs": {}
+    },
+    "state_schema": "harness.states:SupportRequest",
+    "context_schema": "envs.custom.tools:AccountContext",
+    "nodes": {
+      "route": {
+        "type": "classifier",
+        "model": "typesafe/jev-1.13-20260917",
+        "endpoint": "openrouter-decisions",
+        "price_model_id": "typesafe/jev-1.13",
+        "price_provider_tag": "typesafe",
+        "instructions": "Which team should handle this customer request?",
+        "choices": {
+          "refund": "Refunds, returns, damaged or missing items, money back.",
+          "account": "Address changes and account preferences (email, SMS, language, billing).",
+          "other": "Anything else that is one clear request.",
+          "unclear": "Two or more different requests in one message, or too vague to act on."
+        },
+        "input": "{request}",
+        "output": "route",
+        "confidence_output": "route_confidence",
+        "probabilities_output": "route_probabilities",
+        "timeout_s": 30.0
+      },
+      "refunds": {
+        "type": "agent",
+        "agent": {
+          "spec": "harness/spec/plain.yaml",
+          "override": {
+            "name": "support-router-refunds",
+            "tools": {
+              "include": [
+                "look_up_account",
+                "list_orders",
+                "issue_refund",
+                "lookup_policy",
+                "search_faq"
+              ]
+            }
+          }
+        },
+        "message": "{request}",
+        "output": "answer"
+      },
+      "account": {
+        "type": "agent",
+        "agent": {
+          "spec": "harness/spec/plain.yaml",
+          "override": {
+            "name": "support-router-account",
+            "tools": {
+              "include": [
+                "look_up_account",
+                "update_address",
+                "set_preference",
+                "lookup_policy",
+                "search_faq"
+              ]
+            }
+          }
+        },
+        "message": "{request}",
+        "output": "answer"
+      },
+      "general": {
+        "type": "agent",
+        "agent": {
+          "spec": "harness/spec/plain.yaml",
+          "override": {
+            "name": "support-router-general",
+            "tools": {
+              "include": [
+                "lookup_policy",
+                "search_faq"
+              ]
+            }
+          }
+        },
+        "message": "{request}",
+        "output": "answer"
+      },
+      "clarify": {
+        "type": "function",
+        "ref": "envs.custom.approval:ask_to_clarify",
+        "kwargs": {},
+        "retry": null
+      }
+    },
+    "edges": [
+      [
+        "START",
+        "route"
+      ],
+      [
+        "refunds",
+        "END"
+      ],
+      [
+        "account",
+        "END"
+      ],
+      [
+        "general",
+        "END"
+      ],
+      [
+        "clarify",
+        "END"
+      ]
+    ],
+    "conditional_edges": [
+      {
+        "source": "route",
+        "field": "route",
+        "router": null,
+        "routes": {
+          "refund": "refunds",
+          "account": "account",
+          "unclear": "clarify"
+        },
+        "default": "general"
+      }
+    ],
+    "checkpointer": "memory",
+    "source": "harness/spec/workflows/support-router-clarify.yaml"
+  },
+  "node": "route",
+  "cases": 25,
+  "classifier_calls": 25,
+  "input_tokens": 9855,
+  "dollars": 0.00041391,
+  "summary": {
+    "threshold 0.0": {
+      "right_route": 20,
+      "wrong_route": 2,
+      "clarify_needed": 3,
+      "clarify_not_needed": 0
+    },
+    "threshold 0.5": {
+      "right_route": 19,
+      "wrong_route": 2,
+      "clarify_needed": 3,
+      "clarify_not_needed": 1
+    },
+    "threshold 0.8": {
+      "right_route": 19,
+      "wrong_route": 0,
+      "clarify_needed": 4,
+      "clarify_not_needed": 2
+    }
+  },
+  "prices_usd_per_token": [
+    {
+      "model_id": "typesafe/jev-1.13",
+      "provider_tag": "typesafe",
+      "prompt": 4.2e-08,
+      "completion": 0.0,
+      "input_cache_read": 0.0,
+      "input_cache_write": 0.0,
+      "fetched_at": "2026-10-05T21:03:41Z",
+      "source": "https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints"
+    }
+  ],
+  "packages": {
+    "langchain": "1.4.2",
+    "langchain-core": "1.6.5",
+    "langgraph": "1.2.12",
+    "langchain-mcp-adapters": "0.3.2",
+    "langchain-openai": "1.6.5",
+    "langchain-openrouter": "0.2.9",
+    "langchain-typesafe": "0.0.1a3",
+    "mcp": "1.30.0",
+    "pydantic": "2.12.5",
+    "tau2": "1.0.1",
+    "litellm": "1.82.6"
+  },
+  "git": {
+    "sha": "b7f9b5b7c175781ab0807d67fa902e6fed618bb3",
+    "dirty": false
+  }
+}
