@@ -1,0 +1,23 @@
+# plain.yaml plus one component: LangChain's HumanInTheLoopMiddleware pauses the agent
+# before an issue_refund call above $200 until a supervisor approves or rejects it.
+# The rest of the agent (model, prompt, tools, other middleware) is plain.yaml.
+extends: plain.yaml
+name: a2-agent-approval
+description: create_agent (plain) with a supervisor approval pause before large refunds.
+middleware:
+  - type: SummarizationMiddleware
+    model: null
+    trigger: [tokens, 12000]
+    keep: [messages, 20]
+  - type: ModelCallLimitMiddleware
+    run_limit: 20
+    thread_limit: 60
+    exit_behavior: end
+  - type: ToolRetryMiddleware
+    max_retries: 2
+    on_failure: continue
+    initial_delay: 0.5
+    backoff_factor: 2.0
+    tools: [look_up_account, list_orders, lookup_policy, search_faq]  # reads only
+  - type: import
+    ref: envs.custom.approval:refund_approval_middleware

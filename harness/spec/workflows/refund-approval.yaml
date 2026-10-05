@@ -1,0 +1,42 @@
+# The plain agent inside a workflow. The agent runs unchanged; the refund service holds a
+# refund above $200. Code then pauses for a supervisor, issues the approved refund and
+# writes the reply. Functions: envs/custom/approval.py.
+kind: workflow
+name: a2-workflow
+description: Plain agent, then a supervisor approval step and a refund step in code.
+engine: {name: langgraph}
+state_schema: envs.custom.approval:CaseState
+context_schema: envs.custom.tools:AccountContext
+
+nodes:
+  agent:
+    type: agent
+    agent: {spec: harness/spec/plain.yaml}
+    message: "{request}"
+    output: answer
+  find_held:
+    type: function
+    ref: envs.custom.approval:find_held
+  approval:
+    type: function
+    ref: envs.custom.approval:wait_for_supervisor
+  issue:
+    type: function
+    ref: envs.custom.approval:issue_approved
+    # Safe to retry: the refund service deduplicates by operation key.
+    retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
+  reply:
+    type: function
+    ref: envs.custom.approval:reply
+
+edges:
+  - [START, agent]
+  - [agent, find_held]
+  - [approval, issue]
+  - [issue, reply]
+  - [reply, END]
+conditional_edges:
+  - source: find_held
+    field: next_step
+    routes: {approval: approval}
+    default: END

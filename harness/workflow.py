@@ -32,6 +32,7 @@ from langgraph.graph import END as LG_END
 from langgraph.graph import START as LG_START
 from langgraph.graph import StateGraph
 from langgraph.runtime import Runtime
+from langgraph.types import RetryPolicy
 from pydantic import BaseModel
 
 from harness.accounting import Price, fetch_price
@@ -141,11 +142,15 @@ async def _agent_node(name: str, n: AgentNodeSpec, agents: dict[str, Any]) -> No
             "callbacks": ctx.config.get("callbacks"),
             "recursion_limit": 100,
         }
-        result = await agent.ainvoke(
-            {"messages": [HumanMessage(content=fill(n.message, state))]},
-            config=config,
-            context=ctx.context,
+        # When the workflow retries or resumes this node, the agent's own checkpoint may
+        # show unfinished work (a tool call that raised). Continue that run instead of
+        # sending the message again, which would start a second conversation turn on top
+        # of the unanswered tool call.
+        unfinished = agent.checkpointer is not None and (await agent.aget_state(config)).next
+        inputs = (
+            None if unfinished else {"messages": [HumanMessage(content=fill(n.message, state))]}
         )
+        result = await agent.ainvoke(inputs, config=config, context=ctx.context)
         return {n.output: _final_text(result["messages"])}
 
     return run
@@ -177,6 +182,8 @@ async def _classifier_node(name: str, n: ClassifierNodeSpec) -> NodeFn:
         out: dict[str, Any] = {n.output: answer.choice}
         if n.confidence_output:
             out[n.confidence_output] = answer.confidence
+        if n.probabilities_output:
+            out[n.probabilities_output] = dict(answer.probabilities or {})
         return out
 
     return run
@@ -273,6 +280,19 @@ def build_router(ce: ConditionalEdgeSpec) -> tuple[RouterFn, list[str]]:
 # ---------------------------------------------------------------------------------------
 
 
+def _retry_policy(n: NodeSpec) -> RetryPolicy | None:
+    r = getattr(n, "retry", None)
+    if r is None:
+        return None
+    kwargs: dict[str, Any] = {
+        "max_attempts": r.max_attempts,
+        "initial_interval": r.initial_interval,
+    }
+    if r.retry_on:
+        kwargs["retry_on"] = tuple(import_ref(ref) for ref in r.retry_on)
+    return RetryPolicy(**kwargs)
+
+
 class LangGraphEngine:
     """Wire the nodes into a LangGraph StateGraph."""
 
@@ -292,7 +312,7 @@ class LangGraphEngine:
 
         g = StateGraph(built.state_schema, context_schema=built.context_schema)
         for name, fn in built.nodes.items():
-            g.add_node(name, self._adapt(fn))
+            g.add_node(name, self._adapt(fn), retry_policy=_retry_policy(built.spec.nodes[name]))
         for a, b in built.edges:
             g.add_edge(ep(a), ep(b))
         for source, route, targets in built.routers:

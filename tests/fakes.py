@@ -146,3 +146,30 @@ class SequentialEngine:
                 return state
 
         return Runner()
+
+
+class NativeScriptModel(BaseChatModel):
+    """Native tool calling from a script. Each step is ``{"tool": name, "args": {...}}``
+    or ``{"reply": text}``. Counts calls so a test can see what a resume re-ran."""
+
+    steps: list[dict[str, Any]]
+    _i: int = PrivateAttr(default=0)
+
+    @property
+    def _llm_type(self) -> str:
+        return "native-script"
+
+    def _generate(self, messages, stop=None, run_manager=None, **kwargs) -> ChatResult:
+        step = self.steps[self._i]
+        usage = {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15}
+        if "reply" in step:
+            msg = AIMessage(content=step["reply"], usage_metadata=usage)
+        else:
+            call = {"name": step["tool"], "args": step["args"], "id": f"call-{self._i}"}
+            msg = AIMessage(content="", tool_calls=[call], usage_metadata=usage)
+        msg.response_metadata = {"model_name": "fake/native"}
+        self._i += 1
+        return ChatResult(generations=[ChatGeneration(message=msg)])
+
+    def bind_tools(self, tools, **kwargs):
+        return self

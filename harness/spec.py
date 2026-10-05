@@ -343,6 +343,8 @@ class ClassifierNodeSpec(_Strict):
     input: str
     output: str
     confidence_output: str | None = None
+    # State field for the full returned distribution {label: probability}.
+    probabilities_output: str | None = None
     timeout_s: float = 30.0
 
 
@@ -356,12 +358,22 @@ class ToolNodeSpec(_Strict):
     output: str
 
 
+class RetrySpec(_Strict):
+    """LangGraph RetryPolicy for one node. ``retry_on``: import paths of exception classes
+    ("builtins:ConnectionError"); empty keeps LangGraph's default classification."""
+
+    max_attempts: int = 3
+    initial_interval: float = 0.5
+    retry_on: list[str] = []
+
+
 class FunctionNodeSpec(_Strict):
     """Plain Python: ``ref(state, ctx, **kwargs)`` returns a dict of state updates."""
 
     type: Literal["function"]
     ref: str
     kwargs: dict[str, Any] = {}
+    retry: RetrySpec | None = None
 
 
 class SubworkflowNodeSpec(_Strict):

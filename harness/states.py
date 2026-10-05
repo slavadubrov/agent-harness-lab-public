@@ -9,4 +9,5 @@ class SupportRequest(BaseModel):
     request: str
     route: str = ""
     route_confidence: float | None = None
+    route_probabilities: dict[str, float] = {}
     answer: str = ""

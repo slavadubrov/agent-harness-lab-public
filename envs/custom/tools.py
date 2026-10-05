@@ -1,9 +1,11 @@
 """Customer-account tools.
 
 The tools check data integrity only (the order exists, the amount fits, the key is
-known). They do not enforce business policy: refund windows, limits and account
+known). They do not enforce business policy: refund windows, order status and account
 status rules live in the policy MCP server, and the agent must apply them. That is
-what the tasks measure.
+what the tasks measure. The one exception is the refund service
+(``envs/custom/refunds.py``): it holds refunds above $200.00 for a supervisor and
+issues each logical refund once.
 
 The database path reaches the tools through the typed runtime context
 (``ToolRuntime[AccountContext]``), so every task can run on its own database copy.
@@ -20,6 +22,7 @@ from langchain.tools import ToolRuntime, tool
 from pydantic import Field
 
 from envs.custom.db import TODAY, connect
+from envs.custom.refunds import call_refund_service
 
 PreferenceKey = Literal["marketing_emails", "sms_notifications", "language", "paperless_billing"]
 
@@ -27,6 +30,10 @@ PreferenceKey = Literal["marketing_emails", "sms_notifications", "language", "pa
 @dataclass(frozen=True)
 class AccountContext:
     db_path: Path
+    # Names one support case. The refund service builds its operation keys from it.
+    case_id: str = "case"
+    # Fault injection for tests and the lost-response tasks (envs/custom/refunds.py).
+    fault: str | None = None
 
 
 def _db(runtime: ToolRuntime[AccountContext]):
@@ -107,29 +114,13 @@ def issue_refund(
     amount_cents: Annotated[int, Field(gt=0, description="Refund amount in cents.")],
     reason: Annotated[str, Field(min_length=3, description="Short reason for the refund.")],
 ) -> dict[str, Any]:
-    """Issue a refund on an order. This writes to the database and cannot be undone."""
-    con = _db(runtime)
-    try:
-        # Take the write lock before reading the remainder, so two parallel refund calls
-        # cannot both pass the check.
-        con.execute("BEGIN IMMEDIATE")
-        order = con.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
-        if order is None:
-            return {"error": f"No order {order_id}."}
-        refunded = con.execute(
-            "SELECT COALESCE(SUM(amount_cents), 0) FROM refunds WHERE order_id = ?", (order_id,)
-        ).fetchone()[0]
-        remaining = order["total_cents"] - refunded
-        if amount_cents > remaining:
-            return {"error": f"Amount exceeds refundable remainder of {remaining} cents."}
-        cur = con.execute(
-            "INSERT INTO refunds (order_id, amount_cents, reason, created_at) VALUES (?,?,?,?)",
-            (order_id, amount_cents, reason, TODAY.isoformat()),
-        )
-        con.commit()
-        return {"refund_id": cur.lastrowid, "order_id": order_id, "amount_cents": amount_cents}
-    finally:
-        con.close()
+    """Issue a refund on an order. This writes to the database and cannot be undone.
+
+    Refunds above $200.00 are held until a supervisor approves them."""
+    ctx = runtime.context
+    return call_refund_service(
+        ctx.db_path, ctx.case_id, order_id, amount_cents, reason, fault=ctx.fault
+    )
 
 
 @tool

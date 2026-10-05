@@ -54,6 +54,18 @@ CREATE TABLE preferences (
     value       TEXT NOT NULL,
     PRIMARY KEY (account_id, key)
 );
+-- The refund service's own record: one row per logical refund (envs/custom/refunds.py).
+-- It holds refunds that wait for a supervisor and remembers issued ones, so a repeated
+-- request returns the first result. It is not business state: the task checks ignore it.
+CREATE TABLE refund_operations (
+    op_key       TEXT PRIMARY KEY,
+    case_id      TEXT NOT NULL,
+    order_id     TEXT NOT NULL REFERENCES orders(id),
+    amount_cents INTEGER NOT NULL,
+    status       TEXT NOT NULL CHECK (status IN ('held', 'approved', 'rejected', 'issued')),
+    refund_id    INTEGER REFERENCES refunds(id),
+    updated_at   TEXT NOT NULL
+);
 """
 
 

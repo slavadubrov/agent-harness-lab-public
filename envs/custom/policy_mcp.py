@@ -30,9 +30,10 @@ POLICIES: dict[str, str] = {
         "4. Cancelled orders are refunded automatically. Do not issue a manual refund.\n"
         "5. The total refunded on an order can never exceed the order total. If the order is "
         "already fully refunded, do not refund again.\n"
-        "6. Agents may issue refunds up to 20000 cents ($200.00) per order. For a larger "
-        "amount, do not issue any refund; tell the customer the request needs a supervisor "
-        "(see escalation).\n"
+        "6. Agents may issue refunds up to 20000 cents ($200.00) per order. A larger refund "
+        "needs a supervisor's approval. Submit it with issue_refund like any other refund: "
+        "the refund service holds it and issues nothing until a supervisor approves it. Tell "
+        "the customer that a supervisor will review the request.\n"
         "7. Partial refunds are allowed for a missing or damaged part of an order. Refund the "
         "amount the customer states, if the rules above allow it.\n"
         "8. Suspended accounts may receive refunds."
@@ -59,8 +60,10 @@ POLICIES: dict[str, str] = {
     ),
     "escalation": (
         "ESCALATION\n"
-        "When a request needs a supervisor, do not make any change. Tell the customer that a "
-        "supervisor will review the request within two business days."
+        "When a request needs a supervisor, tell the customer that a supervisor will review "
+        "the request within two business days. For a refund above the agent limit, submit "
+        "it with issue_refund so the refund service holds it for that review; make no other "
+        "change."
     ),
 }
 
