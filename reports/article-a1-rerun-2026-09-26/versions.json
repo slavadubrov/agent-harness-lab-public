@@ -1,0 +1,346 @@
+{
+  "generated_at": "2026-09-26T11:32:22Z",
+  "label": "single run",
+  "python": "3.12.13",
+  "uv": "uv 0.12.19 (Homebrew 2026-09-24 aarch64-apple-darwin)",
+  "packages": {
+    "langchain": "1.4.2",
+    "langchain-core": "1.6.5",
+    "langgraph": "1.2.12",
+    "langchain-mcp-adapters": "0.3.2",
+    "langchain-openai": "1.6.5",
+    "langchain-openrouter": "0.2.9",
+    "langchain-typesafe": "0.0.1a3",
+    "mcp": "1.30.0",
+    "pydantic": "2.12.5",
+    "tau2": "1.0.1",
+    "litellm": "1.82.6"
+  },
+  "git": {
+    "sha": "736ca012fe5de09434cfdbe6653b2b326f639d2a",
+    "dirty": false
+  },
+  "tau2": {
+    "repo": "sierra-research/tau2-bench",
+    "commit": "b7ea9074c1cba482b30687fecdb5c8425fd6f619",
+    "note": "package version 1.0.1; commit is 46 commits after tag v1.0.1 (fc0055d)"
+  },
+  "runs": [
+    {
+      "dir": "custom/a1-base",
+      "env": "custom",
+      "spec": "a1-base",
+      "spec_source": "harness/spec/base.yaml",
+      "model": "openai/gpt-6-luna",
+      "model_provider": {
+        "order": [
+          "openai"
+        ],
+        "allow_fallbacks": false
+      },
+      "classifier_models": [
+        "typesafe/jev-1.13-20260917"
+      ],
+      "user_llm": null,
+      "started_at": "2026-09-26T10:51:03Z",
+      "git_at_run": {
+        "sha": "bb6b8da47d04fd6a319f27508bee021519595b64",
+        "dirty": false
+      }
+    },
+    {
+      "dir": "custom/a1-base-glm-5.3-flash",
+      "env": "custom",
+      "spec": "a1-base-glm-5.3-flash",
+      "spec_source": "harness/spec/glm-5.3-flash.yaml",
+      "model": "z-ai/glm-5.3-flash",
+      "model_provider": {
+        "order": [
+          "friendli"
+        ],
+        "allow_fallbacks": false
+      },
+      "classifier_models": [
+        "typesafe/jev-1.13-20260917"
+      ],
+      "user_llm": null,
+      "started_at": "2026-09-26T11:31:43Z",
+      "git_at_run": {
+        "sha": "736ca012fe5de09434cfdbe6653b2b326f639d2a",
+        "dirty": false
+      }
+    },
+    {
+      "dir": "custom/a1-base-mimo-v2.6-flash",
+      "env": "custom",
+      "spec": "a1-base-mimo-v2.6-flash",
+      "spec_source": "harness/spec/mimo-v2.6-flash.yaml",
+      "model": "xiaomi/mimo-v2.6-flash",
+      "model_provider": {
+        "order": [
+          "xiaomi/fp8"
+        ],
+        "allow_fallbacks": false
+      },
+      "classifier_models": [
+        "typesafe/jev-1.13-20260917"
+      ],
+      "user_llm": null,
+      "started_at": "2026-09-26T10:52:22Z",
+      "git_at_run": {
+        "sha": "bb6b8da47d04fd6a319f27508bee021519595b64",
+        "dirty": false
+      }
+    },
+    {
+      "dir": "custom/a1-plain",
+      "env": "custom",
+      "spec": "a1-plain",
+      "spec_source": "harness/spec/plain.yaml",
+      "model": "openai/gpt-6-luna",
+      "model_provider": {
+        "order": [
+          "openai"
+        ],
+        "allow_fallbacks": false
+      },
+      "classifier_models": [],
+      "user_llm": null,
+      "started_at": "2026-09-26T10:51:39Z",
+      "git_at_run": {
+        "sha": "bb6b8da47d04fd6a319f27508bee021519595b64",
+        "dirty": false
+      }
+    },
+    {
+      "dir": "tau3/a1-base",
+      "env": "tau3",
+      "spec": "a1-base",
+      "spec_source": "harness/spec/base.yaml",
+      "model": "openai/gpt-6-luna",
+      "model_provider": {
+        "order": [
+          "openai"
+        ],
+        "allow_fallbacks": false
+      },
+      "classifier_models": [
+        "typesafe/jev-1.13-20260917"
+      ],
+      "user_llm": "openrouter/openai/gpt-6-luna",
+      "started_at": "2026-09-26T10:52:36Z",
+      "git_at_run": {
+        "sha": "bb6b8da47d04fd6a319f27508bee021519595b64",
+        "dirty": false
+      }
+    },
+    {
+      "dir": "tau3/a1-plain",
+      "env": "tau3",
+      "spec": "a1-plain",
+      "spec_source": "harness/spec/plain.yaml",
+      "model": "openai/gpt-6-luna",
+      "model_provider": {
+        "order": [
+          "openai"
+        ],
+        "allow_fallbacks": false
+      },
+      "classifier_models": [],
+      "user_llm": "openrouter/openai/gpt-6-luna",
+      "started_at": "2026-09-26T10:53:44Z",
+      "git_at_run": {
+        "sha": "bb6b8da47d04fd6a319f27508bee021519595b64",
+        "dirty": false
+      }
+    }
+  ],
+  "prices_usd_per_token": {
+    "openai/gpt-6-luna@openai": {
+      "model_id": "openai/gpt-6-luna",
+      "provider_tag": "openai",
+      "prompt": 1e-07,
+      "completion": 5e-07,
+      "input_cache_read": 1e-08,
+      "input_cache_write": 1.25e-07,
+      "fetched_at": "2026-09-26T10:53:44Z",
+      "source": "https://openrouter.ai/api/v1/models/openai/gpt-6-luna/endpoints"
+    },
+    "typesafe/jev-1.13@typesafe": {
+      "model_id": "typesafe/jev-1.13",
+      "provider_tag": "typesafe",
+      "prompt": 4.2e-08,
+      "completion": 0.0,
+      "input_cache_read": 0.0,
+      "input_cache_write": 0.0,
+      "fetched_at": "2026-09-26T10:52:36Z",
+      "source": "https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints"
+    },
+    "z-ai/glm-5.3-flash@friendli": {
+      "model_id": "z-ai/glm-5.3-flash",
+      "provider_tag": "friendli",
+      "prompt": 1.5e-07,
+      "completion": 5e-07,
+      "input_cache_read": 3e-08,
+      "input_cache_write": 0.0,
+      "fetched_at": "2026-09-26T11:31:43Z",
+      "source": "https://openrouter.ai/api/v1/models/z-ai/glm-5.3-flash/endpoints"
+    },
+    "xiaomi/mimo-v2.6-flash@xiaomi/fp8": {
+      "model_id": "xiaomi/mimo-v2.6-flash",
+      "provider_tag": "xiaomi/fp8",
+      "prompt": 1.4e-07,
+      "completion": 2.8e-07,
+      "input_cache_read": 2.8e-09,
+      "input_cache_write": 0.0,
+      "fetched_at": "2026-09-26T10:52:22Z",
+      "source": "https://openrouter.ai/api/v1/models/xiaomi/mimo-v2.6-flash/endpoints"
+    }
+  },
+  "summaries": [
+    {
+      "dir": "custom/a1-base",
+      "spec": "a1-base",
+      "model": "openai/gpt-6-luna",
+      "tasks": 12,
+      "passed": 12,
+      "pass_rate": 1.0,
+      "mean_input_tokens": 6662.083333333333,
+      "mean_output_tokens": 728.1666666666666,
+      "mean_usd_per_task": 0.0007605266666666667,
+      "usd_per_solved_task": 0.0007605266666666667,
+      "tokens_per_solved_task": 7390.25,
+      "total_usd": 0.00912632,
+      "mean_latency_s": 10.268583333333334,
+      "median_latency_s": 9.8215,
+      "mean_model_calls": 4.75,
+      "mean_tool_calls": 3.25,
+      "summarization_calls": 0,
+      "classifier_calls": 6,
+      "blocked_tool_calls": 0,
+      "run_errors": 0,
+      "unpriced_calls": 0,
+      "user_sim_usd_tau2": null
+    },
+    {
+      "dir": "custom/a1-base-glm-5.3-flash",
+      "spec": "a1-base-glm-5.3-flash",
+      "model": "z-ai/glm-5.3-flash",
+      "tasks": 12,
+      "passed": 12,
+      "pass_rate": 1.0,
+      "mean_input_tokens": 10051.083333333334,
+      "mean_output_tokens": 676.8333333333334,
+      "mean_usd_per_task": 0.0017604258333333333,
+      "usd_per_solved_task": 0.0017604258333333333,
+      "tokens_per_solved_task": 10727.916666666666,
+      "total_usd": 0.02112511,
+      "mean_latency_s": 9.51525,
+      "median_latency_s": 8.731,
+      "mean_model_calls": 4.583333333333333,
+      "mean_tool_calls": 3.0833333333333335,
+      "summarization_calls": 0,
+      "classifier_calls": 6,
+      "blocked_tool_calls": 0,
+      "run_errors": 0,
+      "unpriced_calls": 0,
+      "user_sim_usd_tau2": null
+    },
+    {
+      "dir": "custom/a1-base-mimo-v2.6-flash",
+      "spec": "a1-base-mimo-v2.6-flash",
+      "model": "xiaomi/mimo-v2.6-flash",
+      "tasks": 12,
+      "passed": 7,
+      "pass_rate": 0.5833333333333334,
+      "mean_input_tokens": 16939.916666666668,
+      "mean_output_tokens": 1269.6666666666667,
+      "mean_usd_per_task": 0.0009531491666666666,
+      "usd_per_solved_task": 0.00163397,
+      "tokens_per_solved_task": 31216.428571428572,
+      "total_usd": 0.01143779,
+      "mean_latency_s": 106.53058333333334,
+      "median_latency_s": 114.745,
+      "mean_model_calls": 7.166666666666667,
+      "mean_tool_calls": 2.75,
+      "summarization_calls": 0,
+      "classifier_calls": 5,
+      "blocked_tool_calls": 0,
+      "run_errors": 5,
+      "unpriced_calls": 0,
+      "user_sim_usd_tau2": null
+    },
+    {
+      "dir": "custom/a1-plain",
+      "spec": "a1-plain",
+      "model": "openai/gpt-6-luna",
+      "tasks": 12,
+      "passed": 12,
+      "pass_rate": 1.0,
+      "mean_input_tokens": 3417.9166666666665,
+      "mean_output_tokens": 143.41666666666666,
+      "mean_usd_per_task": 0.00035115749999999995,
+      "usd_per_solved_task": 0.00035115749999999995,
+      "tokens_per_solved_task": 3561.3333333333335,
+      "total_usd": 0.00421389,
+      "mean_latency_s": 4.6025,
+      "median_latency_s": 4.6345,
+      "mean_model_calls": 3.3333333333333335,
+      "mean_tool_calls": 3.75,
+      "summarization_calls": 0,
+      "classifier_calls": 0,
+      "blocked_tool_calls": 0,
+      "run_errors": 0,
+      "unpriced_calls": 0,
+      "user_sim_usd_tau2": null
+    },
+    {
+      "dir": "tau3/a1-base",
+      "spec": "a1-base",
+      "model": "openai/gpt-6-luna",
+      "tasks": 8,
+      "passed": 5,
+      "pass_rate": 0.625,
+      "mean_input_tokens": 52429.75,
+      "mean_output_tokens": 2440.875,
+      "mean_usd_per_task": 0.00219347375,
+      "usd_per_solved_task": 0.0035095580000000003,
+      "tokens_per_solved_task": 87793.0,
+      "total_usd": 0.01754779,
+      "mean_latency_s": 35.536875,
+      "median_latency_s": 35.492000000000004,
+      "mean_model_calls": 10,
+      "mean_tool_calls": 5.875,
+      "summarization_calls": 0,
+      "classifier_calls": 0,
+      "blocked_tool_calls": 0,
+      "run_errors": 0,
+      "unpriced_calls": 0,
+      "user_sim_usd_tau2": 0.004233499999999999
+    },
+    {
+      "dir": "tau3/a1-plain",
+      "spec": "a1-plain",
+      "model": "openai/gpt-6-luna",
+      "tasks": 8,
+      "passed": 6,
+      "pass_rate": 0.75,
+      "mean_input_tokens": 43712.875,
+      "mean_output_tokens": 729.5,
+      "mean_usd_per_task": 0.0011538525,
+      "usd_per_solved_task": 0.0015384700000000001,
+      "tokens_per_solved_task": 59256.5,
+      "total_usd": 0.00923082,
+      "mean_latency_s": 26.590625,
+      "median_latency_s": 25.275,
+      "mean_model_calls": 9.375,
+      "mean_tool_calls": 5.375,
+      "summarization_calls": 0,
+      "classifier_calls": 0,
+      "blocked_tool_calls": 0,
+      "run_errors": 0,
+      "unpriced_calls": 0,
+      "user_sim_usd_tau2": 0.0041421900000000005
+    }
+  ]
+}
