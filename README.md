@@ -75,6 +75,8 @@ effects.
 
 The article quotes the runs saved at tag
 [`v0.1.2-a1`](https://github.com/slavadubrov/agent-harness-lab-public/tree/v0.1.2-a1/reports/article-a1).
+[`reports/article-a1-rerun-2026-09-26/`](reports/article-a1-rerun-2026-09-26/) keeps a later
+rerun of the same specs on this repository; its τ³-bench results differ by one task per spec.
 
 ## More detail
 
