@@ -27,7 +27,7 @@ help:
 	@echo "make report             rebuild reports/article-a1/README.md and versions.json"
 	@echo "make a2-custom          run the Part 2 task set (16) with SPEC (agent or workflow)"
 	@echo "make a2-matrix          run the Part 2 task set with plain, approval agent, workflow, router"
-	@echo "make a2-routes          score the router's classifier on labelled requests"
+	@echo "make a2-routes          score both routers' classifiers on 25 labelled requests"
 	@echo "make report-a2          rebuild reports/article-a2/README.md"
 	@echo "make test | fmt | lint"
 
@@ -63,6 +63,7 @@ a2-matrix: sync
 
 a2-routes: sync
 	$(UV) run python -m envs.custom.route_eval --spec harness/spec/workflows/support-router.yaml
+	$(UV) run python -m envs.custom.route_eval --spec harness/spec/workflows/support-router-clarify.yaml
 	$(UV) run python scripts/report_a2.py
 
 report-a2:

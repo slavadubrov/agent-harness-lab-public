@@ -70,7 +70,7 @@ cd agent-harness-lab-public
 cp .env.example .env                        # set OPENROUTER_API_KEY
 make test                                   # offline, no key needed
 make a2-matrix                              # Part 2: four specs on the 16 custom tasks
-make a2-routes                              # Part 2: score the router on 25 labelled requests
+make a2-routes                              # Part 2: score both routers on 25 labelled requests
 make a2-custom SPEC=harness/spec/workflows/refund-approval.yaml   # one spec
 make a1-custom SPEC=harness/spec/plain.yaml # Part 1: 12 custom tasks
 make a1-tau3   SPEC=harness/spec/plain.yaml # Part 1: 8 τ³-bench retail tasks
