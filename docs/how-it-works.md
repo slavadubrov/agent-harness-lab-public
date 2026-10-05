@@ -59,7 +59,7 @@ whether it does.
 |---|---|---|
 | Summarization | before each model call | summarize above 12,000 tokens, keep the last 20 messages |
 | Model call limit | before and after each model call | 20 calls per run, then end the run |
-| Tool retry | around each tool call | 2 retries on a tool error |
+| Tool retry | around each tool call | 2 retries on a tool error, for the four read tools only |
 | Jev write guard | around each write tool call | block the call when Jev returns p ≥ 0.5 |
 | Schema-Guided Reasoning | around each model call | one typed `NextStep` per call |
 
@@ -135,4 +135,4 @@ cost for each chat call is saved next to it as a check.
   article moves the evaluator out of that process
   ([`evaluator/`](../evaluator/README.md) is empty until then).
 - No limit on total time or spending per task.
-- Retried writes have no idempotency key.
+- Writes have no idempotency key, so retrying a write that raised after it committed would run it twice. Tool retry is therefore limited to `look_up_account`, `list_orders`, `lookup_policy` and `search_faq`. A write that raises is not retried: LangGraph's default tool node re-raises the exception, and the run ends with the error recorded. Rejections such as "No order" are returned values, not exceptions, so they still reach the model.

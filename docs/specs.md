@@ -76,10 +76,14 @@ tools:
 |---|---|
 | `SummarizationMiddleware` | LangChain summarization |
 | `ModelCallLimitMiddleware` | LangChain model call limit |
-| `ToolRetryMiddleware` | LangChain tool retry |
+| `ToolRetryMiddleware` | LangChain tool retry. `tools: [names]` limits it to those tools; omit it to retry every tool |
 | `SchemaGuidedReasoning` | SGR, [`harness/sgr.py`](../harness/sgr.py) |
 | `TypeSafeAutoMode` | Jev write guard, [`harness/typesafe_guard.py`](../harness/typesafe_guard.py) |
 | `import` | Any other `AgentMiddleware`: `{type: import, ref, kwargs}` |
+
+`ToolCallLimitMiddleware` has no typed entry. Use `import` with
+`ref: langchain.agents.middleware:ToolCallLimitMiddleware` and kwargs such as `tool_name`,
+`thread_limit`, `run_limit` and `exit_behavior`. No A1 spec uses it.
 
 For `import`, a kwargs value of `"$harness_model"` is replaced with the harness chat
 model, for middleware that needs one.

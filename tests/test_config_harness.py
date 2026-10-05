@@ -217,3 +217,44 @@ def test_example_workflow_spec_builds():
     assert isinstance(spec, WorkflowSpec)
     wf = run(build_workflow(spec))
     assert {"route", "refunds", "account"} <= set(wf.nodes)
+
+
+# -- tool retry scope -----------------------------------------------------------------------
+
+
+def _retry_calls(spec_name, tool_name):
+    """Run the spec's ToolRetryMiddleware on a tool that always raises; return the call count."""
+    from types import SimpleNamespace
+
+    from langchain.agents.middleware import ToolRetryMiddleware
+
+    s = load_spec(f"harness/spec/{spec_name}.yaml")
+    mw = next(m for m in build_middleware(s, EchoChatModel()) if isinstance(m, ToolRetryMiddleware))
+    mw.initial_delay = 0
+    calls = []
+
+    def handler(request):
+        calls.append(1)
+        raise RuntimeError("boom")
+
+    request = SimpleNamespace(tool=None, tool_call={"name": tool_name, "id": "c1"})
+    try:
+        mw.wrap_tool_call(request, handler)
+    except RuntimeError:  # a tool outside the retry scope raises straight through
+        pass
+    return len(calls)
+
+
+@pytest.mark.parametrize("spec", ["base", "plain", "glm-5.3-flash", "mimo-v2.6-flash"])
+def test_retry_covers_reads_and_not_writes(spec):
+    assert _retry_calls(spec, "look_up_account") == 3  # 1 try + max_retries 2
+    assert _retry_calls(spec, "issue_refund") == 1
+    assert _retry_calls(spec, "set_preference") == 1
+
+
+def test_retry_tools_field_defaults_to_all():
+    from harness.spec import ToolRetrySpec
+
+    assert ToolRetrySpec(type="ToolRetryMiddleware").tools is None
+    with pytest.raises(ValidationError):
+        ToolRetrySpec(type="ToolRetryMiddleware", tool="x")

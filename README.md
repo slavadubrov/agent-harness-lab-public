@@ -43,7 +43,7 @@ run it and check the final database.
 
 | Spec | What it contains |
 |---|---|
-| [`plain.yaml`](harness/spec/plain.yaml) | Native tool calling, summarization, a limit of 20 model calls per run, 2 retries on a tool error |
+| [`plain.yaml`](harness/spec/plain.yaml) | Native tool calling, summarization, a limit of 20 model calls per run, 2 retries on a tool error, read tools only |
 | [`base.yaml`](harness/spec/base.yaml) | Everything in `plain`, plus Schema-Guided Reasoning (SGR) and a Jev guard on the three write tools |
 
 `glm-5.3-flash.yaml` and `mimo-v2.6-flash.yaml` are `base.yaml` with another model.
@@ -90,8 +90,8 @@ rerun of the same specs on this repository; its τ³-bench results differ by one
 
 - The tools do not enforce ownership or business policy. A real service would reject
   a write that breaks policy.
-- There is no limit on total time or spending per task, and retried writes have no
-  idempotency key.
+- There is no limit on total time or spending per task.
+- Writes have no idempotency key, so tool retry covers the four read tools only.
 - The checks and the cost accounting run in the same process as the agent.
 - One run per task. Later articles add a separate evaluator and repeated runs.
 

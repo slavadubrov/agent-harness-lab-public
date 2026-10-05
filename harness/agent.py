@@ -173,6 +173,7 @@ def build_middleware(spec: HarnessSpec, model: BaseChatModel) -> list[AgentMiddl
                     on_failure=m.on_failure,
                     initial_delay=m.initial_delay,
                     backoff_factor=m.backoff_factor,
+                    tools=m.tools,
                 )
             )
         elif isinstance(m, ModelCallLimitSpec):

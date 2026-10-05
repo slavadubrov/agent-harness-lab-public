@@ -157,6 +157,8 @@ class ToolRetrySpec(_Strict):
     on_failure: Literal["continue", "error"] = "continue"
     initial_delay: float = 0.5
     backoff_factor: float = 2.0
+    # Tool names to retry. None retries every tool. Names absent from the agent are ignored.
+    tools: list[str] | None = None
 
 
 class ModelCallLimitSpec(_Strict):
