@@ -135,4 +135,4 @@ cost for each chat call is saved next to it as a check.
   article moves the evaluator out of that process
   ([`evaluator/`](../evaluator/README.md) is empty until then).
 - No limit on total time or spending per task.
-- Writes have no idempotency key, so a write that raises after it committed would run twice. Tool retry is limited to `look_up_account`, `list_orders`, `lookup_policy` and `search_faq`; a failed write returns its error to the model.
+- Writes have no idempotency key, so retrying a write that raised after it committed would run it twice. Tool retry is therefore limited to `look_up_account`, `list_orders`, `lookup_policy` and `search_faq`. A write that raises is not retried: LangGraph's default tool node re-raises the exception, and the run ends with the error recorded. Rejections such as "No order" are returned values, not exceptions, so they still reach the model.
