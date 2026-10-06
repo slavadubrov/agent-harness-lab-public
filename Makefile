@@ -1,4 +1,4 @@
-# agent-harness-lab — A1 targets. Needs uv and OPENROUTER_API_KEY (or OPEN_ROUTER_API_KEY) in .env or the environment.
+# agent-harness-lab — Part 1 (a1-*) and Part 2 (a2-*) targets. Needs uv and OPENROUTER_API_KEY (or OPEN_ROUTER_API_KEY) in .env or the environment.
 SHELL := /bin/bash
 UV ?= uv
 SPEC ?= harness/spec/base.yaml
@@ -15,8 +15,9 @@ USER_LLM_ARGS ?= {"extra_body":{"provider":{"order":["openai"],"allow_fallbacks"
 TAU3_CONCURRENCY ?= 4
 
 CUSTOM_SPECS := harness/spec/base.yaml harness/spec/plain.yaml harness/spec/glm-5.3-flash.yaml harness/spec/mimo-v2.6-flash.yaml
+A2_SPECS := harness/spec/plain.yaml harness/spec/approval-agent.yaml harness/spec/workflows/refund-approval.yaml harness/spec/workflows/support-router.yaml
 
-.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report
+.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2
 
 help:
 	@echo "make a1-custom          run the custom environment dev set with SPEC (default base.yaml)"
@@ -24,6 +25,10 @@ help:
 	@echo "make a1-tau3            run the τ³ retail subset with SPEC"
 	@echo "make a1-tau3-matrix     run the τ³ subset with base.yaml and plain.yaml"
 	@echo "make report             rebuild reports/article-a1/README.md and versions.json"
+	@echo "make a2-custom          run the Part 2 task set (16) with SPEC (agent or workflow)"
+	@echo "make a2-matrix          run the Part 2 task set with plain, approval agent, workflow, router"
+	@echo "make a2-routes          score both routers' classifiers on 25 labelled requests"
+	@echo "make report-a2          rebuild reports/article-a2/README.md"
 	@echo "make test | fmt | lint"
 
 sync:
@@ -41,12 +46,28 @@ lint:
 	$(UV) run ruff format --check .
 
 a1-custom: sync
-	$(UV) run python -m envs.custom.run --spec $(SPEC)
+	$(UV) run python -m envs.custom.run --suite a1 --spec $(SPEC)
 	$(UV) run python scripts/report_a1.py
 
 a1-custom-matrix: sync
-	@for s in $(CUSTOM_SPECS); do $(UV) run python -m envs.custom.run --spec $$s || exit 1; done
+	@for s in $(CUSTOM_SPECS); do $(UV) run python -m envs.custom.run --suite a1 --spec $$s || exit 1; done
 	$(UV) run python scripts/report_a1.py
+
+a2-custom: sync
+	$(UV) run python -m envs.custom.run --suite a2 --spec $(SPEC)
+	$(UV) run python scripts/report_a2.py
+
+a2-matrix: sync
+	@for s in $(A2_SPECS); do $(UV) run python -m envs.custom.run --suite a2 --spec $$s || exit 1; done
+	$(UV) run python scripts/report_a2.py
+
+a2-routes: sync
+	$(UV) run python -m envs.custom.route_eval --spec harness/spec/workflows/support-router.yaml
+	$(UV) run python -m envs.custom.route_eval --spec harness/spec/workflows/support-router-clarify.yaml
+	$(UV) run python scripts/report_a2.py
+
+report-a2:
+	$(UV) run python scripts/report_a2.py
 
 # Sparse checkout of the tau2 data the retail runs need, at the pinned commit.
 tau3-data:

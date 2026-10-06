@@ -212,11 +212,19 @@ def test_workflow_validation():
         )
 
 
-def test_example_workflow_spec_builds():
-    spec = load_any("harness/spec/workflows/support-router.yaml")
+@pytest.mark.parametrize(
+    "path, nodes",
+    [
+        ("support-router.yaml", {"route", "refunds", "account", "general"}),
+        ("support-router-clarify.yaml", {"route", "refunds", "account", "general", "clarify"}),
+        ("refund-approval.yaml", {"agent", "find_held", "approval", "issue", "reply"}),
+    ],
+)
+def test_workflow_specs_build(path, nodes):
+    spec = load_any(f"harness/spec/workflows/{path}")
     assert isinstance(spec, WorkflowSpec)
     wf = run(build_workflow(spec))
-    assert {"route", "refunds", "account"} <= set(wf.nodes)
+    assert nodes <= set(wf.nodes)
 
 
 # -- tool retry scope -----------------------------------------------------------------------

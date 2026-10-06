@@ -1,9 +1,9 @@
-# Example workflow spec. The saved runs do not measure it.
-# Jev routes the request, then one of three agents runs. Each agent is base.yaml with a
-# smaller tool set; everything else about the agent comes from base.yaml.
+# Jev routes the request, then one of three agents runs. Each agent is plain.yaml with a
+# smaller tool set; everything else about the agent comes from plain.yaml, so a comparison
+# with plain.yaml changes only the routing step and the visible tools.
 kind: workflow
-name: support-router
-description: TypeSafe Jev Choice routing to specialised A1 agents.
+name: a2-router
+description: TypeSafe Jev Choice routing to plain agents with narrower tool sets.
 engine: {name: langgraph}
 state_schema: harness.states:SupportRequest
 context_schema: envs.custom.tools:AccountContext
@@ -20,10 +20,11 @@ nodes:
     input: "{request}"
     output: route
     confidence_output: route_confidence
+    probabilities_output: route_probabilities
   refunds:
     type: agent
     agent:
-      spec: harness/spec/base.yaml
+      spec: harness/spec/plain.yaml
       override:
         name: support-router-refunds
         tools: {include: [look_up_account, list_orders, issue_refund, lookup_policy, search_faq]}
@@ -32,7 +33,7 @@ nodes:
   account:
     type: agent
     agent:
-      spec: harness/spec/base.yaml
+      spec: harness/spec/plain.yaml
       override:
         name: support-router-account
         tools: {include: [look_up_account, update_address, set_preference, lookup_policy, search_faq]}
@@ -41,7 +42,7 @@ nodes:
   general:
     type: agent
     agent:
-      spec: harness/spec/base.yaml
+      spec: harness/spec/plain.yaml
       override:
         name: support-router-general
         tools: {include: [lookup_policy, search_faq]}

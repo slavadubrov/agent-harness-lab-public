@@ -99,9 +99,22 @@ A workflow spec (`kind: workflow`) connects several nodes into one LangGraph gra
 agents, structured-output calls, classifiers, tools, functions and other workflows.
 `build_workflow(spec)` in [`harness/workflow.py`](../harness/workflow.py) compiles it.
 
-The example [`support-router.yaml`](../harness/spec/workflows/support-router.yaml) uses
-a Jev classifier to route a request to one of three agents. Each agent is `base.yaml`
-with a smaller tool set.
+| Workflow | What it does |
+|---|---|
+| [`refund-approval.yaml`](../harness/spec/workflows/refund-approval.yaml) | Runs the plain agent, then finds refunds the service holds, pauses for a supervisor, issues the approved refund and writes the reply in code |
+| [`support-router.yaml`](../harness/spec/workflows/support-router.yaml) | A Jev classifier sends the request to one of three plain agents with smaller tool sets |
+| [`support-router-clarify.yaml`](../harness/spec/workflows/support-router-clarify.yaml) | The same router with a fourth route that asks the customer to clarify |
 
-This release has no runner or results for workflows. Part 2 of the series measures
-them.
+`envs.custom.run` runs agent and workflow specs the same way (`make a2-custom SPEC=...`).
+
+Node settings beyond the type's own fields:
+
+- `retry` on a function node sets a LangGraph `RetryPolicy`: `max_attempts`,
+  `initial_interval` and `retry_on`, a list of exception classes as import paths
+  (`builtins:ConnectionError`). Retry only a node whose writes are safe to repeat.
+- `probabilities_output` on a classifier node stores Jev's full distribution next to
+  the chosen label and its confidence.
+
+An agent node runs a whole `create_agent` inside the node. If the workflow retries or
+resumes that node while the agent's own checkpoint shows unfinished work, the node
+continues the agent's run instead of sending the message again.

@@ -1,0 +1,26 @@
+# support-router.yaml with one more route: requests that hold two different requests, or
+# are too vague to act on, go to a clarifying question instead of a specialist.
+extends: support-router.yaml
+name: a2-router-clarify
+description: Jev routing with an explicit route for requests no single specialist fits.
+nodes:
+  route:
+    choices:
+      refund: Refunds, returns, damaged or missing items, money back.
+      account: Address changes and account preferences (email, SMS, language, billing).
+      other: Anything else that is one clear request.
+      unclear: Two or more different requests in one message, or too vague to act on.
+  clarify:
+    type: function
+    ref: envs.custom.approval:ask_to_clarify
+conditional_edges:
+  - source: route
+    field: route
+    routes: {refund: refunds, account: account, unclear: clarify}
+    default: general
+edges:
+  - [START, route]
+  - [refunds, END]
+  - [account, END]
+  - [general, END]
+  - [clarify, END]
