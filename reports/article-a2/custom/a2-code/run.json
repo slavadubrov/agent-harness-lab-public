@@ -1,0 +1,182 @@
+{
+  "env": "custom",
+  "label": "single run",
+  "suite": "a2",
+  "started_at": "2026-10-07T17:16:33Z",
+  "finished_at": "2026-10-07T17:17:01Z",
+  "spec": {
+    "kind": "workflow",
+    "name": "a2-code",
+    "description": "One structured model call, then code for the checks, the writes and the reply.",
+    "engine": {
+      "name": "langgraph",
+      "ref": null,
+      "kwargs": {}
+    },
+    "state_schema": "envs.custom.code_workflow:CodeCase",
+    "context_schema": "envs.custom.tools:AccountContext",
+    "nodes": {
+      "read": {
+        "type": "structured",
+        "model": {
+          "provider": "openrouter",
+          "id": "openai/gpt-6-luna",
+          "settings": {
+            "max_tokens": 1024,
+            "temperature": null,
+            "reasoning": {
+              "effort": "low"
+            },
+            "provider": {
+              "order": [
+                "openai"
+              ],
+              "allow_fallbacks": false
+            },
+            "timeout_ms": 120000,
+            "max_retries": 2
+          },
+          "ref": null,
+          "kwargs": {}
+        },
+        "output_schema": "envs.custom.code_workflow:Request",
+        "prompt": "Read this message to an online shop's customer support and fill in the fields.\n\n{request}\n",
+        "writes": {
+          "kind": "kind",
+          "amount_cents": "amount_cents",
+          "address": "address",
+          "settings": "settings"
+        },
+        "method": "function_calling"
+      },
+      "handle": {
+        "type": "function",
+        "ref": "envs.custom.code_workflow:handle",
+        "kwargs": {},
+        "retry": {
+          "max_attempts": 3,
+          "initial_interval": 0.5,
+          "retry_on": [
+            "builtins:ConnectionError"
+          ]
+        }
+      },
+      "find_held": {
+        "type": "function",
+        "ref": "envs.custom.approval:find_held",
+        "kwargs": {},
+        "retry": null
+      },
+      "approval": {
+        "type": "function",
+        "ref": "envs.custom.approval:wait_for_supervisor",
+        "kwargs": {},
+        "retry": null
+      },
+      "issue": {
+        "type": "function",
+        "ref": "envs.custom.approval:issue_approved",
+        "kwargs": {},
+        "retry": {
+          "max_attempts": 3,
+          "initial_interval": 0.5,
+          "retry_on": [
+            "builtins:ConnectionError"
+          ]
+        }
+      },
+      "reply": {
+        "type": "function",
+        "ref": "envs.custom.approval:reply",
+        "kwargs": {},
+        "retry": null
+      }
+    },
+    "edges": [
+      [
+        "START",
+        "read"
+      ],
+      [
+        "read",
+        "handle"
+      ],
+      [
+        "handle",
+        "find_held"
+      ],
+      [
+        "approval",
+        "issue"
+      ],
+      [
+        "issue",
+        "reply"
+      ],
+      [
+        "reply",
+        "END"
+      ]
+    ],
+    "conditional_edges": [
+      {
+        "source": "find_held",
+        "field": "next_step",
+        "router": null,
+        "routes": {
+          "approval": "approval"
+        },
+        "default": "END"
+      }
+    ],
+    "checkpointer": "memory",
+    "source": "harness/spec/workflows/support-code.yaml"
+  },
+  "prices_usd_per_token": [
+    {
+      "model_id": "openai/gpt-6-luna",
+      "provider_tag": "openai",
+      "prompt": 1e-07,
+      "completion": 5e-07,
+      "input_cache_read": 1e-08,
+      "input_cache_write": 1.25e-07,
+      "fetched_at": "2026-10-07T17:16:33Z",
+      "source": "https://openrouter.ai/api/v1/models/openai/gpt-6-luna/endpoints"
+    }
+  ],
+  "packages": {
+    "langchain": "1.4.2",
+    "langchain-core": "1.6.5",
+    "langgraph": "1.2.12",
+    "langchain-mcp-adapters": "0.3.2",
+    "langchain-openai": "1.6.5",
+    "langchain-openrouter": "0.2.9",
+    "langchain-typesafe": "0.0.1a3",
+    "mcp": "1.30.0",
+    "pydantic": "2.12.5",
+    "tau2": "1.0.1",
+    "litellm": "1.82.6"
+  },
+  "git": {
+    "sha": "cfd07926acf6726f7c4e66fd8797112008b8bbdf",
+    "dirty": false
+  },
+  "tasks": [
+    "refund-full-damaged",
+    "refund-partial-missing-item",
+    "refund-outside-window",
+    "refund-over-agent-limit",
+    "refund-not-delivered",
+    "refund-already-refunded",
+    "refund-other-customers-order",
+    "address-update-shipping",
+    "address-missing-fields",
+    "address-suspended-account",
+    "preferences-two-changes",
+    "preferences-one-unsupported",
+    "refund-over-limit-approved",
+    "refund-over-limit-rejected",
+    "refund-partial-lost-response",
+    "refund-over-limit-approved-lost-response"
+  ]
+}

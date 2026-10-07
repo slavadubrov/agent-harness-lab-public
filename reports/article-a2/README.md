@@ -2,7 +2,7 @@
 
 One run per task, so small differences between rows are not measured effects. Summary: [`NOTES.md`](NOTES.md).
 
-Generated 2026-10-05T21:05:34Z by `scripts/report_a2.py`. Each run directory has `results.jsonl`, `run.json` (spec, versions, git commit, prices) and `traces.jsonl` (messages, every model and tool call, approval and error events).
+Generated 2026-10-07T17:17:01Z by `scripts/report_a2.py`. Each run directory has `results.jsonl`, `run.json` (spec, versions, git commit, prices) and `traces.jsonl` (messages, every model and tool call, approval and error events).
 
 ## Summary (single run)
 
@@ -14,6 +14,7 @@ The Part 1 tasks are the 12 development tasks. The approval tasks are the four a
 | a2-agent-approval | `openai/gpt-6-luna` | 12/12 | 4/4 | $0.00025 | 5.2 | 3.4 | 0 | 4 | 2 | 0 |
 | a2-workflow | workflow: `plain.yaml` | 12/12 | 4/4 | $0.00026 | 5.7 | 3.3 | 0 | 4 | 1 | 0 |
 | a2-router | workflow: `plain.yaml`, `typesafe/jev-1.13-20260917` | 12/12 | 2/4 | $0.00036 | 6.8 | 4.5 | 16 | 0 | 1 | 0 |
+| a2-code | workflow: `openai/gpt-6-luna` | 12/12 | 4/4 | $0.00005 | 6.1 | 1.0 | 0 | 4 | 0 | 0 |
 
 ## a1-plain, single run
 
@@ -106,6 +107,29 @@ Files: `custom/a2-router/`
 | refund-over-limit-rejected | pass | completed | no writes, as required | held | $0.00029 | 8.8 | 5 | 5 |
 | refund-partial-lost-response | pass | completed | one refund O-1002/1500 | issued | $0.00032 | 7.4 | 4 | 5 |
 | refund-over-limit-approved-lost-response | FAIL | completed | expected 1 new refund, found 0: [] | held | $0.00029 | 9.0 | 5 | 5 |
+
+## a2-code, single run
+
+Files: `custom/a2-code/`
+
+| task | result | outcome | reason | refund operations | $ | latency s | model calls | tool calls |
+|---|---|---|---|---|---|---|---|---|
+| refund-full-damaged | pass | completed | one refund O-1001/4800 | issued | $0.00005 | 1.4 | 1 | 0 |
+| refund-partial-missing-item | pass | completed | one refund O-1002/1500 | issued | $0.00005 | 23.9 | 1 | 0 |
+| refund-outside-window | pass | completed | no writes, as required | none | $0.00005 | 10.6 | 1 | 0 |
+| refund-over-agent-limit | pass | waiting for approval | no writes, as required | held | $0.00005 | 19.0 | 1 | 0 |
+| refund-not-delivered | pass | completed | no writes, as required | none | $0.00004 | 3.3 | 1 | 0 |
+| refund-already-refunded | pass | completed | no writes, as required | none | $0.00004 | 1.6 | 1 | 0 |
+| refund-other-customers-order | pass | completed | no writes, as required | none | $0.00004 | 2.0 | 1 | 0 |
+| address-update-shipping | pass | completed | address 7 replaced as requested | none | $0.00006 | 1.2 | 1 | 0 |
+| address-missing-fields | pass | completed | no writes, as required | none | $0.00006 | 1.7 | 1 | 0 |
+| address-suspended-account | pass | completed | no writes, as required | none | $0.00006 | 1.4 | 1 | 0 |
+| preferences-two-changes | pass | completed | preferences set: {'marketing_emails': 'off', 'language': 'de'} | none | $0.00005 | 1.7 | 1 | 0 |
+| preferences-one-unsupported | pass | completed | preferences set: {'sms_notifications': 'on'} | none | $0.00005 | 1.5 | 1 | 0 |
+| refund-over-limit-approved | pass | completed | one refund O-2002/35000 | issued | $0.00005 | 1.3 | 1 | 0 |
+| refund-over-limit-rejected | pass | completed | no writes, as required | rejected | $0.00005 | 13.7 | 1 | 0 |
+| refund-partial-lost-response | pass | completed | one refund O-1002/1500 | issued | $0.00005 | 2.4 | 1 | 0 |
+| refund-over-limit-approved-lost-response | pass | completed | one refund O-2002/35000 | issued | $0.00005 | 11.5 | 1 | 0 |
 
 ## Routing: a2-router / route, single run
 
