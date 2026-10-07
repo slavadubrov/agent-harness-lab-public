@@ -55,6 +55,7 @@ check the final database.
 | [`approval-agent.yaml`](harness/spec/approval-agent.yaml) | `plain` plus LangChain's `HumanInTheLoopMiddleware`, which pauses before a refund above $200 |
 | [`workflows/refund-approval.yaml`](harness/spec/workflows/refund-approval.yaml) | The `plain` agent, then code that waits for the supervisor, issues the approved refund and writes the reply |
 | [`workflows/support-router.yaml`](harness/spec/workflows/support-router.yaml) | A Jev classifier sends each request to one of three `plain` agents with fewer tools |
+| [`workflows/support-code.yaml`](harness/spec/workflows/support-code.yaml) | No agent: one model call reads the message into fields, and code checks the policy, writes and replies |
 
 `glm-5.3-flash.yaml` and `mimo-v2.6-flash.yaml` are `base.yaml` with another model.
 `workflows/support-router-clarify.yaml` adds a route that asks the customer to clarify.
@@ -69,7 +70,7 @@ git clone https://github.com/slavadubrov/agent-harness-lab-public
 cd agent-harness-lab-public
 cp .env.example .env                        # set OPENROUTER_API_KEY
 make test                                   # offline, no key needed
-make a2-matrix                              # Part 2: four specs on the 16 custom tasks
+make a2-matrix                              # Part 2: five specs on the 16 custom tasks
 make a2-routes                              # Part 2: score both routers on 25 labelled requests
 make a2-custom SPEC=harness/spec/workflows/refund-approval.yaml   # one spec
 make a1-custom SPEC=harness/spec/plain.yaml # Part 1: 12 custom tasks

@@ -17,6 +17,7 @@ refund, and the refund service's reply is lost after it committed
 | a2-agent-approval | HumanInTheLoopMiddleware before refunds above $200 | 12/12 | 4/4 | 3,449 | 3.3 | $0.00394 |
 | a2-workflow | approval, issue and reply nodes after the agent | 12/12 | 4/4 | 3,303 | 3.1 | $0.00423 |
 | a2-router | a Jev routing step and narrower tool lists | 12/12 | 2/4 | 3,298 | 4.4 | $0.00573 |
+| a2-code | no agent: one structured model call, then code (run 2026-10-07) | 12/12 | 4/4 | 301 | 1.0 | $0.00078 |
 
 Routing: 25 customer requests, each labelled by hand before any router ran (8 refund,
 9 account, 4 other, 4 unclear). `unclear` marks a message with two different requests or
@@ -32,6 +33,14 @@ confidence is below the threshold.
 
 ## Observations
 
+- **The workflow with no agent passed all 16 tasks.** a2-code makes one structured
+  model call that reads the message into fields (kind, amount, address, settings); regular
+  expressions find the email and the order number, and code applies the policy, writes
+  through the same tools and refund service, and replies from templates. On the Part 1
+  tasks it used a mean of 301 input tokens and one model call per task, against 3,303 to
+  3,449 tokens and 3.1 to 4.4 calls for the agent designs. Its median latency was 1.7 s,
+  against 4.9 to 5.9 s. Every reply was correct, including both approved tasks. It ran
+  on 2026-10-07, two days after the other specs.
 - **The plain agent cannot finish an approved refund.** In both approved tasks it
   submitted the refund, the service held it, and the agent told the customer that a
   supervisor would review it. Nothing in the run waits for the decision, so the refund
@@ -74,6 +83,9 @@ confidence is below the threshold.
 
 ## Limits
 
+- The code workflow's rules were written from the policy with the 16 tasks in view. It
+  was not run on the 25 routing requests or on other wordings; a request of another kind
+  goes to a colleague (`kind: other`), and a message that names no order gets a question.
 - One run per task and 25 routing requests. Repeated runs come in a later part.
 - The labels were written by the author, not by independent annotators.
 - The 0.8 threshold was not chosen on separate data. It shows the trade-off on these 25
@@ -87,4 +99,5 @@ confidence is below the threshold.
 
 - The custom runs and the a2-router routing run used commit `6fe7433`; the
   a2-router-clarify routing run used `b7f9b5b`. `git.dirty` is false in every `run.json`.
+- The a2-code run used commit `cfd0792`.
 - Package versions and endpoint prices are in each `run.json`.
