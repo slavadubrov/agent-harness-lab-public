@@ -24,7 +24,7 @@ from harness.runinfo import now  # noqa: E402
 
 REPORT = ROOT / "reports" / "article-a2"
 PART1 = {t.id for t in TASKS}
-ORDER = ["a1-plain", "a2-agent-approval", "a2-workflow", "a2-router"]
+ORDER = ["a1-plain", "a2-agent-approval", "a2-workflow", "a2-router", "a2-code"]
 
 
 def models(spec: dict) -> str:
@@ -35,6 +35,8 @@ def models(spec: dict) -> str:
                 ids.add(Path(n["agent"]["spec"]).name)
             elif n["type"] == "classifier":
                 ids.add(n["model"])
+            elif n["type"] == "structured":
+                ids.add(n["model"]["id"])
         return "workflow: " + ", ".join(f"`{i}`" for i in sorted(ids))
     return f"`{spec['model']['id']}`"
 
