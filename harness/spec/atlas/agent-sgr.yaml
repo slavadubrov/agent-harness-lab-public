@@ -1,0 +1,25 @@
+# Atlas study, harness layer "SGR only": plain.yaml plus Schema-Guided Reasoning, with no
+# Jev write guard. base.yaml is the same agent with the guard added, so plain -> agent-sgr
+# -> base changes one component per step.
+extends: ../plain.yaml
+name: atlas-agent-sgr
+description: create_agent (plain) with Schema-Guided Reasoning and no write guard.
+middleware:
+  - type: SummarizationMiddleware
+    model: null
+    trigger: [tokens, 12000]
+    keep: [messages, 20]
+  - type: ModelCallLimitMiddleware
+    run_limit: 20
+    thread_limit: 60
+    exit_behavior: end
+  - type: ToolRetryMiddleware
+    max_retries: 2
+    on_failure: continue
+    initial_delay: 0.5
+    backoff_factor: 2.0
+    tools: [look_up_account, list_orders, lookup_policy, search_faq]  # reads only
+  - type: SchemaGuidedReasoning
+    method: function_calling
+    tool_choice: required
+    max_parse_retries: 1

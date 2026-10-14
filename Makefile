@@ -17,7 +17,7 @@ TAU3_CONCURRENCY ?= 4
 CUSTOM_SPECS := harness/spec/base.yaml harness/spec/plain.yaml harness/spec/glm-5.3-flash.yaml harness/spec/mimo-v2.6-flash.yaml
 A2_SPECS := harness/spec/plain.yaml harness/spec/approval-agent.yaml harness/spec/workflows/refund-approval.yaml harness/spec/workflows/support-router.yaml harness/spec/workflows/support-code.yaml
 
-.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2
+.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 atlas-study atlas-tau3 atlas-guard report-atlas
 
 help:
 	@echo "make a1-custom          run the custom environment dev set with SPEC (default base.yaml)"
@@ -29,6 +29,9 @@ help:
 	@echo "make a2-matrix          run the Part 2 task set with plain, approval agent, workflow, router"
 	@echo "make a2-routes          score both routers' classifiers on 25 labelled requests"
 	@echo "make report-a2          rebuild reports/article-a2/README.md"
+	@echo "make atlas-study        repeated runs: 5 designs x 3 harness layers (TRIALS, default 5)"
+	@echo "make atlas-guard        score the Jev write guard on labelled proposed writes"
+	@echo "make report-atlas       rebuild reports/atlas-study/README.md"
 	@echo "make test | fmt | lint"
 
 sync:
@@ -104,3 +107,38 @@ a1-tau3-matrix:
 
 report:
 	$(UV) run python scripts/report_a1.py
+
+# Atlas study (scripts/atlas_study.py). Writes under reports/atlas-study/ only; the
+# article folders stay as the articles quote them.
+TRIALS ?= 5
+atlas-study: sync
+	$(UV) run python scripts/atlas_study.py --trials $(TRIALS)
+	$(UV) run python scripts/atlas_study.py --tau3 --trials $(TRIALS)
+	$(UV) run python scripts/report_atlas.py
+
+atlas-guard: sync
+	$(UV) run python -m envs.custom.guard_eval
+
+report-atlas:
+	$(UV) run python scripts/report_atlas.py
+
+# One τ³ trial into OUT (a folder under reports/atlas-study/tau3/). Same commands as
+# a1-tau3, with its own tau2 simulation name so trials never overwrite each other.
+OUT ?=
+atlas-tau3: sync tau3-data
+	$(if $(OUT),,$(error set OUT to the trial folder))
+	$(eval NAME := $(SPEC_NAME))
+	$(if $(NAME),,$(error could not read the spec name from $(SPEC)))
+	$(eval IDS := $(shell $(UV) run --quiet python -m envs.tau3.subset))
+	$(eval TAG := atlas-$(NAME)-$(notdir $(patsubst %/,%,$(dir $(OUT))))-$(notdir $(OUT)))
+	$(eval TRACES := build/tau3/$(TAG)/traces.jsonl)
+	rm -rf "$(TAU2_DATA_DIR)/simulations/$(TAG)" "build/tau3/$(TAG)"
+	$(UV) run python -m envs.tau3.cli run --domain retail --agent langchain_harness \
+	  --agent-llm "$$($(call SPEC_PY,s.model.id))" \
+	  --agent-llm-args '{"spec":"$(SPEC)","trace_path":"$(TRACES)"}' \
+	  --user-llm $(USER_LLM) --user-llm-args '$(USER_LLM_ARGS)' \
+	  --task-split-name test --task-ids $(IDS) --num-trials 1 \
+	  --max-concurrency $(TAU3_CONCURRENCY) --max-steps 100 --save-to $(TAG) --log-level ERROR
+	$(UV) run python -m envs.tau3.collect --save-to $(TAG) --traces $(TRACES) --spec $(SPEC) \
+	  --out $(OUT) --user-llm $(USER_LLM) \
+	  --command "tau2 run --domain retail --agent langchain_harness --task-split-name test --task-ids $(IDS) --num-trials 1 --user-llm $(USER_LLM)"

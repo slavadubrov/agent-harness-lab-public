@@ -1,0 +1,25 @@
+# Atlas study: approval-agent.yaml plus Schema-Guided Reasoning (no write guard).
+extends: ../approval-agent.yaml
+name: atlas-approval-agent-sgr
+description: Approval agent (HumanInTheLoopMiddleware) with Schema-Guided Reasoning.
+middleware:
+  - type: SummarizationMiddleware
+    model: null
+    trigger: [tokens, 12000]
+    keep: [messages, 20]
+  - type: ModelCallLimitMiddleware
+    run_limit: 20
+    thread_limit: 60
+    exit_behavior: end
+  - type: ToolRetryMiddleware
+    max_retries: 2
+    on_failure: continue
+    initial_delay: 0.5
+    backoff_factor: 2.0
+    tools: [look_up_account, list_orders, lookup_policy, search_faq]  # reads only
+  - type: import
+    ref: envs.custom.approval:refund_approval_middleware
+  - type: SchemaGuidedReasoning
+    method: function_calling
+    tool_choice: required
+    max_parse_retries: 1

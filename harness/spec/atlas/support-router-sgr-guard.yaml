@@ -1,0 +1,12 @@
+# Atlas study: the router design whose three agents are base.yaml agents
+# (Schema-Guided Reasoning and the Jev write guard).
+extends: ../workflows/support-router.yaml
+name: atlas-support-router-sgr-guard
+description: Jev routing to three SGR + Jev agents with narrower tool sets.
+nodes:
+  refunds:
+    agent: {spec: harness/spec/base.yaml}
+  account:
+    agent: {spec: harness/spec/base.yaml}
+  general:
+    agent: {spec: harness/spec/base.yaml}

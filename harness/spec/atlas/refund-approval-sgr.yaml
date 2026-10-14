@@ -1,0 +1,7 @@
+# Atlas study: the agent-inside-a-workflow design with an SGR agent (no write guard).
+extends: ../workflows/refund-approval.yaml
+name: atlas-refund-approval-sgr
+description: SGR agent, then a supervisor approval step and a refund step in code.
+nodes:
+  agent:
+    agent: {spec: harness/spec/atlas/agent-sgr.yaml}

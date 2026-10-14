@@ -101,6 +101,32 @@ def test_jev_guard_blocks_or_allows_a_write(
     assert row["tool_calls"] == 1 - blocked  # a blocked tool never runs
 
 
+@pytest.mark.parametrize(("p", "blocked"), [(0.9, True), (0.1, False)])
+def test_jev_guard_records_its_decision_in_the_trace(monkeypatch, tmp_path, p, blocked):
+    monkeypatch.setattr("harness.agent.jev_classifier", lambda *_: FakeJev(p))
+    guard = {"type": "TypeSafeAutoMode", "tools": ["issue_refund"], "instructions": "test"}
+    steps = [
+        act("look_up_account", email="ana.novak@example.com"),
+        act("issue_refund", order_id="O-1001", amount_cents=4800, reason="damaged"),
+        act("reply_to_user", message="done"),
+    ]
+    seed = create_seed(tmp_path / "seed.sqlite")
+    agent = asyncio.run(build_harness(spec(steps, [guard])))
+    task = TASKS_BY_ID["refund-full-damaged"]
+    _, trace = asyncio.run(run_task(agent, task, seed, tmp_path / task.id, []))
+    tools = [m["data"] for m in trace["messages"] if m["type"] == "tool"]
+    by_name = {t["name"]: t for t in tools}
+    assert "jev_guard" not in by_name["look_up_account"]["response_metadata"]  # not guarded
+    decision = by_name["issue_refund"]["response_metadata"]["jev_guard"]
+    assert decision == {
+        "question": "is_risky",
+        "probability": p,
+        "threshold": 0.5,
+        "blocked": blocked,
+    }
+    assert (by_name["issue_refund"]["status"] == "error") is blocked
+
+
 def test_tau3_adapter_returns_tool_calls_and_resumes(tmp_path):
     from tau2.data_model.message import ToolMessage, UserMessage
     from tau2.environment.tool import as_tool
