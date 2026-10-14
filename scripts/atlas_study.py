@@ -18,9 +18,10 @@ one spec run one after another (the runner names its scratch folder by spec and 
 different specs run in parallel. An existing trial folder is skipped, so an interrupted
 study resumes where it stopped.
 
-Layers:
+Layers (SGR on/off x write guard on/off):
 - base:                 native tool calling, no SGR, no write guard
 - sgr_only:             Schema-Guided Reasoning, no write guard
+- guard_only:           native tool calling and the Jev write guard
 - sgr_plus_write_guard: Schema-Guided Reasoning and the Jev write guard
 
 The workflow with no agent (plain_workflow) has no agent loop, so the agent layers do not
@@ -47,21 +48,25 @@ CUSTOM: dict[str, dict[str, str]] = {
     "router": {
         "base": "harness/spec/workflows/support-router.yaml",
         "sgr_only": "harness/spec/atlas/support-router-sgr.yaml",
+        "guard_only": "harness/spec/atlas/support-router-guard.yaml",
         "sgr_plus_write_guard": "harness/spec/atlas/support-router-sgr-guard.yaml",
     },
     "agent_in_workflow": {
         "base": "harness/spec/workflows/refund-approval.yaml",
         "sgr_only": "harness/spec/atlas/refund-approval-sgr.yaml",
+        "guard_only": "harness/spec/atlas/refund-approval-guard.yaml",
         "sgr_plus_write_guard": "harness/spec/atlas/refund-approval-sgr-guard.yaml",
     },
     "agent_with_approval": {
         "base": "harness/spec/approval-agent.yaml",
         "sgr_only": "harness/spec/atlas/approval-agent-sgr.yaml",
+        "guard_only": "harness/spec/atlas/approval-agent-guard.yaml",
         "sgr_plus_write_guard": "harness/spec/atlas/approval-agent-sgr-guard.yaml",
     },
     "autonomous_agent": {
         "base": "harness/spec/plain.yaml",
         "sgr_only": "harness/spec/atlas/agent-sgr.yaml",
+        "guard_only": "harness/spec/atlas/agent-guard.yaml",
         "sgr_plus_write_guard": "harness/spec/base.yaml",
     },
 }
@@ -74,13 +79,17 @@ TAU3: dict[str, str] = {
 }
 
 
-def custom_jobs(trials: int, only: set[str]) -> list[tuple[str, list[tuple[list[str], Path]]]]:
+def custom_jobs(
+    trials: int, only: set[str], layers_wanted: set[str]
+) -> list[tuple[str, list[tuple[list[str], Path]]]]:
     """One job per spec: its trials in order, each (command, output folder)."""
     jobs = []
     for design, layers in CUSTOM.items():
         if only and design not in only:
             continue
         for layer, spec in layers.items():
+            if layers_wanted and layer not in layers_wanted:
+                continue
             runs = []
             for n in range(1, trials + 1):
                 out = OUT / "custom" / design / layer / f"trial-{n}"
@@ -131,6 +140,7 @@ def main() -> int:
     p.add_argument("--trials", type=int, default=5)
     p.add_argument("--tau3", action="store_true", help="run the τ³ cells instead of custom")
     p.add_argument("--only", default="", help="comma-separated designs (custom only)")
+    p.add_argument("--layers", default="", help="comma-separated layers (custom only)")
     p.add_argument("--parallel", type=int, default=3, help="specs run at the same time")
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args()
@@ -138,7 +148,8 @@ def main() -> int:
     only = {s for s in args.only.split(",") if s}
     if unknown := only - set(CUSTOM):
         raise SystemExit(f"unknown designs: {sorted(unknown)}")
-    jobs = tau3_jobs(args.trials) if args.tau3 else custom_jobs(args.trials, only)
+    layers = {s for s in args.layers.split(",") if s}
+    jobs = tau3_jobs(args.trials) if args.tau3 else custom_jobs(args.trials, only, layers)
     with ThreadPoolExecutor(max_workers=max(1, args.parallel)) as pool:
         results = list(pool.map(lambda j: run_job(j[0], j[1], args.dry_run), jobs))
     failed = [f for r in results for f in r]

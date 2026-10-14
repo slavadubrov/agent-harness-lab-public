@@ -1,0 +1,7 @@
+# Atlas study: the agent-inside-a-workflow design with a plain agent plus the Jev guard.
+extends: ../workflows/refund-approval.yaml
+name: atlas-refund-approval-guard
+description: Plain agent with the Jev write guard, then supervisor approval and refund in code.
+nodes:
+  agent:
+    agent: {spec: harness/spec/atlas/agent-guard.yaml}
