@@ -94,6 +94,21 @@ The article quotes the runs saved at tag
 [`reports/article-a1-rerun-2026-09-26/`](reports/article-a1-rerun-2026-09-26/) keeps a later
 rerun of the same specs on this repository; its τ³-bench results differ by one task per spec.
 
+## Repeated runs and the write guard (Atlas study)
+
+[`reports/atlas-study/`](reports/atlas-study/) repeats the Part 2 designs five times each,
+adds Schema-Guided Reasoning and the Jev write guard to every design that contains an
+agent, runs the τ³ subset five times per spec, and scores the guard on 24 labelled
+writes. [`NOTES.md`](reports/atlas-study/NOTES.md) summarizes what it shows. The Agent
+Harness & Architecture Atlas, an interactive view of these runs, is built from these
+files.
+
+```bash
+make atlas-study TRIALS=5   # 85 custom-task trials and 10 τ³ trials, about $0.75
+make atlas-guard            # the guard on labelled writes, about $0.005
+make report-atlas           # rebuild reports/atlas-study/README.md
+```
+
 ## More detail
 
 | Document | Read it to learn |

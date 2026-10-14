@@ -1,8 +1,8 @@
-"""Repeated runs for the Harness Atlas: five designs x three harness layers, k trials each.
+"""Repeated runs for the Harness Atlas: five designs x four harness layers, k trials each.
 
     uv run python scripts/atlas_study.py --trials 5                  # custom tasks, all cells
     uv run python scripts/atlas_study.py --trials 5 --only autonomous_agent
-    uv run python scripts/atlas_study.py --tau3 --trials 3           # τ³ retail, two layers
+    uv run python scripts/atlas_study.py --tau3 --trials 5           # τ³ retail, two layers
     uv run python scripts/atlas_study.py --dry-run                   # print the plan only
 
 Every cell is one spec file run on the same task set, the same model and the same
