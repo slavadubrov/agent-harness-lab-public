@@ -11,6 +11,9 @@ This is the demo for the series **Building and Evaluating Agent Harnesses**:
   adds a supervisor approval for large refunds and compares three ways to build it:
   the plain agent, the agent with an approval pause, and a LangGraph workflow around the
   agent. Release `v0.2.0-a2`.
+- Part 3 (in progress) repeats the Part 2 designs 10 times, runs them on 32 requests the
+  workflow's rules were not written for, adds a hybrid design, checks on the reply and a
+  judge model. Data: [`reports/article-a3/`](reports/article-a3/).
 
 The assistant handles refunds, address changes and account preferences. One YAML file
 defines an agent: model, prompt, tools and middleware. A workflow file connects agents,
@@ -30,7 +33,8 @@ check the final database.
 | [`harness/spec/`](harness/spec/) | Agent specs (`base.yaml`, `plain.yaml`, `approval-agent.yaml`, …) and workflow specs in `workflows/` |
 | [`envs/custom/`](envs/custom/) | 16 support tasks, a SQLite database, 5 account tools, the refund service, a policy MCP server, the supervisor approval steps and the router evaluation |
 | [`envs/tau3/`](envs/tau3/) | Adapter that runs the same harness on 8 τ³-bench retail tasks |
-| [`reports/article-a1/`](reports/article-a1/), [`reports/article-a2/`](reports/article-a2/) | Saved results, traces and package versions for each part |
+| [`reports/article-a1/`](reports/article-a1/), [`reports/article-a2/`](reports/article-a2/), [`reports/article-a3/`](reports/article-a3/) | Saved results, traces and package versions for each part |
+| [`atlas/`](atlas/) | The run data exported for the Agent or Workflow Atlas explainer, with its JSON Schema |
 | [`tests/`](tests/) | Offline tests with fake models |
 
 ## How one task runs
@@ -75,15 +79,22 @@ make a2-routes                              # Part 2: score both routers on 25 l
 make a2-custom SPEC=harness/spec/workflows/refund-approval.yaml   # one spec
 make a1-custom SPEC=harness/spec/plain.yaml # Part 1: 12 custom tasks
 make a1-tau3   SPEC=harness/spec/plain.yaml # Part 1: 8 τ³-bench retail tasks
+make a3-k10                                 # Part 3: designs 0-5 on the 16 tasks, 10 runs
+make a3-oot                                 # Part 3: designs 1-6 on the 32 new requests, 5 runs
+make report-a3                              # Part 3: rebuild reports/article-a3/README.md
 ```
 
 Without `SPEC`, the `a1-*` targets use `base.yaml`. Each run prints one line per task
 and replaces the files under `reports/article-<part>/<env>/<spec>/`. Use `git diff` to
 compare your run with the saved one. `make help` lists every target. The Part 2 runs cost
-about $0.02 in total on 2026-10-05 prices.
+about $0.02 in total on 2026-10-05 prices. The Part 3 runs write one folder per run, stop
+at a budget cap per step, and cost $0.50 in total on 2026-10-15. `make atlas-export`
+needs the blog's data contract package, which is not public; its output is committed in
+`atlas/`.
 
 ## Results
 
+[`reports/article-a3/NOTES.md`](reports/article-a3/NOTES.md),
 [`reports/article-a2/NOTES.md`](reports/article-a2/NOTES.md) and
 [`reports/article-a1/NOTES.md`](reports/article-a1/NOTES.md) summarize the saved runs of
 each part; the `README.md` next to each has the per-task tables. Each row is a single run
@@ -112,10 +123,12 @@ rerun of the same specs on this repository; its τ³-bench results differ by one
 - There is no limit on total time or spending per task.
 - The supervisor is a script, and the checkpointer is in memory: a paused case does not
   survive a restart. A real approval step needs a persistent checkpointer.
-- The checks read the database only, not the reply. Part 2's reply findings come from
-  reading the traces.
+- Parts 1 and 2 check the database only, not the reply; Part 2's reply findings come
+  from reading the traces. Part 3 adds two deterministic reply checks and a judge model
+  (`envs/custom/replies.py`).
 - The checks and the cost accounting run in the same process as the agent.
-- One run per task. Later articles add a separate evaluator and repeated runs.
+- Parts 1 and 2 ran each task once. Part 3 repeats the runs. A separate evaluator comes
+  in a later part.
 
 A spec can import Python code and start MCP server commands. Treat a spec file as code
 and review it before you run it.

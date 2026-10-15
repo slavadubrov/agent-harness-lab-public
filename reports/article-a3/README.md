@@ -2,7 +2,7 @@
 
 Repeated runs for Part 3 and the Agent or Workflow Atlas. Summary and limits: [`NOTES.md`](NOTES.md).
 
-Generated 2026-10-15T15:10:18Z by `scripts/report_a3.py`. Each run folder has `results.jsonl`, `traces.jsonl` and `run.json` (spec, spec hash, price table, versions, git commit). Dollars use the pinned price table `harness/prices/openrouter-2026-10-05.json`.
+Generated 2026-10-15T15:26:00Z by `scripts/report_a3.py`. Each run folder has `results.jsonl`, `traces.jsonl` and `run.json` (spec, spec hash, price table, versions, git commit). Dollars use the pinned price table `harness/prices/openrouter-2026-10-05.json`.
 
 ## k10: the 16 known tasks, up to 10 runs per design
 
@@ -12,7 +12,7 @@ A run is one pass of one design over all the tasks. Run 1 of every design ran be
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 0 do nothing | 10 | 80/160 | 0.50 | 0/160 | n/a | n/a | $0.00000 ($0.00000 to $0.00000) | 0% | 0.00 | 0.0 | 0 |
 | 1 plain agent | 10 | 139/160 | 0.81 | 110/160 | 30/30 | 0/30 | $0.00394 ($0.00364 to $0.00527) | 63% | 3.62 | 7.4 | 0 |
-| 2 agent with approval middleware | 10 | 160/160 | 1.00 | 109/160 | 32/50 | 0/50 | $0.00408 ($0.00365 to $0.00470) | 59% | 3.56 | 7.0 | 0 |
+| 2 agent with approval middleware | 10 | 160/160 | 1.00 | 109/160 | 30/50 | 0/50 | $0.00408 ($0.00365 to $0.00470) | 59% | 3.56 | 7.0 | 0 |
 | 3 agent inside a workflow | 10 | 160/160 | 1.00 | 141/160 | 50/50 | 20/50 | $0.00403 ($0.00331 to $0.00474) | 63% | 3.62 | 6.8 | 0 |
 | 4 router and three agents | 10 | 140/160 | 0.88 | 111/160 | 30/30 | 0/30 | $0.00464 ($0.00410 to $0.00561) | 39% | 4.46 | 6.5 | 0 |
 | 5 workflow with no agent | 10 | 160/160 | 1.00 | 150/160 | 50/50 | 50/50 | $0.00078 ($0.00078 to $0.00078) | 0% | 1.00 | 1.2 | 0 |

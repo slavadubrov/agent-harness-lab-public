@@ -49,7 +49,7 @@ Three kinds of check:
 |---|---|---|---|---|---|---|---|
 | 0 do nothing | 80/160 | 0.50 | 0/160 | | | $0 | |
 | 1 plain agent | 139/160 | 0.81 | 110/160 | 30/30 | 0/30 | $0.00394 ($0.00364 to $0.00527) | 63% |
-| 2 agent with approval middleware | 160/160 | 1.00 | 109/160 | 32/50 | 0/50 | $0.00408 ($0.00365 to $0.00470) | 59% |
+| 2 agent with approval middleware | 160/160 | 1.00 | 109/160 | 30/50 | 0/50 | $0.00408 ($0.00365 to $0.00470) | 59% |
 | 3 agent inside a workflow | 160/160 | 1.00 | 141/160 | 50/50 | 20/50 | $0.00403 ($0.00331 to $0.00474) | 63% |
 | 4 router and three agents | 140/160 | 0.88 | 111/160 | 30/30 | 0/30 | $0.00464 ($0.00410 to $0.00561) | 39% |
 | 5 workflow with no agent | 160/160 | 1.00 | 150/160 | 50/50 | 50/50 | $0.00078 (every run) | 0% |
@@ -63,10 +63,12 @@ Three kinds of check:
 - **The state results did not change between runs**, except one failure of design 1 on
   `preferences-one-unsupported`. Designs 1 and 4 failed both approved tasks in all 10
   runs: nothing in them waits for the supervisor.
-- **Design 2's false reply is the usual result.** After the supervisor approved the $350
-  refund, its reply said the refund was still held in 8 of 10 runs of
+- **Design 2's false reply came in every run.** After the supervisor approved the $350
+  refund, its reply said the refund still waited for approval in 10 of 10 runs of
   `refund-over-limit-approved` and in 10 of 10 runs of
-  `refund-over-limit-approved-lost-response`. The state check passed every time.
+  `refund-over-limit-approved-lost-response`: "it's on hold", "it won't be issued until
+  approved", or "a supervisor must approve it before the refund is issued". The state
+  check passed every time.
 - **The agents never name the refund id.** Designs 1, 2 and 4 named it in none of their
   replies after an issued refund. Design 5, design 6 and design 3's code steps after an
   approval named it every time.
@@ -179,7 +181,7 @@ Two checks over all 1,989 replies, without labels:
 | | v1 | v2 |
 |---|---|---|
 | "action" where nothing was written and nothing should be (1,229 replies) | 65 | 1 |
-| "says held" agrees with `no_false_hold` (381 replies after an issued refund) | 379 | 378 |
+| "says held" agrees with `no_false_hold` (381 replies after an issued refund) | 381 | 380 |
 | design 2's 20 false "held" replies are read as | action | handoff |
 
 What this means for the numbers above:
@@ -211,7 +213,7 @@ What this means for the numbers above:
   showed the router sending a refund policy question to the code. The design was not
   changed, so that the 32 messages stay a test the hybrid was not fitted to.
 - Design 6's runs on the known tasks ran after the other designs' runs, so their prompt
-  cache and provider load differ. Designs 5 and 6 read no cached tokens.
+  cache and provider load differ. On the known tasks, designs 5 and 6 read no cached tokens.
 - The supervisor is a script that answers at once. No run restarted the process.
 - Latency depends on the provider's load; compare medians only within one batch.
 - Billed cost equals the computed cost for chat calls. OpenRouter reports no cost for Jev
@@ -228,6 +230,39 @@ What this means for the numbers above:
 | G5 router repeats | Done. 10 more runs per router; the Part 2 files are unchanged. |
 | G7 do-nothing design | Done. 8 of 16 tasks in every run, 7 of the 12 original tasks. |
 | G8 router export | Done in the export: label, choice, confidence and probabilities per request and run. |
+
+## Rulings
+
+Decisions made during Phase 1 that the plan or the task did not settle. The plan file
+lists the first 16 in full.
+
+1. G3 has two texts: the teapot message with the email but no order number (step 8) and
+   the text SLA-253 quotes, which has neither.
+2. The 16 known tasks got an expected outcome too, written after the Part 2 results.
+3. "Expected outcome met" is the state check plus the judge's reading of the reply.
+4. The judge is TypeSafe Jev with two typed questions per reply.
+5. Design 0 (do nothing) is a workflow with one function node.
+6. Design 6 uses the Part 2 router with an `unclear` route and a threshold, in a flat
+   workflow (an approval pause inside a child graph would not reach the runner).
+7. The threshold comes from a rule fixed before design 6 ran (fewest wrong routes, then
+   fewest unneeded questions over the 11 router runs): 0.9.
+8. The 30 labels were drawn after the new-set runs, so they cover answers and handoffs.
+9. Dollars use the pinned Part 2 price table.
+10. New reports live in `reports/article-a3/`; the Part 2 folders are unchanged, and the
+    judge's verdicts on Part 2 runs live in `reports/article-a3/judge/a2/`.
+11. Trace events add `step` (a workflow node attempt) and `resume`; Part 2 traces are
+    rebuilt from the messages and marked so.
+12. Records built from a run carry run id, commit, spec hash, models, price table and
+    provenance; task and design definitions carry their commit and file.
+13. pass^k is the share of tasks passed in all runs.
+14. Runs interleave the designs, 4 tasks at a time, with a fresh target per run.
+15. Code changed while a batch ran was written in a separate worktree, so every run
+    records a clean commit.
+16. Design 6 was not changed after a three-message smoke test showed it sending a refund
+    policy question to the code, so the 32 messages stay a test it was not fitted to.
+17. Judge v1 was replaced by v2 after its four misreadings in sample A; v2 is measured
+    on sample B, labelled before v2 ran.
+18. The address check accepts "ss" for "ß", so a correct "Torstrasse" passes.
 
 ## Spend
 
@@ -255,6 +290,7 @@ cost and the computed dollars.
 | 2bdf920 | judge v2's outcome definitions |
 | 4571842 | sample B labels, before judge v2 ran |
 | 2aca9e1 | judge retries; judge v2 ran at 4571842 and here (verdicts in 545bf3d) |
+| df44ead | the fixed `no_false_hold` and `refund_id_in_reply` checks that the data uses |
 
 Every `run.json` records its commit (none dirty), spec hash, price table and package
 versions.
