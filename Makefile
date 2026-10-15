@@ -1,4 +1,4 @@
-# agent-harness-lab — Part 1 (a1-*) and Part 2 (a2-*) targets. Needs uv and OPENROUTER_API_KEY (or OPEN_ROUTER_API_KEY) in .env or the environment.
+# agent-harness-lab — Part 1 (a1-*), Part 2 (a2-*) and Part 3 (a3-*) targets. Needs uv and OPENROUTER_API_KEY (or OPEN_ROUTER_API_KEY) in .env or the environment.
 SHELL := /bin/bash
 UV ?= uv
 SPEC ?= harness/spec/base.yaml
@@ -16,8 +16,12 @@ TAU3_CONCURRENCY ?= 4
 
 CUSTOM_SPECS := harness/spec/base.yaml harness/spec/plain.yaml harness/spec/glm-5.3-flash.yaml harness/spec/mimo-v2.6-flash.yaml
 A2_SPECS := harness/spec/plain.yaml harness/spec/approval-agent.yaml harness/spec/workflows/refund-approval.yaml harness/spec/workflows/support-router.yaml harness/spec/workflows/support-code.yaml
+# Part 3: design 0 (do nothing), then designs 1-5. Dollars use the pinned Part 2 prices.
+A3_SPECS := harness/spec/workflows/do-nothing.yaml $(A2_SPECS)
+ROUTERS := harness/spec/workflows/support-router.yaml harness/spec/workflows/support-router-clarify.yaml
+PRICES := harness/prices/openrouter-2026-10-05.json
 
-.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2
+.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 a3-k10 a3-routes report-a3
 
 help:
 	@echo "make a1-custom          run the custom environment dev set with SPEC (default base.yaml)"
@@ -29,6 +33,9 @@ help:
 	@echo "make a2-matrix          run the Part 2 task set with plain, approval agent, workflow, router"
 	@echo "make a2-routes          score both routers' classifiers on 25 labelled requests"
 	@echo "make report-a2          rebuild reports/article-a2/README.md"
+	@echo "make a3-k10             Part 3: designs 0-5 on the 16 tasks, 10 runs, cap \$$1"
+	@echo "make a3-routes          Part 3: both routers on the 25 requests, 10 more runs"
+	@echo "make report-a3          rebuild reports/article-a3/README.md"
 	@echo "make test | fmt | lint"
 
 sync:
@@ -68,6 +75,17 @@ a2-routes: sync
 
 report-a2:
 	$(UV) run python scripts/report_a2.py
+
+a3-k10: sync
+	$(UV) run python -m envs.custom.batch --batch k10 --suite a2 --runs 10 \
+	  --step p1-03 --budget 1.00 --specs $(A3_SPECS)
+
+a3-routes: sync
+	$(UV) run python -m envs.custom.route_eval --runs 10 --out reports/article-a3/routing \
+	  --step p1-03 --budget 1.00 --price-table $(PRICES) --spec $(ROUTERS)
+
+report-a3:
+	$(UV) run python scripts/report_a3.py
 
 # Sparse checkout of the tau2 data the retail runs need, at the pinned commit.
 tau3-data:

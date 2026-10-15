@@ -10,6 +10,16 @@ Writes results.jsonl (label, choice, confidence, full distribution per case) and
 run.json to reports/article-a2/routing/<spec name>/, and prints the trade-off between
 routing everything and sending low-confidence requests to a clarifying question.
 These cases tune nothing; a threshold chosen from them would need fresh cases to test.
+
+Repeated runs (Part 3) go to a separate folder and never replace the Part 2 files:
+
+    python -m envs.custom.route_eval --runs 10 --out reports/article-a3/routing \
+        --step p1-03 --budget 1.00 --price-table harness/prices/openrouter-2026-10-05.json \
+        --spec harness/spec/workflows/support-router.yaml \
+               harness/spec/workflows/support-router-clarify.yaml
+
+Run r of every spec comes before run r+1, each run is written to <out>/<spec name>/r<NN>/,
+and the spend counts against the step's cap as in ``envs.custom.batch``.
 """
 
 from __future__ import annotations
@@ -18,13 +28,15 @@ import argparse
 import asyncio
 import json
 from dataclasses import asdict
+from pathlib import Path
 from typing import Any
 
+from envs.custom.batch import LEDGER, record_spend, schedule, spent, within_budget
 from envs.custom.tools import AccountContext
-from harness.accounting import UsageRecorder, fetch_price
+from harness.accounting import Price, UsageRecorder, fetch_price, load_price_table
 from harness.env import load_api_key
-from harness.runinfo import git_sha, now, packages
-from harness.spec import REPO_ROOT, ClassifierNodeSpec, load_workflow_spec
+from harness.runinfo import git_sha, now, packages, spec_hash
+from harness.spec import REPO_ROOT, ClassifierNodeSpec, WorkflowSpec, load_workflow_spec
 from harness.workflow import NodeContext, build_node
 
 # (label, request). Labels: refund, account, other, unclear.
@@ -82,14 +94,14 @@ def score(rows: list[dict[str, Any]], threshold: float) -> dict[str, int]:
     return s
 
 
-async def main_async(args) -> int:
-    load_api_key()
-    spec = load_workflow_spec(args.spec)
-    node = spec.nodes[args.node]
+async def score_once(
+    spec: WorkflowSpec, node_name: str, price: Price, out_dir: Path, info: dict[str, Any]
+) -> tuple[list[dict[str, Any]], float]:
+    """Classify the 25 cases once; write results.jsonl and run.json to ``out_dir``."""
+    node = spec.nodes[node_name]
     if not isinstance(node, ClassifierNodeSpec):
-        raise SystemExit(f"node {args.node!r} is not a classifier")
-    price = fetch_price(node.price_model_id, node.price_provider_tag)
-    route = await build_node(args.node, node, {})
+        raise SystemExit(f"node {node_name!r} is not a classifier")
+    route = await build_node(node_name, node, {})
     rec = UsageRecorder([price])
     ctx = NodeContext(context=AccountContext(db_path=REPO_ROOT), config={"callbacks": [rec]})
     started = now()
@@ -107,7 +119,6 @@ async def main_async(args) -> int:
         }
 
     rows = await asyncio.gather(*(one(label, req) for label, req in CASES))
-    out_dir = REPO_ROOT / "reports" / "article-a2" / "routing" / spec.name
     out_dir.mkdir(parents=True, exist_ok=True)
     with open(out_dir / "results.jsonl", "w") as f:
         for r in rows:
@@ -118,10 +129,11 @@ async def main_async(args) -> int:
         json.dumps(
             {
                 "label": "single run",
+                **info,
                 "started_at": started,
                 "finished_at": now(),
                 "spec": spec.model_dump(mode="json"),
-                "node": args.node,
+                "node": node_name,
                 "cases": len(rows),
                 "classifier_calls": totals.classifier_calls,
                 "input_tokens": totals.input_tokens,
@@ -134,22 +146,72 @@ async def main_async(args) -> int:
             indent=2,
         )
     )
-    print(f"\n{spec.name} / {args.node}: {len(rows)} labelled requests, single run")
+    print(f"\n{spec.name} / {node_name}: {len(rows)} labelled requests, {info['label']}")
     for r in rows:
         mark = "ok " if r["choice"] == r["label"] else "-- "
         print(
             f"{mark}{r['label']:8} -> {r['choice']:8} {r['confidence'] or 0:.2f}  {r['request'][:60]}"
         )
-    for name, s in summary.items():
-        print(f"{name}: {s}")
+    for name, sc in summary.items():
+        print(f"{name}: {sc}")
     print(f"${totals.dollars:.6f} for {totals.classifier_calls} classifier calls; wrote {out_dir}")
+    return rows, totals.dollars
+
+
+async def main_async(args) -> int:
+    load_api_key()
+    specs = [load_workflow_spec(path) for path in args.spec]
+    pinned = load_price_table(args.price_table) if args.price_table else None
+
+    def price_of(spec: WorkflowSpec) -> Price:
+        node = spec.nodes[args.node]
+        if not isinstance(node, ClassifierNodeSpec):
+            raise SystemExit(f"node {args.node!r} is not a classifier")
+        if pinned is None:
+            return fetch_price(node.price_model_id, node.price_provider_tag)
+        return next(p for p in pinned[1] if p.model_id == node.price_model_id)
+
+    if not args.out:  # Part 2: one run per spec, into reports/article-a2/routing/
+        for spec in specs:
+            out_dir = REPO_ROOT / "reports" / "article-a2" / "routing" / spec.name
+            await score_once(spec, args.node, price_of(spec), out_dir, {})
+        return 0
+    if pinned is None or not args.step:
+        raise SystemExit("--out needs --price-table, --step and --budget")
+    most = 0.0
+    by_path = dict(zip(args.spec, specs, strict=True))
+    for r, path in schedule(args.spec, args.runs):
+        spec = by_path[path]
+        out_dir = Path(args.out) / spec.name / f"r{r:02d}"
+        if (out_dir / "results.jsonl").exists():
+            print(f"skip {out_dir}: already run")
+            continue
+        used = spent(LEDGER, args.step)
+        if not within_budget(used, most, args.budget):
+            print(f"stop: {args.step} spent ${used:.5f}; cap ${args.budget:.2f}")
+            return 1
+        info = {
+            "label": f"run {r} of {args.runs}",
+            "run": r,
+            "runs": args.runs,
+            "spec_hash": spec_hash(spec.model_dump(mode="json")),
+            "price_table": pinned[0],
+        }
+        _, dollars = await score_once(spec, args.node, price_of(spec), out_dir, info)
+        most = max(most, dollars)
+        record_spend(LEDGER, step=args.step, batch="route", spec=spec.name, run=r, dollars=dollars)
     return 0
 
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--spec", default="harness/spec/workflows/support-router.yaml")
+    p.add_argument("--spec", nargs="+", default=["harness/spec/workflows/support-router.yaml"])
     p.add_argument("--node", default="route")
+    p.add_argument("--runs", type=int, default=1)
+    p.add_argument("--out", default="", help="folder for repeated runs (default: Part 2 files)")
+    p.add_argument("--step", default="", help="the budget the spend counts against")
+    p.add_argument("--budget", type=float, default=0.0)
+    p.add_argument("--price-table", default="")
     raise SystemExit(asyncio.run(main_async(p.parse_args())))
 
 

@@ -1,0 +1,26 @@
+{
+  "version": "openrouter-2026-10-05",
+  "note": "The OpenRouter endpoint prices that the Part 2 runs recorded in reports/article-a2/custom/*/run.json. Runs that name this table compute dollars from it, not from the live price.",
+  "prices_usd_per_token": [
+    {
+      "model_id": "openai/gpt-6-luna",
+      "provider_tag": "openai",
+      "prompt": 1e-07,
+      "completion": 5e-07,
+      "input_cache_read": 1e-08,
+      "input_cache_write": 1.25e-07,
+      "fetched_at": "2026-10-05T20:59:10Z",
+      "source": "https://openrouter.ai/api/v1/models/openai/gpt-6-luna/endpoints"
+    },
+    {
+      "model_id": "typesafe/jev-1.13",
+      "provider_tag": "typesafe",
+      "prompt": 4.2e-08,
+      "completion": 0.0,
+      "input_cache_read": 0.0,
+      "input_cache_write": 0.0,
+      "fetched_at": "2026-10-05T21:00:38Z",
+      "source": "https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints"
+    }
+  ]
+}
