@@ -212,3 +212,54 @@ def test_route_score_counts_clarifications_as_right_only_for_unclear_requests():
         "clarify_needed": 2,
         "clarify_not_needed": 1,
     }
+
+
+# -- design 6, the hybrid ------------------------------------------------------------------
+
+
+def hybrid(tmp_path, route: str, confidence: float, read: dict, agent_steps=()) -> WorkflowSpec:
+    """hybrid.yaml with fixed router and reader answers and a scripted agent."""
+    import yaml
+
+    agent = tmp_path / "agent.yaml"
+    agent.write_text(
+        yaml.safe_dump(
+            scripted("harness/spec/plain.yaml", list(agent_steps)).model_dump(
+                mode="json", exclude={"source"}
+            )
+        )
+    )
+    data = load_workflow_spec("harness/spec/workflows/hybrid.yaml").model_dump(exclude={"source"})
+    data["nodes"]["route"] = {
+        "type": "function",
+        "ref": "tests.fakes:fixed_route",
+        "kwargs": {"route": route, "confidence": confidence},
+    }
+    data["nodes"]["read"] = {"type": "function", "ref": "tests.fakes:fixed_read", "kwargs": read}
+    data["nodes"]["agent"]["agent"] = {"spec": str(agent), "override": {}}
+    return WorkflowSpec.model_validate(data)
+
+
+def test_hybrid_sends_a_known_refund_through_code_and_the_approval_steps(tmp_path):
+    spec = hybrid(tmp_path, "refund", 0.99, {"kind": "refund"})
+    row, trace = run(spec, "refund-over-limit-approved", tmp_path)
+    assert row["passed"], row["reason"]
+    assert row["approval_requests"] == 1
+    assert "issued (refund" in row["final_answer"]
+    assert trace["workflow_state"]["path"] == "code"
+
+
+def test_hybrid_asks_when_the_router_is_unsure(tmp_path):
+    spec = hybrid(tmp_path, "refund", 0.3, {"kind": "refund"})
+    row, trace = run(spec, "refund-full-damaged", tmp_path)
+    assert not row["passed"]  # no refund: it asked a question instead
+    assert trace["workflow_state"]["path"] == "clarify"
+    assert "which one thing you need first" in row["final_answer"]
+
+
+def test_hybrid_sends_other_requests_to_the_agent(tmp_path):
+    steps = [{"reply": "Refunds are possible within 30 days of delivery."}]
+    spec = hybrid(tmp_path, "other", 0.99, {}, agent_steps=steps)
+    row, trace = run(spec, "policy-refund-window", tmp_path)
+    assert row["passed"] and row["final_answer"] == steps[0]["reply"]
+    assert trace["workflow_state"]["path"] == "agent"

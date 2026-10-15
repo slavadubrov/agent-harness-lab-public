@@ -1,0 +1,95 @@
+# Design 6: a decision model sends the known kinds of request to the workflow with no agent
+# and the rest to the agent inside a workflow. The route node is the classifier of
+# support-router-clarify.yaml (TypeSafe Jev). `decide` asks the customer a question when
+# the router picks `unclear` or its confidence is below the threshold. The threshold was
+# chosen on the 25 labelled router requests before this design ran on new messages
+# (reports/article-a3/NOTES.md). Refund and account requests go to the nodes of
+# support-code.yaml; other requests go to the agent of refund-approval.yaml; both continue
+# to the same approval steps. Functions: envs/custom/code_workflow.py, envs/custom/approval.py.
+kind: workflow
+name: a3-hybrid
+description: Jev sends known requests to code, the rest to an agent, unclear ones to a question.
+engine: {name: langgraph}
+state_schema: envs.custom.code_workflow:HybridCase
+context_schema: envs.custom.tools:AccountContext
+
+nodes:
+  route:
+    type: classifier
+    model: typesafe/jev-1.13-20260917
+    instructions: Which team should handle this customer request?
+    choices:
+      refund: Refunds, returns, damaged or missing items, money back.
+      account: Address changes and account preferences (email, SMS, language, billing).
+      other: Anything else that is one clear request.
+      unclear: Two or more different requests in one message, or too vague to act on.
+    input: "{request}"
+    output: route
+    confidence_output: route_confidence
+    probabilities_output: route_probabilities
+  decide:
+    type: function
+    ref: envs.custom.code_workflow:choose_path
+    kwargs: {threshold: 0.8}
+  read:
+    type: structured
+    model:
+      provider: openrouter
+      id: openai/gpt-6-luna
+      settings:
+        max_tokens: 1024
+        reasoning: {effort: low}
+        provider: {order: [openai], allow_fallbacks: false}
+        timeout_ms: 120000
+        max_retries: 2
+    output_schema: envs.custom.code_workflow:Request
+    prompt: |
+      Read this message to an online shop's customer support and fill in the fields.
+
+      {request}
+    writes: {kind: kind, amount_cents: amount_cents, address: address, settings: settings}
+  handle:
+    type: function
+    ref: envs.custom.code_workflow:handle
+    # Safe to retry: the refund service deduplicates by operation key.
+    retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
+  agent:
+    type: agent
+    agent: {spec: harness/spec/plain.yaml}
+    message: "{request}"
+    output: answer
+  clarify:
+    type: function
+    ref: envs.custom.approval:ask_to_clarify
+  find_held:
+    type: function
+    ref: envs.custom.approval:find_held
+  approval:
+    type: function
+    ref: envs.custom.approval:wait_for_supervisor
+  issue:
+    type: function
+    ref: envs.custom.approval:issue_approved
+    retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
+  reply:
+    type: function
+    ref: envs.custom.approval:reply
+
+edges:
+  - [START, route]
+  - [route, decide]
+  - [read, handle]
+  - [handle, find_held]
+  - [agent, find_held]
+  - [approval, issue]
+  - [issue, reply]
+  - [reply, END]
+  - [clarify, END]
+conditional_edges:
+  - source: decide
+    field: path
+    routes: {code: read, agent: agent, clarify: clarify}
+  - source: find_held
+    field: next_step
+    routes: {approval: approval}
+    default: END

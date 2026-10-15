@@ -107,3 +107,15 @@ def test_do_nothing_passes_only_the_no_write_tasks(tmp_path):
     assert passed == {t.id for t in SUITES["a2"] if t.expected == "no_write"}
     assert len(passed & {t.id for t in TASKS}) == 7
     assert all(r["model_calls"] == 0 and r["final_answer"] is None for r in rows)
+
+
+def test_hybrid_path_needs_a_known_kind_and_enough_confidence():
+    from envs.custom.code_workflow import HybridCase, choose_path
+
+    def path(route: str, confidence: float) -> str:
+        state = HybridCase(request="x", route=route, route_confidence=confidence)
+        return choose_path(state, None, threshold=0.8)["path"]
+
+    assert path("refund", 0.9) == "code" and path("account", 0.8) == "code"
+    assert path("other", 0.99) == "agent"
+    assert path("unclear", 0.99) == "clarify" and path("refund", 0.79) == "clarify"
