@@ -2,9 +2,13 @@
 
     uv run python scripts/report_a3.py [reports folder]
 
-Reads reports/article-a3/custom/<batch>/<spec>/r<NN>/ (results.jsonl, run.json),
-reports/article-a3/routing/<spec>/r<NN>/ and reports/article-a3/spend.jsonl. Computes
-nothing that is not in those files.
+Reads reports/article-a3/custom/<batch>/<spec>/r<NN>/ (results.jsonl, run.json and,
+once the judge has run, judge.jsonl), reports/article-a3/routing/<spec>/r<NN>/ and
+reports/article-a3/spend.jsonl. Computes nothing that is not in those files.
+
+"Expected outcome" needs the judge: the state check passed and the judge read the
+expected outcome in the reply. The two reply checks are deterministic
+(envs/custom/replies.py) and count only the replies they apply to.
 """
 
 from __future__ import annotations
@@ -21,8 +25,10 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from report_a1 import fmt_usd, md_escape  # noqa: E402
 
+from envs.custom.replies import reply_checks  # noqa: E402
 from envs.custom.route_eval import THRESHOLDS  # noqa: E402
 from envs.custom.stats import pass_hat_k, task_stats  # noqa: E402
+from envs.custom.tasks import TASKS_BY_ID  # noqa: E402
 from harness.runinfo import now  # noqa: E402
 
 DESIGNS = {
@@ -49,12 +55,30 @@ def load_batches(report: Path) -> dict[str, dict[str, list[dict]]]:
     out: dict[str, dict[str, list[dict]]] = defaultdict(lambda: defaultdict(list))
     for results in sorted(report.glob("custom/*/*/r*/results.jsonl")):
         run = json.loads((results.parent / "run.json").read_text())
-        out[run["batch"]][run["spec"]["name"]].append({"run": run, "rows": read_jsonl(results)})
+        rows = read_jsonl(results)
+        judged = results.parent / "judge.jsonl"
+        verdicts = {j["task_id"]: j for j in read_jsonl(judged)} if judged.exists() else {}
+        for r in rows:
+            r["judge_outcome"] = verdicts[r["task_id"]]["outcome"] if verdicts else None
+            r.update(reply_checks(r))
+        out[run["batch"]][run["spec"]["name"]].append({"run": run, "rows": rows})
     rank = {name: i for i, name in enumerate(DESIGNS)}
     return {
         b: dict(sorted(specs.items(), key=lambda kv: rank.get(kv[0], 99)))
         for b, specs in out.items()
     }
+
+
+def met(row: dict) -> bool | None:
+    """The state check passed and the judge read the expected outcome."""
+    if row["judge_outcome"] is None:
+        return None
+    return row["passed"] and row["judge_outcome"] == TASKS_BY_ID[row["task_id"]].outcome
+
+
+def fraction(values: list[bool | None]) -> str:
+    applies = [v for v in values if v is not None]
+    return f"{sum(applies)}/{len(applies)}" if applies else "n/a"
 
 
 def cache_share(rows: list[dict]) -> float:
@@ -73,9 +97,10 @@ def batch_lines(batch: str, specs: dict[str, list[dict]]) -> list[str]:
         "of tasks that passed in all runs of the design. Cost and the cache-read share are "
         "per run; the share is of all input tokens.",
         "",
-        "| design | runs | pass rate | pass^k | median $/run (min to max) | median cache-read "
-        "share | mean model calls/task | median latency s/task | run errors |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "| design | runs | state check | pass^k | expected outcome (judge) | no false hold "
+        "| refund id in reply | median $/run (min to max) | median cache-read share | mean "
+        "model calls/task | median latency s/task | run errors |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for name, runs in specs.items():
         rows = [r for run in runs for r in run["rows"]]
@@ -87,6 +112,9 @@ def batch_lines(batch: str, specs: dict[str, list[dict]]) -> list[str]:
         lines.append(
             f"| {DESIGNS.get(name, name)} | {len(runs)} | "
             f"{sum(r['passed'] for r in rows)}/{len(rows)} | {pass_hat_k(by_task):.2f} | "
+            f"{fraction([met(r) for r in rows])} | "
+            f"{fraction([r['no_false_hold'] for r in rows])} | "
+            f"{fraction([r['refund_id_in_reply'] for r in rows])} | "
             f"{fmt_usd(median(costs))} ({fmt_usd(min(costs))} to {fmt_usd(max(costs))}) | "
             f"{median(shares):.0%} | {sum(r['model_calls'] for r in rows) / len(rows):.2f} | "
             f"{median(r['latency_s'] for r in rows):.1f} | "
@@ -109,13 +137,42 @@ def batch_lines(batch: str, specs: dict[str, list[dict]]) -> list[str]:
     lines.append("")
     lines.append("Each cell: dollars for the run, and the cache-read share in brackets.")
 
+    categories = list(
+        dict.fromkeys(
+            TASKS_BY_ID[r["task_id"]].category for r in next(iter(specs.values()))[0]["rows"]
+        )
+    )
+    if len(categories) > 1:
+        lines += [
+            "",
+            f"### {batch}: per category and design",
+            "",
+            "| category | design | state check | expected outcome (judge) | mean $/message |",
+            "|---|---|---|---|---|",
+        ]
+        for category in categories:
+            for name, runs in specs.items():
+                rows = [
+                    r
+                    for run in runs
+                    for r in run["rows"]
+                    if TASKS_BY_ID[r["task_id"]].category == category
+                ]
+                lines.append(
+                    f"| {category} | {DESIGNS.get(name, name)} | "
+                    f"{sum(r['passed'] for r in rows)}/{len(rows)} | "
+                    f"{fraction([met(r) for r in rows])} | "
+                    f"{fmt_usd(sum(r['dollars'] for r in rows) / len(rows))} |"
+                )
+
     lines += [
         "",
         f"### {batch}: per task and design",
         "",
-        "| task | design | passed | all runs | model calls mean (median) | input tokens mean "
-        "(median) | latency s mean (median) | $ mean (median) |",
-        "|---|---|---|---|---|---|---|---|",
+        "| task | design | state check | all runs | expected outcome (judge) | model calls "
+        "mean (median) | input tokens mean (median) | latency s mean (median) | $ mean "
+        "(median) |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     task_ids = list(dict.fromkeys(r["task_id"] for runs in specs.values() for r in runs[0]["rows"]))
     for task_id in task_ids:
@@ -126,7 +183,7 @@ def batch_lines(batch: str, specs: dict[str, list[dict]]) -> list[str]:
             s = task_stats(rows)
             lines.append(
                 f"| {task_id} | {name} | {s['passed']}/{s['runs']} | "
-                f"{'yes' if s['passed_all'] else 'no'} | "
+                f"{'yes' if s['passed_all'] else 'no'} | {fraction([met(r) for r in rows])} | "
                 f"{s['model_calls_mean']:.1f} ({s['model_calls_median']:g}) | "
                 f"{s['input_tokens_mean']:,.0f} ({s['input_tokens_median']:,.0f}) | "
                 f"{s['latency_s_mean']:.1f} ({s['latency_s_median']:.1f}) | "
