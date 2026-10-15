@@ -94,6 +94,21 @@ def score(rows: list[dict[str, Any]], threshold: float) -> dict[str, int]:
     return s
 
 
+CANDIDATE_THRESHOLDS = (0.5, 0.6, 0.7, 0.8, 0.9)
+
+
+def choose_threshold(runs: list[list[dict[str, Any]]]) -> float:
+    """The candidate threshold with the fewest wrong routes summed over ``runs``, then the
+    fewest unneeded questions, then the lowest value."""
+
+    def cost(t: float) -> tuple[int, int, float]:
+        scores = [score(rows, t) for rows in runs]
+        wrong = sum(s["wrong_route"] for s in scores)
+        return wrong, sum(s["clarify_not_needed"] for s in scores), t
+
+    return min(CANDIDATE_THRESHOLDS, key=cost)
+
+
 async def score_once(
     spec: WorkflowSpec, node_name: str, price: Price, out_dir: Path, info: dict[str, Any]
 ) -> tuple[list[dict[str, Any]], float]:

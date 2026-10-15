@@ -263,3 +263,15 @@ def test_hybrid_sends_other_requests_to_the_agent(tmp_path):
     row, trace = run(spec, "policy-refund-window", tmp_path)
     assert row["passed"] and row["final_answer"] == steps[0]["reply"]
     assert trace["workflow_state"]["path"] == "agent"
+
+
+def test_threshold_with_fewest_wrong_routes_then_fewest_unneeded_questions():
+    from envs.custom.route_eval import choose_threshold
+
+    run = [
+        {"label": "refund", "choice": "refund", "confidence": 0.75},
+        {"label": "unclear", "choice": "refund", "confidence": 0.65},
+    ]
+    # 0.5 and 0.6 route the unclear request (1 wrong); 0.7 asks only about it; 0.8 and 0.9
+    # also ask about the refund (1 unneeded question).
+    assert choose_threshold([run, run]) == 0.7
