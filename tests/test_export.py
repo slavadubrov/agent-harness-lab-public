@@ -101,3 +101,45 @@ def test_recorded_trace_keeps_both_attempts_of_the_retried_handle_step(k10: Expo
     handles = [e for e in trace.events if e.type == "step" and e.name == "handle"]
     assert [e.error is not None for e in handles] == [True, False]
     assert trace.events[-1].type == "reply" and "(refund 2)" in trace.events[-1].text
+
+
+def test_rebuilt_trace_of_design_5_keeps_its_one_model_call(part2: Export):
+    trace = next(
+        t
+        for t in part2.traces
+        if t.run_id == "a2/a2-code/r01" and t.task_id == "refund-full-damaged"
+    )
+    calls = [e for e in trace.events if e.type == "model_call"]
+    assert [c.input_tokens for c in calls] == [304]
+
+
+def test_rebuilt_trace_shows_no_tool_call_that_never_ran(part2: Export):
+    trace = next(
+        t
+        for t in part2.traces
+        if t.run_id == "a2/a2-agent-approval/r01" and t.task_id == "refund-over-limit-rejected"
+    )
+    tools = [e for e in trace.events if e.type == "tool_call"]
+    assert len(tools) == 4  # the trace recorded 4 tool calls; the rejection is not one
+
+
+@pytest.fixture(scope="module")
+def recorded() -> Export:
+    return Export.build(batches=["k10", "oot"])
+
+
+def test_recorded_traces_keep_their_order(recorded: Export):
+    replies = {(r.run_id, r.task_id): r.reply for r in recorded.results}
+    for t in recorded.traces:
+        if replies[t.run_id, t.task_id]:
+            assert t.events[-1].type == "reply", (t.run_id, t.task_id)
+        seen: dict[str, int] = {}
+        for e in t.events:
+            if e.type == "step":
+                n = int(e.text.split()[-1])
+                assert n == seen.get(e.name, 0) + 1, (t.run_id, t.task_id, e.name, e.text)
+                seen[e.name] = n
+        waits = [i for i, e in enumerate(t.events) if e.type == "wait"]
+        early = [i for i, e in enumerate(t.events) if e.type == "reply"][:-1]
+        if waits and early:
+            assert early[0] < waits[0], (t.run_id, t.task_id)

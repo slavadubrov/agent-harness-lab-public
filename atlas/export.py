@@ -521,8 +521,8 @@ def recorded_events(tr: RawTrace, row: RawRow) -> list[Event]:
         (0.0, 0, event("message", "customer", tr.user_message, t=0.0))
     ]
 
-    def add(t: float | None, e: Event) -> None:
-        timed.append((t or 0.0, len(timed), e))
+    def add(t: float | None, e: Event, order: int | None = None) -> None:
+        timed.append((t or 0.0, len(timed) if order is None else order, e))
 
     state = tr.workflow_state
     for c in tr.model_calls:
@@ -535,9 +535,9 @@ def recorded_events(tr: RawTrace, row: RawRow) -> list[Event]:
         )
     attempts: dict[str, int] = defaultdict(int)
     for n in tr.node_calls:
-        attempts[n.name] += 1
         if n.error and n.error.startswith("GraphInterrupt"):
             continue  # the node paused for the supervisor: the runner's wait event marks it
+        attempts[n.name] += 1
         add(
             n.t_start,
             event(
@@ -553,9 +553,12 @@ def recorded_events(tr: RawTrace, row: RawRow) -> list[Event]:
         add(e.t, runner_event(e))
     waits = [e.t for e in tr.events if e.event == "approval requested"]
     if state and state.answer and state.reply and state.answer != state.reply and waits:
-        add(waits[0], event("reply", "assistant", state.answer, t=waits[0]))
+        # The reply written before the pause comes before the wait at the same time.
+        add(waits[0], event("reply", "assistant", state.answer, t=waits[0]), order=-1)
     if row.final_answer:
-        add(row.latency_s, event("reply", "assistant", row.final_answer, t=row.latency_s))
+        # Event times are rounded, so the final reply goes last whatever its time says.
+        end = max([row.latency_s, *(t for t, _, _ in timed)])
+        add(end, event("reply", "assistant", row.final_answer, t=end), order=len(timed) + 10**6)
     return [e for _, _, e in sorted(timed, key=lambda x: (x[0], x[1]))]
 
 
@@ -563,11 +566,19 @@ def rebuilt_events(tr: RawTrace, row: RawRow, spec_name: str) -> list[Event]:
     """Part 2 traces have no event times: rebuild the order from the messages."""
     events = [event("message", "customer", tr.user_message)]
     state = tr.workflow_state
+    agent_nodes = (None, "model")
     for c in tr.model_calls:
-        if c.kind == "classifier":
-            events.append(model_call_event(c, None, state, None))
-    chat = iter([c for c in tr.model_calls if c.kind == "chat" and not c.failed])
-    tools = iter(tr.tool_calls)
+        if c.kind == "classifier" or (c.kind == "chat" and c.node not in agent_nodes):
+            events.append(model_call_event(c, None, state, None))  # a router or a reader call
+    chat = iter(
+        [c for c in tr.model_calls if c.kind == "chat" and c.node in agent_nodes and not c.failed]
+    )
+    pending = list(tr.tool_calls)  # in the order the tools finished
+
+    def take(name: str) -> RawToolCall | None:
+        i = next((i for i, c in enumerate(pending) if c.name == name), None)
+        return None if i is None else pending.pop(i)
+
     runner = list(tr.events)
     errors = [e for e in runner if e.event in ("error", "resume after error")]
     approvals = [e for e in runner if e not in errors]
@@ -579,14 +590,16 @@ def rebuilt_events(tr: RawTrace, row: RawRow, spec_name: str) -> list[Event]:
                 events += [runner_event(e) for e in approvals]  # the pause before the tool
                 approvals = []
         elif m.type == "tool":
-            raw = next(tools, None)
+            raw = take(m.data.name or "")
+            if raw is None:
+                continue  # a message the middleware added (a rejection): no tool ran
             while raw is not None and raw.error:
                 events.append(
                     event("tool_call", raw.name, tool_text(raw.args, None), error=raw.error)
                 )
                 events += [runner_event(e) for e in errors[:2]]
                 errors = errors[2:]
-                raw = next(tools, None)
+                raw = take(raw.name)
             output = text_of(m.data.content)[:300]
             events.append(
                 event(
@@ -851,8 +864,10 @@ class Export:
 
 
 def main() -> None:
-    if git("status", "--porcelain", "--", "reports"):
-        raise SystemExit("Commit the reports first: the manifest names the commit they are in.")
+    if git("status", "--porcelain", "--", ".", ":(exclude)atlas/data", ":(exclude)atlas/schema"):
+        raise SystemExit(
+            "Commit every change first: the manifest names the commit the data comes from."
+        )
     manifest = Export.build(batches=["a2", "k10", "oot"]).write(OUT)
     for f in manifest.files:
         size = (OUT / "data" / f.path).stat().st_size
