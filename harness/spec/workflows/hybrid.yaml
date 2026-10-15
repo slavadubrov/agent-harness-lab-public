@@ -30,7 +30,9 @@ nodes:
   decide:
     type: function
     ref: envs.custom.code_workflow:choose_path
-    kwargs: {threshold: 0.8}
+    # make a3-threshold: over 11 runs of the 25 requests, 0.9 gave 0 wrong routes and 22
+    # unneeded questions; 0.8 gave 1 wrong route and 21.
+    kwargs: {threshold: 0.9}
   read:
     type: structured
     model:
