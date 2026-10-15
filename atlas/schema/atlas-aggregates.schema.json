@@ -154,6 +154,7 @@
           "type": "number"
         },
         "cache_read_share": {
+          "description": "Input tokens read from the prompt cache over all input tokens of these task runs, pooled (classifier tokens included).",
           "maximum": 1,
           "minimum": 0,
           "title": "Cache Read Share",
