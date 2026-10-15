@@ -84,3 +84,20 @@ def test_design_2_reply_after_approval_fails_the_held_check(part2: Export):
         r for r in part2.results if r.design == 2 and r.task_id == "refund-over-limit-approved"
     )
     assert r.passed and r.reply_checks.no_false_hold is False
+
+
+@pytest.fixture(scope="module")
+def k10() -> Export:
+    return Export.build(batches=["k10"])
+
+
+def test_recorded_trace_keeps_both_attempts_of_the_retried_handle_step(k10: Export):
+    trace = next(
+        t
+        for t in k10.traces
+        if t.run_id == "k10/a2-code/r01" and t.task_id == "refund-partial-lost-response"
+    )
+    assert trace.ordering == "recorded" and all(e.t is not None for e in trace.events)
+    handles = [e for e in trace.events if e.type == "step" and e.name == "handle"]
+    assert [e.error is not None for e in handles] == [True, False]
+    assert trace.events[-1].type == "reply" and "(refund 2)" in trace.events[-1].text
