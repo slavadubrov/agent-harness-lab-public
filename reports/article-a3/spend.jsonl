@@ -64,3 +64,23 @@
 {"step": "p1-03", "batch": "k10", "spec": "a2-workflow", "run": 10, "tasks": 16, "dollars": 0.00368107, "billed": 0.00368107, "at": "2026-10-15T14:19:38Z"}
 {"step": "p1-03", "batch": "k10", "spec": "a2-router", "run": 10, "tasks": 16, "dollars": 0.00440364, "billed": 0.00414871, "at": "2026-10-15T14:20:03Z"}
 {"step": "p1-03", "batch": "k10", "spec": "a2-code", "run": 10, "tasks": 16, "dollars": 0.0007819, "billed": 0.0007819, "at": "2026-10-15T14:20:10Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 1, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:29Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 1, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:31Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 2, "dollars": 0.0003792600000000001, "at": "2026-10-15T14:20:33Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 2, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:34Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 3, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:36Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 3, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:38Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 4, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:39Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 4, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:41Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 5, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:43Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 5, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:44Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 6, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:46Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 6, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:48Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 7, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:50Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 7, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:51Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 8, "dollars": 0.0003792600000000001, "at": "2026-10-15T14:20:53Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 8, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:55Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 9, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:56Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 9, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:58Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 10, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:21:00Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 10, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:21:02Z"}
