@@ -32,7 +32,11 @@ def test_part_2_numbers_match_the_data_checklist(part2: Export):
     assert calls == {1: 3.50, 2: 3.44, 3: 3.31, 4: 4.50, 5: 1.00}
     tallies = {}
     for router in ("a2-router", "a2-router-clarify"):
-        rows = [r.model_dump() for r in part2.routes if r.router == router]
+        rows = [
+            r.model_dump()
+            for r in part2.routes
+            if r.router == router and r.run_id.startswith("a2-route/")
+        ]
         assert len(rows) == 25
         tallies[router] = score(rows, 0.8)
     assert tallies["a2-router"] == {
