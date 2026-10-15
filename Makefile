@@ -20,8 +20,11 @@ A2_SPECS := harness/spec/plain.yaml harness/spec/approval-agent.yaml harness/spe
 A3_SPECS := harness/spec/workflows/do-nothing.yaml $(A2_SPECS)
 ROUTERS := harness/spec/workflows/support-router.yaml harness/spec/workflows/support-router-clarify.yaml
 PRICES := harness/prices/openrouter-2026-10-05.json
+# The Atlas export imports the blog's explainer_contract package (not public).
+CONTRACT ?= ../notes/packages/explainer_contract
+WITH_CONTRACT = $(UV) run --with-editable $(CONTRACT)
 
-.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 a3-k10 a3-routes report-a3
+.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 a3-k10 a3-routes report-a3 atlas-export atlas-check
 
 help:
 	@echo "make a1-custom          run the custom environment dev set with SPEC (default base.yaml)"
@@ -36,6 +39,8 @@ help:
 	@echo "make a3-k10             Part 3: designs 0-5 on the 16 tasks, 10 runs, cap \$$1"
 	@echo "make a3-routes          Part 3: both routers on the 25 requests, 10 more runs"
 	@echo "make report-a3          rebuild reports/article-a3/README.md"
+	@echo "make atlas-export       write atlas/data and atlas/schema (needs CONTRACT)"
+	@echo "make atlas-check        pyright --strict on atlas/ and the export tests"
 	@echo "make test | fmt | lint"
 
 sync:
@@ -122,3 +127,10 @@ a1-tau3-matrix:
 
 report:
 	$(UV) run python scripts/report_a1.py
+
+atlas-export: sync
+	$(WITH_CONTRACT) python -m atlas.export
+
+atlas-check: sync
+	$(WITH_CONTRACT) --with pyright==1.1.414 pyright
+	$(WITH_CONTRACT) python -m pytest -q tests/test_export.py
