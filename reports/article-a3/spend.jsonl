@@ -84,3 +84,45 @@
 {"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 9, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:58Z"}
 {"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 10, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:21:00Z"}
 {"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 10, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:21:02Z"}
+{"step": "smoke", "batch": "smoke", "spec": "a3-hybrid", "run": 1, "tasks": 3, "dollars": 0.000138, "billed": 8.81e-05, "at": "2026-10-15T14:23:37Z"}
+{"step": "smoke", "batch": "smoke", "spec": "a3-hybrid", "run": 1, "tasks": 1, "dollars": 6.337e-05, "billed": 4.59e-05, "at": "2026-10-15T14:23:39Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a1-plain", "run": 1, "tasks": 32, "dollars": 0.01103188, "billed": 0.01103189, "at": "2026-10-15T14:25:24Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-agent-approval", "run": 1, "tasks": 32, "dollars": 0.01018097, "billed": 0.01018096, "at": "2026-10-15T14:26:21Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-workflow", "run": 1, "tasks": 32, "dollars": 0.00898742, "billed": 0.00898743, "at": "2026-10-15T14:27:21Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-router", "run": 1, "tasks": 32, "dollars": 0.00986285, "billed": 0.00936341, "at": "2026-10-15T14:28:07Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-code", "run": 1, "tasks": 32, "dollars": 0.0015071, "billed": 0.0015071, "at": "2026-10-15T14:28:18Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a3-hybrid", "run": 1, "tasks": 32, "dollars": 0.00166182, "billed": 0.001118, "at": "2026-10-15T14:28:29Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a1-plain", "run": 2, "tasks": 32, "dollars": 0.00931305, "billed": 0.00931304, "at": "2026-10-15T14:29:34Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-agent-approval", "run": 2, "tasks": 32, "dollars": 0.00866024, "billed": 0.00866025, "at": "2026-10-15T14:30:29Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-workflow", "run": 2, "tasks": 32, "dollars": 0.00879796, "billed": 0.00879797, "at": "2026-10-15T14:31:19Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-router", "run": 2, "tasks": 32, "dollars": 0.00980499, "billed": 0.00930556, "at": "2026-10-15T14:32:13Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-code", "run": 2, "tasks": 32, "dollars": 0.0015071, "billed": 0.0015071, "at": "2026-10-15T14:32:23Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a3-hybrid", "run": 2, "tasks": 32, "dollars": 0.00150443, "billed": 0.00096061, "at": "2026-10-15T14:32:33Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a1-plain", "run": 3, "tasks": 32, "dollars": 0.00962374, "billed": 0.00962374, "at": "2026-10-15T14:33:31Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-agent-approval", "run": 3, "tasks": 32, "dollars": 0.00886087, "billed": 0.00886088, "at": "2026-10-15T14:34:17Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-workflow", "run": 3, "tasks": 32, "dollars": 0.00874939, "billed": 0.00874939, "at": "2026-10-15T14:35:05Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-router", "run": 3, "tasks": 32, "dollars": 0.0086122, "billed": 0.00811276, "at": "2026-10-15T14:35:53Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-code", "run": 3, "tasks": 32, "dollars": 0.0015071, "billed": 0.0015071, "at": "2026-10-15T14:36:02Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a3-hybrid", "run": 3, "tasks": 32, "dollars": 0.00160202, "billed": 0.0010582, "at": "2026-10-15T14:36:13Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a1-plain", "run": 4, "tasks": 32, "dollars": 0.00826324, "billed": 0.00826324, "at": "2026-10-15T14:36:57Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-agent-approval", "run": 4, "tasks": 32, "dollars": 0.00885139, "billed": 0.00885139, "at": "2026-10-15T14:37:40Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-workflow", "run": 4, "tasks": 32, "dollars": 0.00836998, "billed": 0.00836999, "at": "2026-10-15T14:38:28Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-router", "run": 4, "tasks": 32, "dollars": 0.00851822, "billed": 0.00801877, "at": "2026-10-15T14:39:17Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-code", "run": 4, "tasks": 32, "dollars": 0.0015071, "billed": 0.0015071, "at": "2026-10-15T14:39:27Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a3-hybrid", "run": 4, "tasks": 32, "dollars": 0.00167082, "billed": 0.001127, "at": "2026-10-15T14:39:39Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a1-plain", "run": 5, "tasks": 32, "dollars": 0.00862807, "billed": 0.00862811, "at": "2026-10-15T14:40:27Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-agent-approval", "run": 5, "tasks": 32, "dollars": 0.00811847, "billed": 0.00811848, "at": "2026-10-15T14:41:11Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-workflow", "run": 5, "tasks": 32, "dollars": 0.00801613, "billed": 0.00801613, "at": "2026-10-15T14:41:55Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-router", "run": 5, "tasks": 32, "dollars": 0.0089467, "billed": 0.00844723, "at": "2026-10-15T14:42:44Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-code", "run": 5, "tasks": 32, "dollars": 0.0015071, "billed": 0.0015071, "at": "2026-10-15T14:42:54Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a3-hybrid", "run": 5, "tasks": 32, "dollars": 0.00150493, "billed": 0.00096111, "at": "2026-10-15T14:43:04Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 1, "tasks": 16, "dollars": 0.00095058, "billed": 0.0006735, "at": "2026-10-15T14:43:12Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 2, "tasks": 16, "dollars": 0.00095008, "billed": 0.000673, "at": "2026-10-15T14:43:18Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 3, "tasks": 16, "dollars": 0.00095108, "billed": 0.000674, "at": "2026-10-15T14:43:25Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 4, "tasks": 16, "dollars": 0.00095058, "billed": 0.0006735, "at": "2026-10-15T14:43:32Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 5, "tasks": 16, "dollars": 0.00095158, "billed": 0.0006745, "at": "2026-10-15T14:43:39Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 6, "tasks": 16, "dollars": 0.00095058, "billed": 0.0006735, "at": "2026-10-15T14:43:46Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 7, "tasks": 16, "dollars": 0.00095058, "billed": 0.0006735, "at": "2026-10-15T14:43:53Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 8, "tasks": 16, "dollars": 0.00095008, "billed": 0.000673, "at": "2026-10-15T14:44:01Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 9, "tasks": 16, "dollars": 0.00095008, "billed": 0.000673, "at": "2026-10-15T14:44:11Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 10, "tasks": 16, "dollars": 0.00095058, "billed": 0.0006735, "at": "2026-10-15T14:44:18Z"}
