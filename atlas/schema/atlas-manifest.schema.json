@@ -1,0 +1,87 @@
+{
+  "$defs": {
+    "DataFile": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "model": {
+          "enum": [
+            "TasksFile",
+            "DesignsFile",
+            "RunsFile",
+            "TracesFile",
+            "AggregatesFile",
+            "RoutesFile"
+          ],
+          "title": "Model",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "records": {
+          "title": "Records",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "model",
+        "sha256",
+        "records"
+      ],
+      "title": "DataFile",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "`data/manifest.json`: where the files come from, and which model each one has.",
+  "properties": {
+    "contract": {
+      "const": "atlas",
+      "title": "Contract",
+      "type": "string"
+    },
+    "source_repo": {
+      "title": "Source Repo",
+      "type": "string"
+    },
+    "source_ref": {
+      "description": "Branch or tag of the lab repo.",
+      "title": "Source Ref",
+      "type": "string"
+    },
+    "source_sha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Source Sha",
+      "type": "string"
+    },
+    "exported_at": {
+      "format": "date-time",
+      "title": "Exported At",
+      "type": "string"
+    },
+    "files": {
+      "items": {
+        "$ref": "#/$defs/DataFile"
+      },
+      "title": "Files",
+      "type": "array"
+    }
+  },
+  "required": [
+    "contract",
+    "source_repo",
+    "source_ref",
+    "source_sha",
+    "exported_at",
+    "files"
+  ],
+  "title": "Manifest",
+  "type": "object"
+}

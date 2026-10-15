@@ -1,0 +1,45 @@
+{
+  "contract": "atlas",
+  "source_repo": "https://github.com/slavadubrov/agent-harness-lab-public",
+  "source_ref": "a3-atlas",
+  "source_sha": "ac790c562f81056ada4a8ad380d6a06a912e6133",
+  "exported_at": "2026-10-15T14:51:53Z",
+  "files": [
+    {
+      "path": "tasks.json",
+      "model": "TasksFile",
+      "sha256": "e3615372cf554ec5317c6142c8300b0b5d932896b422e4fca351b39c27d282c5",
+      "records": 48
+    },
+    {
+      "path": "designs.json",
+      "model": "DesignsFile",
+      "sha256": "bdb750301d2591aadcdcfe21b5a12e7179523770e2e6267dca858b470cbc06d3",
+      "records": 7
+    },
+    {
+      "path": "runs.json",
+      "model": "RunsFile",
+      "sha256": "6568a76f437898acd7e89d046ce679a44981ed2a39b89e052e3abd1c2c16f16b",
+      "records": 2265
+    },
+    {
+      "path": "traces.json",
+      "model": "TracesFile",
+      "sha256": "96399dfafdf399c366cedde9f405cb03e173ca7832f2b8aaf984a228051783cf",
+      "records": 2160
+    },
+    {
+      "path": "aggregates.json",
+      "model": "AggregatesFile",
+      "sha256": "04cb328145f4d968d8ec512b830f01c9a017ecf85ec7d9b63c1f677c3a9d0050",
+      "records": 426
+    },
+    {
+      "path": "routes.json",
+      "model": "RoutesFile",
+      "sha256": "fc41e64e02dfc43c78545e27f100c8a46ccf0b6483e8eda7a7324ac8b7e44fd8",
+      "records": 550
+    }
+  ]
+}

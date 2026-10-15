@@ -1,0 +1,91 @@
+{
+  "$defs": {
+    "Design": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "0 does nothing; 1 to 5 as in the article; 6 hybrid.",
+          "maximum": 6,
+          "minimum": 0,
+          "title": "Id",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "spec_name": {
+          "title": "Spec Name",
+          "type": "string"
+        },
+        "spec_path": {
+          "title": "Spec Path",
+          "type": "string"
+        },
+        "spec_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Spec Hash",
+          "type": "string"
+        },
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Models",
+          "type": "array"
+        },
+        "source": {
+          "$ref": "#/$defs/Source"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "spec_name",
+        "spec_path",
+        "spec_hash",
+        "models",
+        "source"
+      ],
+      "title": "Design",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "git_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Git Sha",
+          "type": "string"
+        },
+        "path": {
+          "description": "File in the lab repo.",
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "git_sha",
+        "path"
+      ],
+      "title": "Source",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "designs": {
+      "items": {
+        "$ref": "#/$defs/Design"
+      },
+      "title": "Designs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "designs"
+  ],
+  "title": "DesignsFile",
+  "type": "object"
+}

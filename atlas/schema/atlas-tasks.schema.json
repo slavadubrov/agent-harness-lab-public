@@ -1,0 +1,142 @@
+{
+  "$defs": {
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "git_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Git Sha",
+          "type": "string"
+        },
+        "path": {
+          "description": "File in the lab repo.",
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "git_sha",
+        "path"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "Task": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "task_set": {
+          "enum": [
+            "known",
+            "out_of_template"
+          ],
+          "title": "Task Set",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "known",
+            "vague",
+            "two_requests",
+            "policy",
+            "unusual"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "expected_outcome": {
+          "enum": [
+            "action",
+            "question",
+            "refusal",
+            "handoff",
+            "answer"
+          ],
+          "title": "Expected Outcome",
+          "type": "string"
+        },
+        "expected_state": {
+          "enum": [
+            "write",
+            "no_write",
+            "partial"
+          ],
+          "title": "Expected State",
+          "type": "string"
+        },
+        "approval": {
+          "anyOf": [
+            {
+              "enum": [
+                "approve",
+                "reject"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approval"
+        },
+        "fault": {
+          "anyOf": [
+            {
+              "const": "lost_response",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Fault"
+        },
+        "part1": {
+          "description": "One of the 12 original tasks.",
+          "title": "Part1",
+          "type": "boolean"
+        },
+        "source": {
+          "$ref": "#/$defs/Source"
+        }
+      },
+      "required": [
+        "id",
+        "task_set",
+        "category",
+        "message",
+        "expected_outcome",
+        "expected_state",
+        "approval",
+        "fault",
+        "part1",
+        "source"
+      ],
+      "title": "Task",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "tasks": {
+      "items": {
+        "$ref": "#/$defs/Task"
+      },
+      "title": "Tasks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "tasks"
+  ],
+  "title": "TasksFile",
+  "type": "object"
+}
