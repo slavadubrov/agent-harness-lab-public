@@ -61,12 +61,20 @@ RETRY_DELAY_S = 2.0
 LABELS = REPORTS / "labels" / "judge-check.jsonl"
 LABELS_2 = REPORTS / "labels" / "judge-check-2.jsonl"
 
+# A reply that says the refund is still waiting: present or future tense only, so "which was
+# held … has now been issued" passes. Replies are matched with ’ written as '.
 HOLD = re.compile(
-    r"\b(?:held|on hold|pending|awaiting|waiting for"
-    r"|until (?:it is |it's |a supervisor )?approv\w*"
-    r"|(?:needs?|requires?|subject to)\b[^.]{0,40}\b(?:approval|review)"
-    r"|for (?:a )?supervisor(?:'s)? (?:approval|review)|will review"
-    r"|(?:has not|hasn't|not yet) been (?:issued|refunded|processed)"
+    r"\b(?:(?:is|it's|it is|remains|stays|still|currently|being|will be)\s+(?:currently\s+)?"
+    r"(?:on hold|held|pending(?! on your)|awaiting|waiting for|under review)"
+    r"|pending (?:supervisor |a supervisor's |the supervisor's )?(?:approval|review)"
+    r"|until (?:it is |it's |a supervisor |the supervisor )?approv\w*"
+    r"|must approve (?:it|this|the refund)"
+    r"|before (?:the refund )?(?:is|it's|it is|can be|will be) issued"
+    r"|once (?:a |the )?supervisor approves"
+    r"|(?:sent|submitted|passed|forwarded|escalated)\b[^.]{0,40}\bfor "
+    r"(?:supervisor |a supervisor's |the supervisor's )?(?:approval|review)"
+    r"|will review"
+    r"|(?:has not|hasn't|has not yet|not yet) been (?:issued|refunded|processed)"
     r"|not (?:been )?issued yet|won't be issued|will not be issued"
     r"|nothing (?:has been|was) (?:refunded|issued)|no money has been)\b",
     re.IGNORECASE,
@@ -112,7 +120,7 @@ def _issued(ops: list[dict[str, Any]]) -> list[int]:
 def no_false_hold(reply: str | None, ops: list[dict[str, Any]]) -> bool | None:
     if not _issued(ops) or any(op["status"] != "issued" for op in ops):
         return None
-    return not HOLD.search(reply or "")
+    return not HOLD.search((reply or "").replace("\u2019", "'"))
 
 
 def refund_id_in_reply(reply: str | None, ops: list[dict[str, Any]]) -> bool | None:
@@ -120,8 +128,14 @@ def refund_id_in_reply(reply: str | None, ops: list[dict[str, Any]]) -> bool | N
     if not ids:
         return None
     text = reply or ""
+    # "refund 2", "refund #2", "refund ID: 2", "ID 2", "#2"; not "refund in 2-3 days".
     return all(
-        re.search(rf"(?:\brefund\b[^\d$]{{0,12}}|#\s*|\bID\b:?\s*){i}(?!\d)", text, re.I)
+        re.search(
+            rf"\brefund\s*(?:(?:id|number|no\.?)\s*)?[:#]?\s*{i}\b(?!\s*[-\u2013]\s*\d)"
+            rf"|\bID\s*:?\s*{i}\b|#\s*{i}\b",
+            text,
+            re.I,
+        )
         for i in ids
     )
 

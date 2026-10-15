@@ -127,3 +127,50 @@ def test_a_folder_is_done_only_when_every_verdict_is_from_this_judge_version(tmp
     assert not current(path)  # v1 rows carry no version
     path.write_text(json.dumps({"task_id": "a", "judge_version": JUDGE_VERSION}) + "\n")
     assert current(path)
+
+
+K10 = Path(__file__).resolve().parents[1] / "reports" / "article-a3" / "custom" / "k10"
+
+
+def test_held_check_catches_design_2_saying_a_supervisor_must_still_approve():
+    for run in ("r01", "r07"):
+        rows = (K10 / "a2-agent-approval" / run / "results.jsonl").read_text().splitlines()
+        row = next(json.loads(r) for r in rows if '"refund-over-limit-approved"' in r)
+        assert no_false_hold(row["final_answer"], row["refund_operations"]) is False, run
+
+
+def test_held_check_on_plausible_replies_after_an_issued_refund():
+    still_waiting = [
+        "Once a supervisor approves it, the refund will be issued.",
+        "I've sent it to a supervisor for approval.",
+        "Your refund is under review.",
+        "It's on hold for supervisor approval.",
+        "The refund is pending supervisor approval.",
+        "It won't be issued until a supervisor approves it.",
+    ]
+    issued = [
+        "Your refund, which was held for review, has now been issued (refund 2).",
+        "The refund of $350.00 has been issued (refund 2). It may show as pending on your card.",
+        "Thanks for waiting for the supervisor's approval. Your refund has been issued (refund 2).",
+        "I've issued a full refund of $48.00.",
+    ]
+    for reply in still_waiting:
+        assert no_false_hold(reply, ISSUED) is False, reply
+    for reply in issued:
+        assert no_false_hold(reply, ISSUED) is True, reply
+
+
+def test_refund_id_does_not_count_amounts_days_or_items():
+    for reply in (
+        "You'll see the refund in 2-3 business days.",
+        "Expect the refund within 2 days.",
+        "I issued a refund for 2 items.",
+    ):
+        assert refund_id_in_reply(reply, ISSUED) is False, reply
+    for reply in (
+        "Done (refund 2).",
+        "Refund #2 is issued.",
+        "Your refund ID: 2.",
+        "refund number 2",
+    ):
+        assert refund_id_in_reply(reply, ISSUED) is True, reply
