@@ -39,6 +39,11 @@ from pathlib import Path
 from typing import Any
 
 from langchain_typesafe import Choice, Noul
+from langchain_typesafe.client import (
+    TypeSafeAPIConnectionError,
+    TypeSafeInternalServerError,
+    TypeSafeRateLimitError,
+)
 
 from envs.custom.batch import LEDGER, PRICE_TABLE, REPORTS, record_spend, spent, within_budget
 from envs.custom.tasks import OUTCOMES, TASKS_BY_ID
@@ -49,6 +54,10 @@ from harness.typesafe_guard import jev_classifier
 
 JUDGE_MODEL = "typesafe/jev-1.13-20260917"
 JUDGE_VERSION = "v2"
+# The decisions endpoint sometimes answers 529 Overloaded: retry those calls with a backoff.
+RETRY_ON = (TypeSafeInternalServerError, TypeSafeRateLimitError, TypeSafeAPIConnectionError)
+RETRIES = 5
+RETRY_DELAY_S = 2.0
 LABELS = REPORTS / "labels" / "judge-check.jsonl"
 LABELS_2 = REPORTS / "labels" / "judge-check-2.jsonl"
 
@@ -138,6 +147,11 @@ def judge_path(folder: Path) -> Path:
     return folder / "judge.jsonl"
 
 
+def current(path: Path) -> bool:
+    """Whether every verdict in a judge.jsonl comes from this judge version."""
+    return path.exists() and all(r.get("judge_version") == JUDGE_VERSION for r in read_jsonl(path))
+
+
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
@@ -155,10 +169,18 @@ async def judge_folder(classifier, folder: Path, rec: UsageRecorder) -> list[dic
         if not row["final_answer"]:
             return {**out, "outcome": "none"}
         state = judge_state(TASKS_BY_ID[row["task_id"]].user_message, row["final_answer"])
-        async with sem:
-            resp = await classifier.ainvoke(
-                {"state": state, "questions": JUDGE_QUESTIONS}, config={"callbacks": [rec]}
-            )
+        for attempt in range(RETRIES):
+            try:
+                async with sem:
+                    resp = await classifier.ainvoke(
+                        {"state": state, "questions": JUDGE_QUESTIONS},
+                        config={"callbacks": [rec]},
+                    )
+                break
+            except RETRY_ON:
+                if attempt == RETRIES - 1:
+                    raise
+                await asyncio.sleep(RETRY_DELAY_S * 2**attempt)
         c, n = resp.choices["outcome"], resp.nouls["says_held"]
         return {
             **out,
@@ -187,7 +209,7 @@ async def judge_main(args) -> int:
     classifier = jev_classifier(JUDGE_MODEL, "openrouter-decisions", 30.0)
     most = 0.0
     for folder in map(Path, args.folders):
-        if judge_path(folder).exists() and not args.force:
+        if current(judge_path(folder)):
             continue
         used = spent(LEDGER, args.step)
         if not within_budget(used, most, args.budget):
@@ -303,7 +325,6 @@ def main() -> None:
     j.add_argument("--step", required=True)
     j.add_argument("--budget", type=float, required=True)
     j.add_argument("--labels", default=str(LABELS), help="must exist before the judge runs")
-    j.add_argument("--force", action="store_true", help="replace existing verdicts")
     a = sub.add_parser("agreement")
     a.add_argument("--labels", default=str(LABELS))
     args = p.parse_args()

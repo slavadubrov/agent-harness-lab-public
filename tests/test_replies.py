@@ -83,3 +83,47 @@ def test_a_second_sample_leaves_out_the_replies_already_labelled():
         "handoff": 6,
         "answer": 6,
     }
+
+
+def test_judge_retries_an_overloaded_service(tmp_path, monkeypatch):
+    import asyncio
+    from types import SimpleNamespace
+
+    from langchain_typesafe.client import TypeSafeInternalServerError
+
+    from envs.custom import replies
+    from harness.accounting import UsageRecorder
+
+    monkeypatch.setattr(replies, "RETRY_DELAY_S", 0.0)
+    folder = tmp_path / "custom" / "k10" / "a1-plain" / "r01"
+    folder.mkdir(parents=True)
+    row = {"task_id": "refund-full-damaged", "final_answer": "Refunded.", "refund_operations": []}
+    (folder / "results.jsonl").write_text(json.dumps(row) + "\n")
+
+    class Overloaded:
+        calls = 0
+
+        async def ainvoke(self, request, config=None):
+            Overloaded.calls += 1
+            if Overloaded.calls < 3:
+                raise TypeSafeInternalServerError(529, None, {})
+            outcome = SimpleNamespace(choice="action", confidence=0.9, probabilities={})
+            return SimpleNamespace(
+                model="typesafe/jev",
+                choices={"outcome": outcome},
+                nouls={"says_held": SimpleNamespace(noul=0.0)},
+            )
+
+    rows = asyncio.run(replies.judge_folder(Overloaded(), folder, UsageRecorder([])))
+    assert Overloaded.calls == 3 and rows[0]["outcome"] == "action"
+
+
+def test_a_folder_is_done_only_when_every_verdict_is_from_this_judge_version(tmp_path):
+    from envs.custom.replies import JUDGE_VERSION, current
+
+    path = tmp_path / "judge.jsonl"
+    assert not current(path)
+    path.write_text(json.dumps({"task_id": "a", "outcome": "action"}) + "\n")
+    assert not current(path)  # v1 rows carry no version
+    path.write_text(json.dumps({"task_id": "a", "judge_version": JUDGE_VERSION}) + "\n")
+    assert current(path)
