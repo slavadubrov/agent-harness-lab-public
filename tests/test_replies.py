@@ -52,3 +52,13 @@ def test_judge_asks_for_the_outcome_kind_and_a_held_claim():
     assert JUDGE_QUESTIONS["says_held"].type == "noul"
     state = judge_state("Refund my teapot.", "Refunded (refund 2).")
     assert "Refund my teapot." in state and "Refunded (refund 2)." in state
+
+
+def test_judge_verdicts_for_part_2_runs_stay_out_of_the_part_2_folders():
+    from envs.custom.batch import REPORTS
+    from envs.custom.replies import judge_path
+
+    a2 = A2 / "a1-plain"
+    assert judge_path(a2) == REPORTS / "judge" / "a2" / "a1-plain" / "judge.jsonl"
+    a3 = REPORTS / "custom" / "k10" / "a1-plain" / "r01"
+    assert judge_path(a3) == a3 / "judge.jsonl"

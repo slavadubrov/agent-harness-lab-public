@@ -55,7 +55,7 @@ from explainer_contract.atlas import (
 from explainer_contract.export_schema import schemas
 from pydantic import BaseModel, ConfigDict, JsonValue, TypeAdapter
 
-from envs.custom.replies import no_false_hold, refund_id_in_reply
+from envs.custom.replies import judge_path, no_false_hold, refund_id_in_reply
 from envs.custom.tasks import OOT_TASKS, SUITES, TASKS, TASKS_BY_ID
 from harness.accounting import load_price_table
 from harness.runinfo import spec_hash
@@ -337,7 +337,7 @@ class RunFolder:
     @classmethod
     def read(cls, batch: Batch, folder: Path) -> RunFolder:
         meta = RawRun.model_validate_json((folder / "run.json").read_text())
-        judged = folder / "judge.jsonl"
+        judged = judge_path(folder)
         return cls(
             batch=batch,
             spec_name=str(meta.spec["name"]),

@@ -11,7 +11,9 @@ The deterministic checks read the reply and the refund service's record of the c
 The judge is TypeSafe Jev, the router's model. For each reply it answers two typed
 questions: which of the five outcomes the reply is (``envs.custom.tasks.OUTCOMES``), and
 whether it says that a refund is still held. Its results are reported separately from the
-checks above. Labels written before the judge ran measure how often it agrees.
+checks above. Labels written before the judge ran measure how often it agrees. Verdicts go
+to judge.jsonl in each Part 3 run folder; for the Part 2 runs, to
+reports/article-a3/judge/a2/<spec>/, so the Part 2 folders stay as they were.
 
     python -m envs.custom.replies sample <run folders>            # 30 replies to label
     python -m envs.custom.replies judge --step p1-04 --budget 0.50 <run folders>
@@ -117,6 +119,12 @@ def judge_state(message: str, reply: str) -> str:
     return f"Customer message:\n{message}\n\nReply from the support assistant:\n{reply}"
 
 
+def judge_path(folder: Path) -> Path:
+    if folder.resolve().parent.parent.name == "article-a2":
+        return REPORTS / "judge" / "a2" / folder.name / "judge.jsonl"
+    return folder / "judge.jsonl"
+
+
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
@@ -145,7 +153,9 @@ async def judge_folder(classifier, folder: Path, rec: UsageRecorder) -> list[dic
         }
 
     rows = await asyncio.gather(*(one(r) for r in read_jsonl(folder / "results.jsonl")))
-    with open(folder / "judge.jsonl", "w") as f:
+    out = judge_path(folder)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with open(out, "w") as f:
         for r in rows:
             f.write(json.dumps(r) + "\n")
     return rows
@@ -159,7 +169,7 @@ async def judge_main(args) -> int:
     classifier = jev_classifier(JUDGE_MODEL, "openrouter-decisions", 30.0)
     most = 0.0
     for folder in map(Path, args.folders):
-        if (folder / "judge.jsonl").exists():
+        if judge_path(folder).exists():
             continue
         used = spent(LEDGER, args.step)
         if not within_budget(used, most, args.budget):
@@ -227,7 +237,7 @@ def agreement(labels: list[dict[str, Any]]) -> dict[str, Any]:
     """Judge and deterministic check against the labels."""
     judged = {}
     for folder in {lab["folder"] for lab in labels}:
-        for row in read_jsonl(REPO_ROOT / folder / "judge.jsonl"):
+        for row in read_jsonl(judge_path(REPO_ROOT / folder)):
             judged[folder, row["task_id"]] = row
     outcome, held, check, disagree = 0, 0, [0, 0], []
     for lab in labels:
