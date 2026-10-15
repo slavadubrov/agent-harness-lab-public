@@ -19,12 +19,13 @@ A2_SPECS := harness/spec/plain.yaml harness/spec/approval-agent.yaml harness/spe
 # Part 3: design 0 (do nothing), then designs 1-5. Dollars use the pinned Part 2 prices.
 A3_SPECS := harness/spec/workflows/do-nothing.yaml $(A2_SPECS)
 ROUTERS := harness/spec/workflows/support-router.yaml harness/spec/workflows/support-router-clarify.yaml
+HYBRID := harness/spec/workflows/hybrid.yaml
 PRICES := harness/prices/openrouter-2026-10-05.json
 # The Atlas export imports the blog's explainer_contract package (not public).
 CONTRACT ?= ../notes/packages/explainer_contract
 WITH_CONTRACT = $(UV) run --with-editable $(CONTRACT)
 
-.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 a3-k10 a3-routes report-a3 atlas-export atlas-check
+.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 a3-k10 a3-routes a3-threshold a3-oot a3-hybrid-k10 a3-judge report-a3 atlas-export atlas-check
 
 help:
 	@echo "make a1-custom          run the custom environment dev set with SPEC (default base.yaml)"
@@ -38,6 +39,10 @@ help:
 	@echo "make report-a2          rebuild reports/article-a2/README.md"
 	@echo "make a3-k10             Part 3: designs 0-5 on the 16 tasks, 10 runs, cap \$$1"
 	@echo "make a3-routes          Part 3: both routers on the 25 requests, 10 more runs"
+	@echo "make a3-threshold       the hybrid's threshold from the a2-router-clarify runs"
+	@echo "make a3-oot             Part 3: designs 1-6 on the 32 new messages, 5 runs, cap \$$1"
+	@echo "make a3-hybrid-k10      Part 3: design 6 on the 16 tasks, 10 runs (same cap)"
+	@echo "make a3-judge           judge every saved reply, cap \$$0.50"
 	@echo "make report-a3          rebuild reports/article-a3/README.md"
 	@echo "make atlas-export       write atlas/data and atlas/schema (needs CONTRACT)"
 	@echo "make atlas-check        pyright --strict on atlas/ and the export tests"
@@ -88,6 +93,22 @@ a3-k10: sync
 a3-routes: sync
 	$(UV) run python -m envs.custom.route_eval --runs 10 --out reports/article-a3/routing \
 	  --step p1-03 --budget 1.00 --price-table $(PRICES) --spec $(ROUTERS)
+
+a3-threshold:
+	$(UV) run python -m envs.custom.route_eval --choose-threshold \
+	  reports/article-a2/routing/a2-router-clarify reports/article-a3/routing/a2-router-clarify/r*
+
+a3-oot: sync
+	$(UV) run python -m envs.custom.batch --batch oot --suite oot --runs 5 \
+	  --step p1-06 --budget 1.00 --specs $(A2_SPECS) $(HYBRID)
+
+a3-hybrid-k10: sync
+	$(UV) run python -m envs.custom.batch --batch k10 --suite a2 --runs 10 \
+	  --step p1-06 --budget 1.00 --specs $(HYBRID)
+
+a3-judge: sync
+	$(UV) run python -m envs.custom.replies judge --step p1-04 --budget 0.50 \
+	  reports/article-a2/custom/* reports/article-a3/custom/*/*/r*
 
 report-a3:
 	$(UV) run python scripts/report_a3.py

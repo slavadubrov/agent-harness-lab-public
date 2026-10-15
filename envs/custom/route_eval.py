@@ -173,7 +173,27 @@ async def score_once(
     return rows, totals.dollars
 
 
+def print_threshold(folders: list[str]) -> None:
+    """The cost of each candidate threshold over saved runs, and the one chosen."""
+    runs = [
+        [json.loads(line) for line in (Path(f) / "results.jsonl").read_text().splitlines()]
+        for f in folders
+    ]
+    print(f"{len(runs)} runs of {len(runs[0])} labelled requests")
+    print("threshold  wrong routes  unneeded questions  needed questions")
+    for t in CANDIDATE_THRESHOLDS:
+        s = [score(rows, t) for rows in runs]
+        print(
+            f"{t:9}  {sum(x['wrong_route'] for x in s):12}  "
+            f"{sum(x['clarify_not_needed'] for x in s):18}  {sum(x['clarify_needed'] for x in s):16}"
+        )
+    print(f"chosen: {choose_threshold(runs)}")
+
+
 async def main_async(args) -> int:
+    if args.choose_threshold:
+        print_threshold(args.choose_threshold)
+        return 0
     load_api_key()
     specs = [load_workflow_spec(path) for path in args.spec]
     pinned = load_price_table(args.price_table) if args.price_table else None
@@ -227,6 +247,9 @@ def main() -> None:
     p.add_argument("--step", default="", help="the budget the spend counts against")
     p.add_argument("--budget", type=float, default=0.0)
     p.add_argument("--price-table", default="")
+    p.add_argument(
+        "--choose-threshold", nargs="+", metavar="RUN_FOLDER", help="print the threshold choice"
+    )
     raise SystemExit(asyncio.run(main_async(p.parse_args())))
 
 

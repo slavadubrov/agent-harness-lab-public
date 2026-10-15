@@ -152,6 +152,8 @@ async def judge_folder(classifier, folder: Path, rec: UsageRecorder) -> list[dic
 
 
 async def judge_main(args) -> int:
+    if not LABELS.exists():
+        raise SystemExit(f"Label the sample first ({LABELS}); the judge runs after the labels.")
     load_api_key()
     version, prices = load_price_table(PRICE_TABLE)
     classifier = jev_classifier(JUDGE_MODEL, "openrouter-decisions", 30.0)
