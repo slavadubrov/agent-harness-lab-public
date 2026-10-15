@@ -1,0 +1,139 @@
+{
+  "$defs": {
+    "Probability": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "probability": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability",
+          "type": "number"
+        }
+      },
+      "required": [
+        "label",
+        "probability"
+      ],
+      "title": "Probability",
+      "type": "object"
+    },
+    "RouteResult": {
+      "additionalProperties": false,
+      "description": "One labelled request in one run of a router.",
+      "properties": {
+        "run_id": {
+          "description": "<batch>/<spec name>/r<NN>; without /r<NN> for a record over all runs.",
+          "pattern": "^[a-z0-9-]+/[A-Za-z0-9._-]+(/r\\d{2})?$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "git_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Git Sha",
+          "type": "string"
+        },
+        "spec_hash": {
+          "description": "sha256 of the spec as run.json records it.",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Spec Hash",
+          "type": "string"
+        },
+        "models": {
+          "description": "Model ids the spec calls; empty for no model.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Models",
+          "type": "array"
+        },
+        "price_table": {
+          "description": "Version of the pinned price table.",
+          "minLength": 1,
+          "title": "Price Table",
+          "type": "string"
+        },
+        "provenance": {
+          "const": "measured",
+          "title": "Provenance",
+          "type": "string"
+        },
+        "router": {
+          "title": "Router",
+          "type": "string"
+        },
+        "run": {
+          "minimum": 1,
+          "title": "Run",
+          "type": "integer"
+        },
+        "label": {
+          "enum": [
+            "refund",
+            "account",
+            "other",
+            "unclear"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "request": {
+          "title": "Request",
+          "type": "string"
+        },
+        "choice": {
+          "title": "Choice",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "probabilities": {
+          "items": {
+            "$ref": "#/$defs/Probability"
+          },
+          "title": "Probabilities",
+          "type": "array"
+        }
+      },
+      "required": [
+        "run_id",
+        "git_sha",
+        "spec_hash",
+        "models",
+        "price_table",
+        "provenance",
+        "router",
+        "run",
+        "label",
+        "request",
+        "choice",
+        "confidence",
+        "probabilities"
+      ],
+      "title": "RouteResult",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "results": {
+      "items": {
+        "$ref": "#/$defs/RouteResult"
+      },
+      "title": "Results",
+      "type": "array"
+    }
+  },
+  "required": [
+    "results"
+  ],
+  "title": "RoutesFile",
+  "type": "object"
+}

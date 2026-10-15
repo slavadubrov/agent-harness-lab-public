@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import subprocess
 import time
 from importlib.metadata import PackageNotFoundError, version
+from typing import Any
 
 from harness.spec import REPO_ROOT
 
@@ -51,3 +54,10 @@ def git_sha() -> dict[str, str | bool | None]:
 
 def now() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def spec_hash(spec: dict[str, Any]) -> str:
+    """sha256 of a spec as run.json records it (``spec.model_dump(mode="json")``), without
+    ``source``, which only names the file the spec was loaded from."""
+    data = {k: v for k, v in spec.items() if k != "source"}
+    return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()

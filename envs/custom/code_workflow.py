@@ -178,3 +178,27 @@ def handle(state: CodeCase, ctx: NodeContext) -> dict[str, Any]:
     if state.kind == "preferences":
         return {"answer": _preferences(state, ctx, account)}
     return {"answer": "I have passed your message to a colleague, who will reply soon."}
+
+
+def do_nothing(state: CaseState, ctx: NodeContext) -> dict[str, Any]:
+    """The baseline of ``do-nothing.yaml``: no model call, no write and no reply."""
+    return {}
+
+
+# -- design 6, the hybrid (hybrid.yaml) ---------------------------------------------------
+
+
+class HybridCase(CodeCase):
+    route: str = ""  # the router's choice
+    route_confidence: float | None = None
+    route_probabilities: dict[str, float] = {}
+    path: str = ""  # what the hybrid did with it: code, agent or clarify
+
+
+def choose_path(state: HybridCase, ctx: NodeContext, threshold: float) -> dict[str, Any]:
+    """Code for the kinds this file handles (refund, account), the agent for one clear
+    request of another kind, and a question when the router picks ``unclear`` or its
+    confidence is below ``threshold``."""
+    if state.route == "unclear" or (state.route_confidence or 0.0) < threshold:
+        return {"path": "clarify"}
+    return {"path": "code" if state.route in ("refund", "account") else "agent"}

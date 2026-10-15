@@ -13,6 +13,9 @@ The runner treats every spec the same way:
 - If the run raises, the runner resumes it once from its last checkpoint, as a recovery
   worker would after a crash. The error is kept in the row either way.
 
+Each runner event records ``t``: seconds after the task started, on the same clock as the
+model, tool and node calls in the trace.
+
 Writes results.jsonl (one row per task), traces.jsonl (messages, every model and tool
 call, approval and error events) and run.json (spec, prices, versions) to
 reports/article-<suite>/custom/<spec name>/.
@@ -51,14 +54,16 @@ MAX_RESUMES = 4  # approval pauses plus one recovery; a run needing more is an e
 class Target:
     """An agent or a workflow, with what the runner needs to read back its messages."""
 
-    def __init__(self, graph: Any, agents: dict[str, Any] | None = None, workflow=False):
+    def __init__(self, graph: Any, agents: dict[str, Any] | None = None, workflow=False, nodes=()):
         self.graph, self.agents, self.is_workflow = graph, agents or {}, workflow
+        self.nodes = set(nodes)  # workflow nodes whose attempts the trace records
 
     @classmethod
     async def build(cls, spec: HarnessSpec | WorkflowSpec) -> Target:
         if isinstance(spec, WorkflowSpec):
             built = await assemble(spec)
-            return cls(get_engine(spec).compile(built), built.agents, workflow=True)
+            graph = get_engine(spec).compile(built)
+            return cls(graph, built.agents, workflow=True, nodes=spec.nodes)
         return cls(await build_harness(spec))
 
     def inputs(self, task: Task) -> dict[str, Any]:
@@ -95,9 +100,17 @@ def _blocked(messages) -> int:
     )
 
 
-async def drive(target: Target, task: Task, ctx: AccountContext, config: dict) -> dict[str, Any]:
-    """Run one task to its end: completed, paused for approval, or failed."""
+async def drive(
+    target: Target, task: Task, ctx: AccountContext, config: dict, t0: float | None = None
+) -> dict[str, Any]:
+    """Run one task to its end: completed, paused for approval, or failed. ``t0`` is the
+    clock reading the event times count from (default: now)."""
+    t0 = time.perf_counter() if t0 is None else t0
     events: list[dict[str, Any]] = []
+
+    def event(**e: Any) -> None:
+        events.append({**e, "t": round(time.perf_counter() - t0, 3)})
+
     inputs: Any = target.inputs(task)
     out: dict[str, Any] | None = None
     recovered = False
@@ -105,23 +118,23 @@ async def drive(target: Target, task: Task, ctx: AccountContext, config: dict) -
         try:
             out = await target.graph.ainvoke(inputs, config=config, context=ctx)
         except Exception as exc:
-            events.append({"event": "error", "error": f"{type(exc).__name__}: {exc}"})
+            event(event="error", error=f"{type(exc).__name__}: {exc}")
             if recovered:
                 return {"outcome": "error", "out": None, "events": events}
             recovered = True
-            events.append({"event": "resume after error"})
+            event(event="resume after error")
             inputs = None
             continue
         interrupts = out.get("__interrupt__") or []
         if not interrupts:
             return {"outcome": "completed", "out": out, "events": events}
         payload = interrupts[0].value
-        events.append({"event": "approval requested", "request": payload})
+        event(event="approval requested", request=payload)
         if task.approval is None:
             return {"outcome": "waiting for approval", "out": out, "events": events}
         inputs = Command(resume=supervise(ctx, payload, task.approval))
-        events.append({"event": f"supervisor: {task.approval}"})
-    events.append({"event": "error", "error": "too many resumes"})
+        event(event=f"supervisor: {task.approval}")
+    event(event="error", error="too many resumes")
     return {"outcome": "error", "out": out, "events": events}
 
 
@@ -141,16 +154,15 @@ async def run_task(target, task: Task, seed: Path, workdir: Path, prices) -> tup
     work = workdir / "final.sqlite"
     shutil.copyfile(start, work)
 
-    rec = UsageRecorder(prices)
+    rec = UsageRecorder(prices, nodes=target.nodes)
     config = {
         "configurable": {"thread_id": task.id},
         "callbacks": [rec],
         "recursion_limit": 100,
     }
     ctx = AccountContext(db_path=work, case_id=task.id, fault=task.fault)
-    t0 = time.perf_counter()
-    result = await drive(target, task, ctx, config)
-    latency = time.perf_counter() - t0
+    result = await drive(target, task, ctx, config, t0=rec.t0)
+    latency = time.perf_counter() - rec.t0
     messages = await target.messages(task.id, result["out"])
 
     errors = [e["error"] for e in result["events"] if e["event"] == "error"]
@@ -176,6 +188,7 @@ async def run_task(target, task: Task, seed: Path, workdir: Path, prices) -> tup
             for op in operations(work, task.id)
         ],
         "input_tokens": totals.input_tokens,
+        "cache_read_tokens": totals.cache_read_tokens,
         "output_tokens": totals.output_tokens,
         "reasoning_tokens": totals.reasoning_tokens,
         "dollars": round(totals.dollars, 8),
@@ -210,31 +223,35 @@ async def run_task(target, task: Task, seed: Path, workdir: Path, prices) -> tup
     return row, trace
 
 
-async def main_async(args) -> int:
-    load_api_key()
-    spec = load_any(args.spec)
-    prices = workflow_prices(spec) if isinstance(spec, WorkflowSpec) else spec_prices(spec)
-    suite = SUITES[args.suite]
-    wanted = args.tasks.split(",") if args.tasks else [t.id for t in suite]
-    if unknown := set(wanted) - {t.id for t in suite}:
-        raise SystemExit(f"unknown task ids for suite {args.suite}: {sorted(unknown)}")
-    tasks = [t for t in suite if t.id in wanted]
-    run_dir = BUILD / f"{spec.name}-{time.strftime('%Y%m%d-%H%M%S')}"
-    # A --tasks run is partial: it writes to build/ unless --out says otherwise, so it
-    # never replaces the committed full-run files in reports/.
-    reports = REPO_ROOT / "reports" / f"article-{args.suite}" / "custom"
-    default_out = run_dir if args.tasks else reports / spec.name
-    out = (Path(args.out) if args.out else default_out).resolve()
-    out.mkdir(parents=True, exist_ok=True)
-    seed = create_seed(run_dir / "seed.sqlite")
+def select_tasks(suite: str, ids: str = "") -> list[Task]:
+    """The tasks of a suite, or the comma-separated ``ids`` among them."""
+    tasks = SUITES[suite]
+    wanted = ids.split(",") if ids else [t.id for t in tasks]
+    if unknown := set(wanted) - {t.id for t in tasks}:
+        raise SystemExit(f"unknown task ids for suite {suite}: {sorted(unknown)}")
+    return [t for t in tasks if t.id in wanted]
 
+
+async def run_pass(
+    spec: HarnessSpec | WorkflowSpec,
+    tasks: list[Task],
+    out: Path,
+    workdir: Path,
+    prices,
+    concurrency: int = 4,
+    info: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    """One run of a spec over ``tasks`` with a freshly built target. Databases go to
+    ``workdir``; results.jsonl, traces.jsonl and run.json (with ``info``) go to ``out``."""
+    out.mkdir(parents=True, exist_ok=True)
+    seed = create_seed(workdir / "seed.sqlite")
     target = await Target.build(spec)
     started = now()
-    sem = asyncio.Semaphore(args.concurrency)
+    sem = asyncio.Semaphore(concurrency)
 
     async def one(task: Task):
         async with sem:
-            return await run_task(target, task, seed, run_dir / task.id, prices)
+            return await run_task(target, task, seed, workdir / task.id, prices)
 
     pairs = await asyncio.gather(*(one(t) for t in tasks))
     rows = [r for r, _ in pairs]
@@ -250,7 +267,7 @@ async def main_async(args) -> int:
             {
                 "env": "custom",
                 "label": "single run",
-                "suite": args.suite,
+                **(info or {}),
                 "started_at": started,
                 "finished_at": now(),
                 "spec": spec.model_dump(mode="json"),
@@ -261,6 +278,23 @@ async def main_async(args) -> int:
             },
             indent=2,
         )
+    )
+    return rows
+
+
+async def main_async(args) -> int:
+    load_api_key()
+    spec = load_any(args.spec)
+    prices = workflow_prices(spec) if isinstance(spec, WorkflowSpec) else spec_prices(spec)
+    tasks = select_tasks(args.suite, args.tasks)
+    run_dir = BUILD / f"{spec.name}-{time.strftime('%Y%m%d-%H%M%S')}"
+    # A --tasks run is partial: it writes to build/ unless --out says otherwise, so it
+    # never replaces the committed full-run files in reports/.
+    reports = REPO_ROOT / "reports" / f"article-{args.suite}" / "custom"
+    default_out = run_dir if args.tasks else reports / spec.name
+    out = (Path(args.out) if args.out else default_out).resolve()
+    rows = await run_pass(
+        spec, tasks, out, run_dir, prices, args.concurrency, {"suite": args.suite}
     )
 
     print(f"\n{spec.name} on custom ({len(rows)} tasks, single run)")

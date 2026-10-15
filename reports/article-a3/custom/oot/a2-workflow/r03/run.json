@@ -1,0 +1,174 @@
+{
+  "env": "custom",
+  "label": "run 3 of 5",
+  "suite": "oot",
+  "batch": "oot",
+  "run": 3,
+  "runs": 5,
+  "spec_hash": "1868a572a812e4c17501c59e71221cb208c6b7a14b18f7fbec1a1ffc09c850b6",
+  "price_table": "openrouter-2026-10-05",
+  "live_prices_match": true,
+  "started_at": "2026-10-15T14:34:18Z",
+  "finished_at": "2026-10-15T14:35:05Z",
+  "spec": {
+    "kind": "workflow",
+    "name": "a2-workflow",
+    "description": "Plain agent, then a supervisor approval step and a refund step in code.",
+    "engine": {
+      "name": "langgraph",
+      "ref": null,
+      "kwargs": {}
+    },
+    "state_schema": "envs.custom.approval:CaseState",
+    "context_schema": "envs.custom.tools:AccountContext",
+    "nodes": {
+      "agent": {
+        "type": "agent",
+        "agent": {
+          "spec": "harness/spec/plain.yaml",
+          "override": {}
+        },
+        "message": "{request}",
+        "output": "answer"
+      },
+      "find_held": {
+        "type": "function",
+        "ref": "envs.custom.approval:find_held",
+        "kwargs": {},
+        "retry": null
+      },
+      "approval": {
+        "type": "function",
+        "ref": "envs.custom.approval:wait_for_supervisor",
+        "kwargs": {},
+        "retry": null
+      },
+      "issue": {
+        "type": "function",
+        "ref": "envs.custom.approval:issue_approved",
+        "kwargs": {},
+        "retry": {
+          "max_attempts": 3,
+          "initial_interval": 0.5,
+          "retry_on": [
+            "builtins:ConnectionError"
+          ]
+        }
+      },
+      "reply": {
+        "type": "function",
+        "ref": "envs.custom.approval:reply",
+        "kwargs": {},
+        "retry": null
+      }
+    },
+    "edges": [
+      [
+        "START",
+        "agent"
+      ],
+      [
+        "agent",
+        "find_held"
+      ],
+      [
+        "approval",
+        "issue"
+      ],
+      [
+        "issue",
+        "reply"
+      ],
+      [
+        "reply",
+        "END"
+      ]
+    ],
+    "conditional_edges": [
+      {
+        "source": "find_held",
+        "field": "next_step",
+        "router": null,
+        "routes": {
+          "approval": "approval"
+        },
+        "default": "END"
+      }
+    ],
+    "checkpointer": "memory",
+    "source": "harness/spec/workflows/refund-approval.yaml"
+  },
+  "prices_usd_per_token": [
+    {
+      "model_id": "openai/gpt-6-luna",
+      "provider_tag": "openai",
+      "prompt": 1e-07,
+      "completion": 5e-07,
+      "input_cache_read": 1e-08,
+      "input_cache_write": 1.25e-07,
+      "fetched_at": "2026-10-05T20:59:10Z",
+      "source": "https://openrouter.ai/api/v1/models/openai/gpt-6-luna/endpoints"
+    },
+    {
+      "model_id": "typesafe/jev-1.13",
+      "provider_tag": "typesafe",
+      "prompt": 4.2e-08,
+      "completion": 0.0,
+      "input_cache_read": 0.0,
+      "input_cache_write": 0.0,
+      "fetched_at": "2026-10-05T21:00:38Z",
+      "source": "https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints"
+    }
+  ],
+  "packages": {
+    "langchain": "1.4.2",
+    "langchain-core": "1.6.5",
+    "langgraph": "1.2.12",
+    "langchain-mcp-adapters": "0.3.2",
+    "langchain-openai": "1.6.5",
+    "langchain-openrouter": "0.2.9",
+    "langchain-typesafe": "0.0.1a3",
+    "mcp": "1.30.0",
+    "pydantic": "2.12.5",
+    "tau2": "1.0.1",
+    "litellm": "1.82.6"
+  },
+  "git": {
+    "sha": "d33319b1d14361e82bd968d36f1c5a86504fe403",
+    "dirty": false
+  },
+  "tasks": [
+    "vague-teapot-no-order",
+    "vague-teapot-no-email",
+    "vague-helmet",
+    "vague-something-wrong",
+    "vague-which-order",
+    "vague-headphones-refunded",
+    "vague-tablecloth-late",
+    "vague-espresso-not-delivered",
+    "two-refund-and-emails",
+    "two-refund-and-address",
+    "two-address-and-language",
+    "two-refund-allowed-address-refused",
+    "two-both-refused",
+    "two-address-allowed-refund-refused",
+    "two-no-identity",
+    "two-refund-allowed-refund-refused",
+    "policy-refund-window",
+    "policy-undelivered",
+    "policy-cancelled",
+    "policy-refund-limit",
+    "policy-languages",
+    "policy-suspended-refund",
+    "policy-partial-refund",
+    "policy-shipped-address",
+    "unusual-where-is-order",
+    "unusual-refund-status",
+    "unusual-close-account",
+    "unusual-change-email",
+    "unusual-complaint",
+    "unusual-invoice",
+    "unusual-exchange",
+    "unusual-why-suspended"
+  ]
+}

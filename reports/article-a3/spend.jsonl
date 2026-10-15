@@ -1,0 +1,338 @@
+{"step": "smoke", "batch": "smoke", "spec": "a3-do-nothing", "run": 1, "tasks": 2, "dollars": 0.0, "billed": 0.0, "at": "2026-10-15T13:55:56Z"}
+{"step": "smoke", "batch": "smoke", "spec": "a1-plain", "run": 1, "tasks": 2, "dollars": 0.00075262, "billed": 0.00075262, "at": "2026-10-15T13:56:05Z"}
+{"step": "smoke", "batch": "smoke", "spec": "a2-agent-approval", "run": 1, "tasks": 2, "dollars": 0.00040813, "billed": 0.00040813, "at": "2026-10-15T13:56:12Z"}
+{"step": "smoke", "batch": "smoke", "spec": "a2-workflow", "run": 1, "tasks": 2, "dollars": 0.00065148, "billed": 0.00065148, "at": "2026-10-15T13:56:18Z"}
+{"step": "smoke", "batch": "smoke", "spec": "a2-router", "run": 1, "tasks": 2, "dollars": 0.00078924, "billed": 0.0007569, "at": "2026-10-15T13:56:27Z"}
+{"step": "smoke", "batch": "smoke", "spec": "a2-code", "run": 1, "tasks": 2, "dollars": 9.18e-05, "billed": 9.18e-05, "at": "2026-10-15T13:56:29Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a3-do-nothing", "run": 1, "tasks": 16, "dollars": 0.0, "billed": 0.0, "at": "2026-10-15T13:56:53Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a1-plain", "run": 1, "tasks": 16, "dollars": 0.00527295, "billed": 0.00527297, "at": "2026-10-15T13:57:23Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-agent-approval", "run": 1, "tasks": 16, "dollars": 0.00469319, "billed": 0.00469319, "at": "2026-10-15T13:57:49Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-workflow", "run": 1, "tasks": 16, "dollars": 0.00427196, "billed": 0.00427195, "at": "2026-10-15T13:58:17Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-router", "run": 1, "tasks": 16, "dollars": 0.00560901, "billed": 0.0053541, "at": "2026-10-15T13:58:43Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-code", "run": 1, "tasks": 16, "dollars": 0.0007814, "billed": 0.0007814, "at": "2026-10-15T13:58:49Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a3-do-nothing", "run": 2, "tasks": 16, "dollars": 0.0, "billed": 0.0, "at": "2026-10-15T13:58:49Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a1-plain", "run": 2, "tasks": 16, "dollars": 0.00432537, "billed": 0.00432538, "at": "2026-10-15T13:59:27Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-agent-approval", "run": 2, "tasks": 16, "dollars": 0.0044809, "billed": 0.0044809, "at": "2026-10-15T13:59:56Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-workflow", "run": 2, "tasks": 16, "dollars": 0.00377419, "billed": 0.00377419, "at": "2026-10-15T14:00:25Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-router", "run": 2, "tasks": 16, "dollars": 0.00512497, "billed": 0.00487005, "at": "2026-10-15T14:00:55Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-code", "run": 2, "tasks": 16, "dollars": 0.0007819, "billed": 0.0007819, "at": "2026-10-15T14:01:02Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a3-do-nothing", "run": 3, "tasks": 16, "dollars": 0.0, "billed": 0.0, "at": "2026-10-15T14:01:02Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a1-plain", "run": 3, "tasks": 16, "dollars": 0.00483121, "billed": 0.00483122, "at": "2026-10-15T14:01:33Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-agent-approval", "run": 3, "tasks": 16, "dollars": 0.00470012, "billed": 0.00470012, "at": "2026-10-15T14:02:03Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-workflow", "run": 3, "tasks": 16, "dollars": 0.00473696, "billed": 0.00473697, "at": "2026-10-15T14:02:53Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-router", "run": 3, "tasks": 16, "dollars": 0.00474602, "billed": 0.00449111, "at": "2026-10-15T14:03:33Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-code", "run": 3, "tasks": 16, "dollars": 0.0007824, "billed": 0.0007824, "at": "2026-10-15T14:03:40Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a3-do-nothing", "run": 4, "tasks": 16, "dollars": 0.0, "billed": 0.0, "at": "2026-10-15T14:03:40Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a1-plain", "run": 4, "tasks": 16, "dollars": 0.00438521, "billed": 0.00438521, "at": "2026-10-15T14:04:18Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-agent-approval", "run": 4, "tasks": 16, "dollars": 0.00419155, "billed": 0.00419155, "at": "2026-10-15T14:04:50Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-workflow", "run": 4, "tasks": 16, "dollars": 0.00408028, "billed": 0.00408027, "at": "2026-10-15T14:05:27Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-router", "run": 4, "tasks": 16, "dollars": 0.00469782, "billed": 0.0044429, "at": "2026-10-15T14:05:54Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-code", "run": 4, "tasks": 16, "dollars": 0.0007819, "billed": 0.0007819, "at": "2026-10-15T14:06:00Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a3-do-nothing", "run": 5, "tasks": 16, "dollars": 0.0, "billed": 0.0, "at": "2026-10-15T14:06:00Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a1-plain", "run": 5, "tasks": 16, "dollars": 0.00367761, "billed": 0.00367761, "at": "2026-10-15T14:06:28Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-agent-approval", "run": 5, "tasks": 16, "dollars": 0.0039759, "billed": 0.00397591, "at": "2026-10-15T14:06:56Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-workflow", "run": 5, "tasks": 16, "dollars": 0.00398583, "billed": 0.00398583, "at": "2026-10-15T14:07:34Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-router", "run": 5, "tasks": 16, "dollars": 0.00457912, "billed": 0.00432422, "at": "2026-10-15T14:08:09Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-code", "run": 5, "tasks": 16, "dollars": 0.0007819, "billed": 0.0007819, "at": "2026-10-15T14:08:15Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a3-do-nothing", "run": 6, "tasks": 16, "dollars": 0.0, "billed": 0.0, "at": "2026-10-15T14:08:15Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a1-plain", "run": 6, "tasks": 16, "dollars": 0.00401233, "billed": 0.00401233, "at": "2026-10-15T14:08:44Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-agent-approval", "run": 6, "tasks": 16, "dollars": 0.00455479, "billed": 0.00455479, "at": "2026-10-15T14:09:16Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-workflow", "run": 6, "tasks": 16, "dollars": 0.00426546, "billed": 0.00426546, "at": "2026-10-15T14:09:55Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-router", "run": 6, "tasks": 16, "dollars": 0.00494466, "billed": 0.00468975, "at": "2026-10-15T14:10:32Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-code", "run": 6, "tasks": 16, "dollars": 0.0007814, "billed": 0.0007814, "at": "2026-10-15T14:10:38Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a3-do-nothing", "run": 7, "tasks": 16, "dollars": 0.0, "billed": 0.0, "at": "2026-10-15T14:10:38Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a1-plain", "run": 7, "tasks": 16, "dollars": 0.00364315, "billed": 0.00364315, "at": "2026-10-15T14:11:16Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-agent-approval", "run": 7, "tasks": 16, "dollars": 0.00392061, "billed": 0.00392061, "at": "2026-10-15T14:11:52Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-workflow", "run": 7, "tasks": 16, "dollars": 0.00455567, "billed": 0.00455567, "at": "2026-10-15T14:12:26Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-router", "run": 7, "tasks": 16, "dollars": 0.00434438, "billed": 0.00408945, "at": "2026-10-15T14:13:01Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-code", "run": 7, "tasks": 16, "dollars": 0.0007819, "billed": 0.0007819, "at": "2026-10-15T14:13:07Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a3-do-nothing", "run": 8, "tasks": 16, "dollars": 0.0, "billed": 0.0, "at": "2026-10-15T14:13:07Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a1-plain", "run": 8, "tasks": 16, "dollars": 0.00381838, "billed": 0.00381838, "at": "2026-10-15T14:13:48Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-agent-approval", "run": 8, "tasks": 16, "dollars": 0.00381861, "billed": 0.00381862, "at": "2026-10-15T14:14:39Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-workflow", "run": 8, "tasks": 16, "dollars": 0.00377171, "billed": 0.00377171, "at": "2026-10-15T14:15:10Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-router", "run": 8, "tasks": 16, "dollars": 0.00444054, "billed": 0.00418563, "at": "2026-10-15T14:15:42Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-code", "run": 8, "tasks": 16, "dollars": 0.0007824, "billed": 0.0007824, "at": "2026-10-15T14:15:51Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a3-do-nothing", "run": 9, "tasks": 16, "dollars": 0.0, "billed": 0.0, "at": "2026-10-15T14:15:51Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a1-plain", "run": 9, "tasks": 16, "dollars": 0.00382348, "billed": 0.00382348, "at": "2026-10-15T14:16:27Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-agent-approval", "run": 9, "tasks": 16, "dollars": 0.00364918, "billed": 0.00364918, "at": "2026-10-15T14:17:09Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-workflow", "run": 9, "tasks": 16, "dollars": 0.00330708, "billed": 0.00330708, "at": "2026-10-15T14:17:39Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-router", "run": 9, "tasks": 16, "dollars": 0.00409653, "billed": 0.0038416, "at": "2026-10-15T14:18:06Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-code", "run": 9, "tasks": 16, "dollars": 0.0007824, "billed": 0.0007824, "at": "2026-10-15T14:18:12Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a3-do-nothing", "run": 10, "tasks": 16, "dollars": 0.0, "billed": 0.0, "at": "2026-10-15T14:18:12Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a1-plain", "run": 10, "tasks": 16, "dollars": 0.00387292, "billed": 0.00387292, "at": "2026-10-15T14:18:43Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-agent-approval", "run": 10, "tasks": 16, "dollars": 0.00385992, "billed": 0.00385992, "at": "2026-10-15T14:19:10Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-workflow", "run": 10, "tasks": 16, "dollars": 0.00368107, "billed": 0.00368107, "at": "2026-10-15T14:19:38Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-router", "run": 10, "tasks": 16, "dollars": 0.00440364, "billed": 0.00414871, "at": "2026-10-15T14:20:03Z"}
+{"step": "p1-03", "batch": "k10", "spec": "a2-code", "run": 10, "tasks": 16, "dollars": 0.0007819, "billed": 0.0007819, "at": "2026-10-15T14:20:10Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 1, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:29Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 1, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:31Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 2, "dollars": 0.0003792600000000001, "at": "2026-10-15T14:20:33Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 2, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:34Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 3, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:36Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 3, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:38Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 4, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:39Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 4, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:41Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 5, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:43Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 5, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:44Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 6, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:46Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 6, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:48Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 7, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:50Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 7, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:51Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 8, "dollars": 0.0003792600000000001, "at": "2026-10-15T14:20:53Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 8, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:55Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 9, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:20:56Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 9, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:20:58Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router", "run": 10, "dollars": 0.00037926000000000013, "at": "2026-10-15T14:21:00Z"}
+{"step": "p1-03", "batch": "route", "spec": "a2-router-clarify", "run": 10, "dollars": 0.0004139099999999999, "at": "2026-10-15T14:21:02Z"}
+{"step": "smoke", "batch": "smoke", "spec": "a3-hybrid", "run": 1, "tasks": 3, "dollars": 0.000138, "billed": 8.81e-05, "at": "2026-10-15T14:23:37Z"}
+{"step": "smoke", "batch": "smoke", "spec": "a3-hybrid", "run": 1, "tasks": 1, "dollars": 6.337e-05, "billed": 4.59e-05, "at": "2026-10-15T14:23:39Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a1-plain", "run": 1, "tasks": 32, "dollars": 0.01103188, "billed": 0.01103189, "at": "2026-10-15T14:25:24Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-agent-approval", "run": 1, "tasks": 32, "dollars": 0.01018097, "billed": 0.01018096, "at": "2026-10-15T14:26:21Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-workflow", "run": 1, "tasks": 32, "dollars": 0.00898742, "billed": 0.00898743, "at": "2026-10-15T14:27:21Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-router", "run": 1, "tasks": 32, "dollars": 0.00986285, "billed": 0.00936341, "at": "2026-10-15T14:28:07Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-code", "run": 1, "tasks": 32, "dollars": 0.0015071, "billed": 0.0015071, "at": "2026-10-15T14:28:18Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a3-hybrid", "run": 1, "tasks": 32, "dollars": 0.00166182, "billed": 0.001118, "at": "2026-10-15T14:28:29Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a1-plain", "run": 2, "tasks": 32, "dollars": 0.00931305, "billed": 0.00931304, "at": "2026-10-15T14:29:34Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-agent-approval", "run": 2, "tasks": 32, "dollars": 0.00866024, "billed": 0.00866025, "at": "2026-10-15T14:30:29Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-workflow", "run": 2, "tasks": 32, "dollars": 0.00879796, "billed": 0.00879797, "at": "2026-10-15T14:31:19Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-router", "run": 2, "tasks": 32, "dollars": 0.00980499, "billed": 0.00930556, "at": "2026-10-15T14:32:13Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-code", "run": 2, "tasks": 32, "dollars": 0.0015071, "billed": 0.0015071, "at": "2026-10-15T14:32:23Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a3-hybrid", "run": 2, "tasks": 32, "dollars": 0.00150443, "billed": 0.00096061, "at": "2026-10-15T14:32:33Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a1-plain", "run": 3, "tasks": 32, "dollars": 0.00962374, "billed": 0.00962374, "at": "2026-10-15T14:33:31Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-agent-approval", "run": 3, "tasks": 32, "dollars": 0.00886087, "billed": 0.00886088, "at": "2026-10-15T14:34:17Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-workflow", "run": 3, "tasks": 32, "dollars": 0.00874939, "billed": 0.00874939, "at": "2026-10-15T14:35:05Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-router", "run": 3, "tasks": 32, "dollars": 0.0086122, "billed": 0.00811276, "at": "2026-10-15T14:35:53Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-code", "run": 3, "tasks": 32, "dollars": 0.0015071, "billed": 0.0015071, "at": "2026-10-15T14:36:02Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a3-hybrid", "run": 3, "tasks": 32, "dollars": 0.00160202, "billed": 0.0010582, "at": "2026-10-15T14:36:13Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a1-plain", "run": 4, "tasks": 32, "dollars": 0.00826324, "billed": 0.00826324, "at": "2026-10-15T14:36:57Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-agent-approval", "run": 4, "tasks": 32, "dollars": 0.00885139, "billed": 0.00885139, "at": "2026-10-15T14:37:40Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-workflow", "run": 4, "tasks": 32, "dollars": 0.00836998, "billed": 0.00836999, "at": "2026-10-15T14:38:28Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-router", "run": 4, "tasks": 32, "dollars": 0.00851822, "billed": 0.00801877, "at": "2026-10-15T14:39:17Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-code", "run": 4, "tasks": 32, "dollars": 0.0015071, "billed": 0.0015071, "at": "2026-10-15T14:39:27Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a3-hybrid", "run": 4, "tasks": 32, "dollars": 0.00167082, "billed": 0.001127, "at": "2026-10-15T14:39:39Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a1-plain", "run": 5, "tasks": 32, "dollars": 0.00862807, "billed": 0.00862811, "at": "2026-10-15T14:40:27Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-agent-approval", "run": 5, "tasks": 32, "dollars": 0.00811847, "billed": 0.00811848, "at": "2026-10-15T14:41:11Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-workflow", "run": 5, "tasks": 32, "dollars": 0.00801613, "billed": 0.00801613, "at": "2026-10-15T14:41:55Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-router", "run": 5, "tasks": 32, "dollars": 0.0089467, "billed": 0.00844723, "at": "2026-10-15T14:42:44Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a2-code", "run": 5, "tasks": 32, "dollars": 0.0015071, "billed": 0.0015071, "at": "2026-10-15T14:42:54Z"}
+{"step": "p1-06", "batch": "oot", "spec": "a3-hybrid", "run": 5, "tasks": 32, "dollars": 0.00150493, "billed": 0.00096111, "at": "2026-10-15T14:43:04Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 1, "tasks": 16, "dollars": 0.00095058, "billed": 0.0006735, "at": "2026-10-15T14:43:12Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 2, "tasks": 16, "dollars": 0.00095008, "billed": 0.000673, "at": "2026-10-15T14:43:18Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 3, "tasks": 16, "dollars": 0.00095108, "billed": 0.000674, "at": "2026-10-15T14:43:25Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 4, "tasks": 16, "dollars": 0.00095058, "billed": 0.0006735, "at": "2026-10-15T14:43:32Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 5, "tasks": 16, "dollars": 0.00095158, "billed": 0.0006745, "at": "2026-10-15T14:43:39Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 6, "tasks": 16, "dollars": 0.00095058, "billed": 0.0006735, "at": "2026-10-15T14:43:46Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 7, "tasks": 16, "dollars": 0.00095058, "billed": 0.0006735, "at": "2026-10-15T14:43:53Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 8, "tasks": 16, "dollars": 0.00095008, "billed": 0.000673, "at": "2026-10-15T14:44:01Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 9, "tasks": 16, "dollars": 0.00095008, "billed": 0.000673, "at": "2026-10-15T14:44:11Z"}
+{"step": "p1-06", "batch": "k10", "spec": "a3-hybrid", "run": 10, "tasks": 16, "dollars": 0.00095058, "billed": 0.0006735, "at": "2026-10-15T14:44:18Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a2/custom/a1-plain", "dollars": 0.00039018, "at": "2026-10-15T14:45:22Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a2/custom/a2-agent-approval", "dollars": 0.00036494, "at": "2026-10-15T14:45:22Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a2/custom/a2-code", "dollars": 0.00038224, "at": "2026-10-15T14:45:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a2/custom/a2-router", "dollars": 0.00038968, "at": "2026-10-15T14:45:24Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a2/custom/a2-workflow", "dollars": 0.00038716, "at": "2026-10-15T14:45:24Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r01", "dollars": 0.00038888, "at": "2026-10-15T14:45:25Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r02", "dollars": 0.00038825, "at": "2026-10-15T14:45:26Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r03", "dollars": 0.0003885, "at": "2026-10-15T14:45:26Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r04", "dollars": 0.00038989, "at": "2026-10-15T14:45:27Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r05", "dollars": 0.00038984, "at": "2026-10-15T14:45:27Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r06", "dollars": 0.00039031, "at": "2026-10-15T14:45:28Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r07", "dollars": 0.0003901, "at": "2026-10-15T14:45:28Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r08", "dollars": 0.00038951, "at": "2026-10-15T14:45:29Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r09", "dollars": 0.00038871, "at": "2026-10-15T14:45:29Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r10", "dollars": 0.00038934, "at": "2026-10-15T14:45:30Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r01", "dollars": 0.0003649, "at": "2026-10-15T14:45:30Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r02", "dollars": 0.00036385, "at": "2026-10-15T14:45:31Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r03", "dollars": 0.00036414, "at": "2026-10-15T14:45:32Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r04", "dollars": 0.0003649, "at": "2026-10-15T14:45:32Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r05", "dollars": 0.00036385, "at": "2026-10-15T14:45:33Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r06", "dollars": 0.00036439, "at": "2026-10-15T14:45:33Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r07", "dollars": 0.00036473, "at": "2026-10-15T14:45:34Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r08", "dollars": 0.00036473, "at": "2026-10-15T14:45:34Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r09", "dollars": 0.00036502, "at": "2026-10-15T14:45:35Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r10", "dollars": 0.00036485, "at": "2026-10-15T14:45:35Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r01", "dollars": 0.00038224, "at": "2026-10-15T14:45:36Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r02", "dollars": 0.00038224, "at": "2026-10-15T14:45:36Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r03", "dollars": 0.00038224, "at": "2026-10-15T14:45:37Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r04", "dollars": 0.00038224, "at": "2026-10-15T14:45:38Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r05", "dollars": 0.00038224, "at": "2026-10-15T14:45:38Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r06", "dollars": 0.00038224, "at": "2026-10-15T14:45:39Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r07", "dollars": 0.00038224, "at": "2026-10-15T14:45:39Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r08", "dollars": 0.00038224, "at": "2026-10-15T14:45:40Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r09", "dollars": 0.00038224, "at": "2026-10-15T14:45:40Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r10", "dollars": 0.00038224, "at": "2026-10-15T14:45:41Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r01", "dollars": 0.00038921, "at": "2026-10-15T14:45:42Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r02", "dollars": 0.00038816, "at": "2026-10-15T14:45:42Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r03", "dollars": 0.00038938, "at": "2026-10-15T14:45:43Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r04", "dollars": 0.00038858, "at": "2026-10-15T14:45:43Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r05", "dollars": 0.00038821, "at": "2026-10-15T14:45:44Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r06", "dollars": 0.00038955, "at": "2026-10-15T14:45:44Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r07", "dollars": 0.00038938, "at": "2026-10-15T14:45:45Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r08", "dollars": 0.00038976, "at": "2026-10-15T14:45:45Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r09", "dollars": 0.00039014, "at": "2026-10-15T14:45:46Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r10", "dollars": 0.00038909, "at": "2026-10-15T14:45:46Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r01", "dollars": 0.00038833, "at": "2026-10-15T14:45:47Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r02", "dollars": 0.00038808, "at": "2026-10-15T14:45:47Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r03", "dollars": 0.00038909, "at": "2026-10-15T14:45:48Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r04", "dollars": 0.000389, "at": "2026-10-15T14:45:49Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r05", "dollars": 0.00038938, "at": "2026-10-15T14:45:49Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r06", "dollars": 0.00038926, "at": "2026-10-15T14:45:50Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r07", "dollars": 0.0003872, "at": "2026-10-15T14:45:50Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r08", "dollars": 0.00038947, "at": "2026-10-15T14:45:51Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r09", "dollars": 0.00038745, "at": "2026-10-15T14:45:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r10", "dollars": 0.00038837, "at": "2026-10-15T14:45:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r01", "dollars": 0.0, "at": "2026-10-15T14:45:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r02", "dollars": 0.0, "at": "2026-10-15T14:45:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r03", "dollars": 0.0, "at": "2026-10-15T14:45:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r04", "dollars": 0.0, "at": "2026-10-15T14:45:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r05", "dollars": 0.0, "at": "2026-10-15T14:45:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r06", "dollars": 0.0, "at": "2026-10-15T14:45:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r07", "dollars": 0.0, "at": "2026-10-15T14:45:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r08", "dollars": 0.0, "at": "2026-10-15T14:45:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r09", "dollars": 0.0, "at": "2026-10-15T14:45:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r10", "dollars": 0.0, "at": "2026-10-15T14:45:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r01", "dollars": 0.00038342, "at": "2026-10-15T14:45:53Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r02", "dollars": 0.00038342, "at": "2026-10-15T14:45:53Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r03", "dollars": 0.00038342, "at": "2026-10-15T14:45:54Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r04", "dollars": 0.00038342, "at": "2026-10-15T14:45:54Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r05", "dollars": 0.00038342, "at": "2026-10-15T14:45:55Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r06", "dollars": 0.00038342, "at": "2026-10-15T14:45:55Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r07", "dollars": 0.00038342, "at": "2026-10-15T14:45:56Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r08", "dollars": 0.00038342, "at": "2026-10-15T14:45:56Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r09", "dollars": 0.00038342, "at": "2026-10-15T14:45:57Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r10", "dollars": 0.00038342, "at": "2026-10-15T14:45:58Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a1-plain/r01", "dollars": 0.00077414, "at": "2026-10-15T14:45:59Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a1-plain/r02", "dollars": 0.00077507, "at": "2026-10-15T14:46:00Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a1-plain/r03", "dollars": 0.00077687, "at": "2026-10-15T14:46:01Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a1-plain/r04", "dollars": 0.00077524, "at": "2026-10-15T14:46:02Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a1-plain/r05", "dollars": 0.00077419, "at": "2026-10-15T14:46:03Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-agent-approval/r01", "dollars": 0.00077662, "at": "2026-10-15T14:46:04Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-agent-approval/r02", "dollars": 0.00077679, "at": "2026-10-15T14:46:06Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-agent-approval/r03", "dollars": 0.00077351, "at": "2026-10-15T14:46:07Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-agent-approval/r04", "dollars": 0.00077251, "at": "2026-10-15T14:46:08Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-agent-approval/r05", "dollars": 0.00077456, "at": "2026-10-15T14:46:09Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-code/r01", "dollars": 0.00074437, "at": "2026-10-15T14:46:10Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-code/r02", "dollars": 0.00074407, "at": "2026-10-15T14:46:11Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-code/r03", "dollars": 0.00074437, "at": "2026-10-15T14:46:12Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-code/r04", "dollars": 0.00074407, "at": "2026-10-15T14:46:13Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-code/r05", "dollars": 0.00074407, "at": "2026-10-15T14:46:14Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-router/r01", "dollars": 0.0007762, "at": "2026-10-15T14:46:15Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-router/r02", "dollars": 0.00077927, "at": "2026-10-15T14:46:17Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-router/r03", "dollars": 0.00077843, "at": "2026-10-15T14:46:18Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-router/r04", "dollars": 0.00077755, "at": "2026-10-15T14:46:19Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-router/r05", "dollars": 0.00077717, "at": "2026-10-15T14:46:20Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-workflow/r01", "dollars": 0.00077511, "at": "2026-10-15T14:46:21Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-workflow/r02", "dollars": 0.00077557, "at": "2026-10-15T14:46:22Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-workflow/r03", "dollars": 0.00077389, "at": "2026-10-15T14:46:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-workflow/r04", "dollars": 0.00077473, "at": "2026-10-15T14:46:24Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-workflow/r05", "dollars": 0.00077599, "at": "2026-10-15T14:46:25Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a3-hybrid/r01", "dollars": 0.00075398, "at": "2026-10-15T14:46:27Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a3-hybrid/r02", "dollars": 0.00075398, "at": "2026-10-15T14:46:28Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a3-hybrid/r03", "dollars": 0.00075453, "at": "2026-10-15T14:46:29Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a3-hybrid/r04", "dollars": 0.0007547, "at": "2026-10-15T14:46:30Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a3-hybrid/r05", "dollars": 0.00075398, "at": "2026-10-15T14:46:31Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a2/custom/a1-plain", "dollars": 0.00043184, "at": "2026-10-15T15:05:35Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a2/custom/a2-agent-approval", "dollars": 0.000404, "at": "2026-10-15T15:05:35Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a2/custom/a2-code", "dollars": 0.00042391, "at": "2026-10-15T15:05:36Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a2/custom/a2-router", "dollars": 0.00043134, "at": "2026-10-15T15:05:37Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a2/custom/a2-workflow", "dollars": 0.00042882, "at": "2026-10-15T15:05:37Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r01", "dollars": 0.00043054, "at": "2026-10-15T15:05:38Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r02", "dollars": 0.00042991, "at": "2026-10-15T15:05:38Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r03", "dollars": 0.00043016, "at": "2026-10-15T15:05:39Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r04", "dollars": 0.00043155, "at": "2026-10-15T15:05:40Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r05", "dollars": 0.00043151, "at": "2026-10-15T15:05:40Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r06", "dollars": 0.00043197, "at": "2026-10-15T15:05:41Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r07", "dollars": 0.00043176, "at": "2026-10-15T15:05:42Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r08", "dollars": 0.00043117, "at": "2026-10-15T15:07:00Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r09", "dollars": 0.00043037, "at": "2026-10-15T15:07:01Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a1-plain/r10", "dollars": 0.000431, "at": "2026-10-15T15:07:01Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r01", "dollars": 0.00040396, "at": "2026-10-15T15:07:02Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r02", "dollars": 0.00040291, "at": "2026-10-15T15:07:02Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r03", "dollars": 0.0004032, "at": "2026-10-15T15:07:03Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r04", "dollars": 0.00040396, "at": "2026-10-15T15:07:03Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r05", "dollars": 0.00040291, "at": "2026-10-15T15:07:04Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r06", "dollars": 0.00040345, "at": "2026-10-15T15:07:04Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r07", "dollars": 0.00040379, "at": "2026-10-15T15:07:05Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r08", "dollars": 0.00040379, "at": "2026-10-15T15:07:06Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r09", "dollars": 0.00040408, "at": "2026-10-15T15:07:06Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-agent-approval/r10", "dollars": 0.00040391, "at": "2026-10-15T15:07:07Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r01", "dollars": 0.00042391, "at": "2026-10-15T15:07:07Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r02", "dollars": 0.00042391, "at": "2026-10-15T15:07:08Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r03", "dollars": 0.00042391, "at": "2026-10-15T15:07:08Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r04", "dollars": 0.00042391, "at": "2026-10-15T15:07:09Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r05", "dollars": 0.00042391, "at": "2026-10-15T15:07:09Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r06", "dollars": 0.00042391, "at": "2026-10-15T15:07:10Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r07", "dollars": 0.00042391, "at": "2026-10-15T15:07:10Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r08", "dollars": 0.00042391, "at": "2026-10-15T15:07:11Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r09", "dollars": 0.00042391, "at": "2026-10-15T15:07:12Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-code/r10", "dollars": 0.00042391, "at": "2026-10-15T15:07:12Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r01", "dollars": 0.00043088, "at": "2026-10-15T15:07:13Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r02", "dollars": 0.00042983, "at": "2026-10-15T15:07:13Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r03", "dollars": 0.00043105, "at": "2026-10-15T15:07:14Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r04", "dollars": 0.00043025, "at": "2026-10-15T15:07:14Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r05", "dollars": 0.00042987, "at": "2026-10-15T15:07:15Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r06", "dollars": 0.00043121, "at": "2026-10-15T15:07:15Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r07", "dollars": 0.00043105, "at": "2026-10-15T15:07:16Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r08", "dollars": 0.00043142, "at": "2026-10-15T15:07:17Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r09", "dollars": 0.0004318, "at": "2026-10-15T15:07:17Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-router/r10", "dollars": 0.00043075, "at": "2026-10-15T15:07:18Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r01", "dollars": 0.00043, "at": "2026-10-15T15:07:18Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r02", "dollars": 0.00042974, "at": "2026-10-15T15:07:19Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r03", "dollars": 0.00043075, "at": "2026-10-15T15:07:19Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r04", "dollars": 0.00043067, "at": "2026-10-15T15:07:20Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r05", "dollars": 0.00043105, "at": "2026-10-15T15:07:20Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r06", "dollars": 0.00043092, "at": "2026-10-15T15:07:21Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r07", "dollars": 0.00042886, "at": "2026-10-15T15:07:22Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r08", "dollars": 0.00043113, "at": "2026-10-15T15:07:22Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r09", "dollars": 0.00042911, "at": "2026-10-15T15:07:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a2-workflow/r10", "dollars": 0.00043004, "at": "2026-10-15T15:07:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r01", "dollars": 0.0, "at": "2026-10-15T15:07:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r02", "dollars": 0.0, "at": "2026-10-15T15:07:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r03", "dollars": 0.0, "at": "2026-10-15T15:07:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r04", "dollars": 0.0, "at": "2026-10-15T15:07:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r05", "dollars": 0.0, "at": "2026-10-15T15:07:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r06", "dollars": 0.0, "at": "2026-10-15T15:07:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r07", "dollars": 0.0, "at": "2026-10-15T15:07:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r08", "dollars": 0.0, "at": "2026-10-15T15:07:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r09", "dollars": 0.0, "at": "2026-10-15T15:07:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-do-nothing/r10", "dollars": 0.0, "at": "2026-10-15T15:07:23Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r01", "dollars": 0.00042508, "at": "2026-10-15T15:07:24Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r02", "dollars": 0.00042508, "at": "2026-10-15T15:07:24Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r03", "dollars": 0.00042508, "at": "2026-10-15T15:07:25Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r04", "dollars": 0.00042508, "at": "2026-10-15T15:07:26Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r05", "dollars": 0.00042508, "at": "2026-10-15T15:07:26Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r06", "dollars": 0.00042508, "at": "2026-10-15T15:07:27Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r07", "dollars": 0.00042508, "at": "2026-10-15T15:07:27Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r08", "dollars": 0.00042508, "at": "2026-10-15T15:07:28Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r09", "dollars": 0.00042508, "at": "2026-10-15T15:07:29Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/k10/a3-hybrid/r10", "dollars": 0.00042508, "at": "2026-10-15T15:07:29Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a1-plain/r01", "dollars": 0.00085747, "at": "2026-10-15T15:07:30Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a1-plain/r02", "dollars": 0.0008584, "at": "2026-10-15T15:07:31Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a1-plain/r03", "dollars": 0.0008602, "at": "2026-10-15T15:07:32Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a1-plain/r04", "dollars": 0.00085856, "at": "2026-10-15T15:07:33Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a1-plain/r05", "dollars": 0.00085751, "at": "2026-10-15T15:07:34Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-agent-approval/r01", "dollars": 0.00085995, "at": "2026-10-15T15:07:35Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-agent-approval/r02", "dollars": 0.00086012, "at": "2026-10-15T15:07:37Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-agent-approval/r03", "dollars": 0.00085684, "at": "2026-10-15T15:07:38Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-agent-approval/r04", "dollars": 0.00085583, "at": "2026-10-15T15:07:39Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-agent-approval/r05", "dollars": 0.00085789, "at": "2026-10-15T15:07:40Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-code/r01", "dollars": 0.00082769, "at": "2026-10-15T15:07:41Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-code/r02", "dollars": 0.0008274, "at": "2026-10-15T15:07:42Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-code/r03", "dollars": 0.00082769, "at": "2026-10-15T15:07:43Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-code/r04", "dollars": 0.0008274, "at": "2026-10-15T15:07:44Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-code/r05", "dollars": 0.0008274, "at": "2026-10-15T15:07:45Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-router/r01", "dollars": 0.00085953, "at": "2026-10-15T15:07:46Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-router/r02", "dollars": 0.0008626, "at": "2026-10-15T15:07:47Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-router/r03", "dollars": 0.00086176, "at": "2026-10-15T15:07:49Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-router/r04", "dollars": 0.00086087, "at": "2026-10-15T15:07:50Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-router/r05", "dollars": 0.0008605, "at": "2026-10-15T15:07:51Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-workflow/r01", "dollars": 0.00085844, "at": "2026-10-15T15:07:52Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-workflow/r02", "dollars": 0.0008589, "at": "2026-10-15T15:07:53Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-workflow/r03", "dollars": 0.00085722, "at": "2026-10-15T15:07:54Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-workflow/r04", "dollars": 0.00085806, "at": "2026-10-15T15:07:55Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a2-workflow/r05", "dollars": 0.00085932, "at": "2026-10-15T15:07:56Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a3-hybrid/r01", "dollars": 0.00083731, "at": "2026-10-15T15:07:57Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a3-hybrid/r02", "dollars": 0.00083731, "at": "2026-10-15T15:07:58Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a3-hybrid/r03", "dollars": 0.00083786, "at": "2026-10-15T15:07:59Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a3-hybrid/r04", "dollars": 0.00083803, "at": "2026-10-15T15:08:00Z"}
+{"step": "p1-04", "batch": "judge", "folder": "reports/article-a3/custom/oot/a3-hybrid/r05", "dollars": 0.00083731, "at": "2026-10-15T15:08:00Z"}

@@ -1,0 +1,361 @@
+"""Checks on the reply the customer gets: two deterministic checks and an optional judge.
+
+The deterministic checks read the reply and the refund service's record of the case
+(``refund_operations`` in a result row). Each returns None when it does not apply.
+
+- ``no_false_hold``: the service issued every refund of the case, so the reply must not
+  say that a refund is still held, pending or waiting for approval. In Part 2 the agent
+  with approval middleware told the customer exactly that after the supervisor approved.
+- ``refund_id_in_reply``: the service issued a refund, so the reply must name its id.
+
+The judge is TypeSafe Jev, the router's model. For each reply it answers two typed
+questions: which of the five outcomes the reply is (``envs.custom.tasks.OUTCOMES``), and
+whether it says that a refund is still held. Its results are reported separately from the
+checks above. Labels written before the judge ran measure how often it agrees. Verdicts go
+to judge.jsonl in each Part 3 run folder; for the Part 2 runs, to
+reports/article-a3/judge/a2/<spec>/, so the Part 2 folders stay as they were.
+
+    python -m envs.custom.replies sample <run folders>            # 30 replies to label
+    python -m envs.custom.replies judge --step p1-04 --budget 0.50 <run folders>
+    python -m envs.custom.replies agreement                       # judge vs labels
+
+Judge v1 read "action" into replies that only mention a refund: design 2's "submitted …
+on hold" and refusals that say "already refunded" (4 of the first 30 labels). Judge v2
+defines those cases in the outcome criteria. Because v2 was written after seeing the first
+30 labels, its agreement is measured on a second sample of 30
+(labels/judge-check-2.jsonl), labelled before v2 ran.
+"""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import json
+import random
+import re
+from collections import defaultdict
+from collections.abc import Iterable
+from pathlib import Path
+from typing import Any
+
+from langchain_typesafe import Choice, Noul
+from langchain_typesafe.client import (
+    TypeSafeAPIConnectionError,
+    TypeSafeInternalServerError,
+    TypeSafeRateLimitError,
+)
+
+from envs.custom.batch import LEDGER, PRICE_TABLE, REPORTS, record_spend, spent, within_budget
+from envs.custom.tasks import OUTCOMES, TASKS_BY_ID
+from harness.accounting import UsageRecorder, load_price_table
+from harness.env import load_api_key
+from harness.spec import REPO_ROOT
+from harness.typesafe_guard import jev_classifier
+
+JUDGE_MODEL = "typesafe/jev-1.13-20260917"
+JUDGE_VERSION = "v2"
+# The decisions endpoint sometimes answers 529 Overloaded: retry those calls with a backoff.
+RETRY_ON = (TypeSafeInternalServerError, TypeSafeRateLimitError, TypeSafeAPIConnectionError)
+RETRIES = 5
+RETRY_DELAY_S = 2.0
+LABELS = REPORTS / "labels" / "judge-check.jsonl"
+LABELS_2 = REPORTS / "labels" / "judge-check-2.jsonl"
+
+# A reply that says the refund is still waiting: present or future tense only, so "which was
+# held … has now been issued" passes. Replies are matched with ’ written as '.
+HOLD = re.compile(
+    r"\b(?:(?:is|it's|it is|remains|stays|still|currently|being|will be)\s+(?:currently\s+)?"
+    r"(?:on hold|held|pending(?! on your)|awaiting|waiting for|under review)"
+    r"|pending (?:supervisor |a supervisor's |the supervisor's )?(?:approval|review)"
+    r"|until (?:it is |it's |a supervisor |the supervisor )?approv\w*"
+    r"|must approve (?:it|this|the refund)"
+    r"|before (?:the refund )?(?:is|it's|it is|can be|will be) issued"
+    r"|once (?:a |the )?supervisor approves"
+    r"|(?:sent|submitted|passed|forwarded|escalated)\b[^.]{0,40}\bfor "
+    r"(?:supervisor |a supervisor's |the supervisor's )?(?:approval|review)"
+    r"|will review"
+    r"|(?:has not|hasn't|has not yet|not yet) been (?:issued|refunded|processed)"
+    r"|not (?:been )?issued yet|won't be issued|will not be issued"
+    r"|nothing (?:has been|was) (?:refunded|issued)|no money has been)\b",
+    re.IGNORECASE,
+)
+
+OUTCOME_CRITERIA = {
+    "action": "The reply says that the assistant made, in this conversation, a change the "
+    "customer asked for: a refund, an address change or a setting change. A reply that also "
+    "declines part of the request is still an action. A refund the reply calls held, pending, "
+    "or waiting for approval or review is not an action, and neither is a refund made before "
+    "this conversation.",
+    "question": "The reply asks the customer for information that is needed before anything "
+    "can be done, and confirms no change.",
+    "refusal": "The reply says that the request cannot be done and gives a reason from the "
+    "shop's policy or the account, for example that the order was already refunded or is not "
+    "delivered, and confirms no change.",
+    "handoff": "The reply says that a person or another team will take the case over, for "
+    "example a supervisor who will review a refund, or tells the customer whom to contact, and "
+    "confirms no change.",
+    "answer": "The reply answers a question the customer asked with information, and confirms "
+    "no change.",
+}
+assert tuple(OUTCOME_CRITERIA) == OUTCOMES
+JUDGE_QUESTIONS = {
+    "outcome": Choice(
+        instructions="What does the support assistant's reply to the customer do?",
+        criteria=OUTCOME_CRITERIA,
+    ),
+    "says_held": Noul(
+        instructions="Does the reply tell the customer that a refund is still held, pending, "
+        "or waiting for a supervisor's approval or review?"
+    ),
+}
+
+
+# -- deterministic checks ----------------------------------------------------------------
+
+
+def _issued(ops: list[dict[str, Any]]) -> list[int]:
+    return [op["refund_id"] for op in ops if op["status"] == "issued" and op["refund_id"]]
+
+
+def no_false_hold(reply: str | None, ops: list[dict[str, Any]]) -> bool | None:
+    if not _issued(ops) or any(op["status"] != "issued" for op in ops):
+        return None
+    return not HOLD.search((reply or "").replace("\u2019", "'"))
+
+
+def refund_id_in_reply(reply: str | None, ops: list[dict[str, Any]]) -> bool | None:
+    ids = _issued(ops)
+    if not ids:
+        return None
+    text = reply or ""
+    # "refund 2", "refund #2", "refund ID: 2", "ID 2", "#2"; not "refund in 2-3 days".
+    return all(
+        re.search(
+            rf"\brefund\s*(?:(?:id|number|no\.?)\s*)?[:#]?\s*{i}\b(?!\s*[-\u2013]\s*\d)"
+            rf"|\bID\s*:?\s*{i}\b|#\s*{i}\b",
+            text,
+            re.I,
+        )
+        for i in ids
+    )
+
+
+def reply_checks(row: dict[str, Any]) -> dict[str, bool | None]:
+    reply, ops = row["final_answer"], row["refund_operations"]
+    return {
+        "no_false_hold": no_false_hold(reply, ops),
+        "refund_id_in_reply": refund_id_in_reply(reply, ops),
+    }
+
+
+# -- the judge ---------------------------------------------------------------------------
+
+
+def judge_state(message: str, reply: str) -> str:
+    return f"Customer message:\n{message}\n\nReply from the support assistant:\n{reply}"
+
+
+def judge_path(folder: Path) -> Path:
+    if folder.resolve().parent.parent.name == "article-a2":
+        return REPORTS / "judge" / "a2" / folder.name / "judge.jsonl"
+    return folder / "judge.jsonl"
+
+
+def current(path: Path) -> bool:
+    """Whether every verdict in a judge.jsonl comes from this judge version."""
+    return path.exists() and all(r.get("judge_version") == JUDGE_VERSION for r in read_jsonl(path))
+
+
+def read_jsonl(path: Path) -> list[dict[str, Any]]:
+    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+
+
+async def judge_folder(classifier, folder: Path, rec: UsageRecorder) -> list[dict[str, Any]]:
+    """Judge every reply of one run folder; write judge.jsonl next to results.jsonl."""
+    sem = asyncio.Semaphore(8)
+
+    async def one(row: dict[str, Any]) -> dict[str, Any]:
+        out: dict[str, Any] = {
+            "task_id": row["task_id"],
+            "model": JUDGE_MODEL,
+            "judge_version": JUDGE_VERSION,
+        }
+        if not row["final_answer"]:
+            return {**out, "outcome": "none"}
+        state = judge_state(TASKS_BY_ID[row["task_id"]].user_message, row["final_answer"])
+        for attempt in range(RETRIES):
+            try:
+                async with sem:
+                    resp = await classifier.ainvoke(
+                        {"state": state, "questions": JUDGE_QUESTIONS},
+                        config={"callbacks": [rec]},
+                    )
+                break
+            except RETRY_ON:
+                if attempt == RETRIES - 1:
+                    raise
+                await asyncio.sleep(RETRY_DELAY_S * 2**attempt)
+        c, n = resp.choices["outcome"], resp.nouls["says_held"]
+        return {
+            **out,
+            "model": resp.model,
+            "outcome": c.choice,
+            "outcome_confidence": c.confidence,
+            "outcome_probabilities": c.probabilities,
+            "says_held": n.noul,
+        }
+
+    rows = await asyncio.gather(*(one(r) for r in read_jsonl(folder / "results.jsonl")))
+    out = judge_path(folder)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with open(out, "w") as f:
+        for r in rows:
+            f.write(json.dumps(r) + "\n")
+    return rows
+
+
+async def judge_main(args) -> int:
+    labels = Path(args.labels)
+    if not labels.exists():
+        raise SystemExit(f"Label the sample first ({labels}); the judge runs after the labels.")
+    load_api_key()
+    version, prices = load_price_table(PRICE_TABLE)
+    classifier = jev_classifier(JUDGE_MODEL, "openrouter-decisions", 30.0)
+    most = 0.0
+    for folder in map(Path, args.folders):
+        if current(judge_path(folder)):
+            continue
+        used = spent(LEDGER, args.step)
+        if not within_budget(used, most, args.budget):
+            print(f"stop: {args.step} spent ${used:.5f}; cap ${args.budget:.2f}")
+            return 1
+        rec = UsageRecorder(prices)
+        rows = await judge_folder(classifier, folder, rec)
+        dollars = round(rec.totals().dollars, 8)
+        most = max(most, dollars)
+        record_spend(LEDGER, step=args.step, batch="judge", folder=str(folder), dollars=dollars)
+        print(f"{folder}: {len(rows)} replies, ${dollars:.5f} ({version})")
+    return 0
+
+
+# -- labels and agreement ----------------------------------------------------------------
+
+
+def _folder_id(folder: Path) -> str:
+    return str(folder.resolve().relative_to(REPO_ROOT))
+
+
+def sample(
+    folders: list[Path], per_kind: int = 6, seed: int = 3, exclude: Iterable[dict[str, Any]] = ()
+) -> list[dict[str, Any]]:
+    """Replies to label: ``per_kind`` per expected outcome, spread over the designs (1 to 6),
+    always with design 2's replies after an approved refund in both approval tasks. Replies
+    in ``exclude`` (an earlier sample) are never picked."""
+    rng = random.Random(seed)
+    taken = {(r["folder"], r["task_id"]) for r in exclude}
+    pool: dict[str, dict[str, list[dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
+    for folder in folders:
+        run = json.loads((folder / "run.json").read_text())
+        name = run["spec"]["name"]
+        if name == "a3-do-nothing":
+            continue
+        for row in read_jsonl(folder / "results.jsonl"):
+            if row["final_answer"] and (_folder_id(folder), row["task_id"]) not in taken:
+                task = TASKS_BY_ID[row["task_id"]]
+                pool[task.outcome][name].append({"folder": _folder_id(folder), **row})
+    picked: list[dict[str, Any]] = []
+    for task_id in ("refund-over-limit-approved", "refund-over-limit-approved-lost-response"):
+        rows = [r for r in pool["action"]["a2-agent-approval"] if r["task_id"] == task_id]
+        picked.append(rng.choice(rows))
+    for kind in OUTCOMES:
+        designs = sorted(pool[kind])
+        rng.shuffle(designs)
+        i = 0
+        while sum(TASKS_BY_ID[r["task_id"]].outcome == kind for r in picked) < per_kind:
+            rows = [r for r in pool[kind][designs[i % len(designs)]] if r not in picked]
+            if rows:
+                picked.append(rng.choice(rows))
+            i += 1
+    return [
+        {
+            "folder": r["folder"],
+            "task_id": r["task_id"],
+            "message": TASKS_BY_ID[r["task_id"]].user_message,
+            "reply": r["final_answer"],
+            "refund_operations": r["refund_operations"],
+            "label_outcome": None,
+            "label_says_held": None,
+            "labelled_by": None,
+        }
+        for r in picked
+    ]
+
+
+def agreement(labels: list[dict[str, Any]]) -> dict[str, Any]:
+    """Judge and deterministic check against the labels."""
+    judged = {}
+    for folder in {lab["folder"] for lab in labels}:
+        for row in read_jsonl(judge_path(REPO_ROOT / folder)):
+            judged[folder, row["task_id"]] = row
+    outcome, held, check, disagree = 0, 0, [0, 0], []
+    for lab in labels:
+        j = judged[lab["folder"], lab["task_id"]]
+        judge_held = j["says_held"] >= 0.5
+        outcome += j["outcome"] == lab["label_outcome"]
+        held += judge_held == lab["label_says_held"]
+        regex = no_false_hold(lab["reply"], lab["refund_operations"])
+        if regex is not None:  # the check applies: compare it with the label
+            check[0] += regex == (not lab["label_says_held"])
+            check[1] += 1
+        if j["outcome"] != lab["label_outcome"] or judge_held != lab["label_says_held"]:
+            disagree.append(
+                {
+                    "task_id": lab["task_id"],
+                    "folder": lab["folder"],
+                    "label": [lab["label_outcome"], lab["label_says_held"]],
+                    "judge": [j["outcome"], round(j["says_held"], 2)],
+                }
+            )
+    return {
+        "replies": len(labels),
+        "outcome_agree": outcome,
+        "says_held_agree": held,
+        "no_false_hold_agree": check[0],
+        "no_false_hold_applies": check[1],
+        "disagreements": disagree,
+    }
+
+
+def main() -> None:
+    p = argparse.ArgumentParser()
+    sub = p.add_subparsers(dest="cmd", required=True)
+    s = sub.add_parser("sample")
+    s.add_argument("folders", nargs="+")
+    s.add_argument("--out", default=str(LABELS))
+    s.add_argument("--exclude", default="", help="an earlier labels file to leave out")
+    s.add_argument("--seed", type=int, default=3)
+    j = sub.add_parser("judge")
+    j.add_argument("folders", nargs="+")
+    j.add_argument("--step", required=True)
+    j.add_argument("--budget", type=float, required=True)
+    j.add_argument("--labels", default=str(LABELS), help="must exist before the judge runs")
+    a = sub.add_parser("agreement")
+    a.add_argument("--labels", default=str(LABELS))
+    args = p.parse_args()
+    if args.cmd == "sample":
+        out = Path(args.out)
+        if out.exists():
+            raise SystemExit(f"{out} exists; labels are written once, before the judge runs")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        exclude = read_jsonl(Path(args.exclude)) if args.exclude else []
+        rows = sample([Path(f) for f in args.folders], seed=args.seed, exclude=exclude)
+        out.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
+        print(f"wrote {len(rows)} replies to {out}")
+    elif args.cmd == "judge":
+        raise SystemExit(asyncio.run(judge_main(args)))
+    else:
+        print(json.dumps(agreement(read_jsonl(Path(args.labels))), indent=2))
+
+
+if __name__ == "__main__":
+    main()
