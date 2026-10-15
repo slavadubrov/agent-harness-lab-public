@@ -2,7 +2,7 @@
 
 Repeated runs for Part 3 and the Agent or Workflow Atlas. Summary and limits: [`NOTES.md`](NOTES.md).
 
-Generated 2026-10-15T14:48:27Z by `scripts/report_a3.py`. Each run folder has `results.jsonl`, `traces.jsonl` and `run.json` (spec, spec hash, price table, versions, git commit). Dollars use the pinned price table `harness/prices/openrouter-2026-10-05.json`.
+Generated 2026-10-15T15:10:18Z by `scripts/report_a3.py`. Each run folder has `results.jsonl`, `traces.jsonl` and `run.json` (spec, spec hash, price table, versions, git commit). Dollars use the pinned price table `harness/prices/openrouter-2026-10-05.json`.
 
 ## k10: the 16 known tasks, up to 10 runs per design
 
@@ -11,12 +11,12 @@ A run is one pass of one design over all the tasks. Run 1 of every design ran be
 | design | runs | state check | pass^k | expected outcome (judge) | no false hold | refund id in reply | median $/run (min to max) | median cache-read share | mean model calls/task | median latency s/task | run errors |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 0 do nothing | 10 | 80/160 | 0.50 | 0/160 | n/a | n/a | $0.00000 ($0.00000 to $0.00000) | 0% | 0.00 | 0.0 | 0 |
-| 1 plain agent | 10 | 139/160 | 0.81 | 106/160 | 30/30 | 0/30 | $0.00394 ($0.00364 to $0.00527) | 63% | 3.62 | 7.4 | 0 |
-| 2 agent with approval middleware | 10 | 160/160 | 1.00 | 128/160 | 32/50 | 0/50 | $0.00408 ($0.00365 to $0.00470) | 59% | 3.56 | 7.0 | 0 |
-| 3 agent inside a workflow | 10 | 160/160 | 1.00 | 140/160 | 50/50 | 20/50 | $0.00403 ($0.00331 to $0.00474) | 63% | 3.62 | 6.8 | 0 |
-| 4 router and three agents | 10 | 140/160 | 0.88 | 104/160 | 30/30 | 0/30 | $0.00464 ($0.00410 to $0.00561) | 39% | 4.46 | 6.5 | 0 |
-| 5 workflow with no agent | 10 | 160/160 | 1.00 | 140/160 | 50/50 | 50/50 | $0.00078 ($0.00078 to $0.00078) | 0% | 1.00 | 1.2 | 0 |
-| 6 hybrid | 10 | 140/160 | 0.88 | 120/160 | 50/50 | 50/50 | $0.00095 ($0.00095 to $0.00095) | 0% | 1.88 | 1.3 | 0 |
+| 1 plain agent | 10 | 139/160 | 0.81 | 110/160 | 30/30 | 0/30 | $0.00394 ($0.00364 to $0.00527) | 63% | 3.62 | 7.4 | 0 |
+| 2 agent with approval middleware | 10 | 160/160 | 1.00 | 109/160 | 32/50 | 0/50 | $0.00408 ($0.00365 to $0.00470) | 59% | 3.56 | 7.0 | 0 |
+| 3 agent inside a workflow | 10 | 160/160 | 1.00 | 141/160 | 50/50 | 20/50 | $0.00403 ($0.00331 to $0.00474) | 63% | 3.62 | 6.8 | 0 |
+| 4 router and three agents | 10 | 140/160 | 0.88 | 111/160 | 30/30 | 0/30 | $0.00464 ($0.00410 to $0.00561) | 39% | 4.46 | 6.5 | 0 |
+| 5 workflow with no agent | 10 | 160/160 | 1.00 | 150/160 | 50/50 | 50/50 | $0.00078 ($0.00078 to $0.00078) | 0% | 1.00 | 1.2 | 0 |
+| 6 hybrid | 10 | 140/160 | 0.88 | 130/160 | 50/50 | 50/50 | $0.00095 ($0.00095 to $0.00095) | 0% | 1.88 | 1.3 | 0 |
 
 ### k10: cost of each run
 
@@ -58,10 +58,10 @@ Each cell: dollars for the run, and the cache-read share in brackets.
 | refund-outside-window | a2-code | 10/10 | yes | 10/10 | 1.0 (1) | 304 (304) | 1.2 (1.1) | $0.00005 ($0.00005) |
 | refund-outside-window | a3-hybrid | 10/10 | yes | 10/10 | 2.0 (2) | 720 (720) | 1.4 (1.4) | $0.00006 ($0.00006) |
 | refund-over-agent-limit | a3-do-nothing | 10/10 | yes | 0/10 | 0.0 (0) | 0 (0) | 0.0 (0.0) | $0.00000 ($0.00000) |
-| refund-over-agent-limit | a1-plain | 10/10 | yes | 7/10 | 4.2 (4) | 4,973 (4,799) | 8.7 (8.9) | $0.00022 ($0.00020) |
+| refund-over-agent-limit | a1-plain | 10/10 | yes | 10/10 | 4.2 (4) | 4,973 (4,799) | 8.7 (8.9) | $0.00022 ($0.00020) |
 | refund-over-agent-limit | a2-agent-approval | 10/10 | yes | 0/10 | 3.5 (3) | 3,646 (3,271) | 7.7 (7.3) | $0.00022 ($0.00016) |
-| refund-over-agent-limit | a2-workflow | 10/10 | yes | 9/10 | 4.2 (4) | 5,047 (4,800) | 8.8 (8.2) | $0.00023 ($0.00020) |
-| refund-over-agent-limit | a2-router | 10/10 | yes | 4/10 | 5.0 (5) | 4,366 (4,420) | 8.2 (7.9) | $0.00031 ($0.00029) |
+| refund-over-agent-limit | a2-workflow | 10/10 | yes | 10/10 | 4.2 (4) | 5,047 (4,800) | 8.8 (8.2) | $0.00023 ($0.00020) |
+| refund-over-agent-limit | a2-router | 10/10 | yes | 10/10 | 5.0 (5) | 4,366 (4,420) | 8.2 (7.9) | $0.00031 ($0.00029) |
 | refund-over-agent-limit | a2-code | 10/10 | yes | 10/10 | 1.0 (1) | 304 (304) | 1.2 (1.2) | $0.00005 ($0.00005) |
 | refund-over-agent-limit | a3-hybrid | 10/10 | yes | 10/10 | 2.0 (2) | 720 (720) | 1.5 (1.4) | $0.00006 ($0.00006) |
 | refund-not-delivered | a3-do-nothing | 10/10 | yes | 0/10 | 0.0 (0) | 0 (0) | 0.0 (0.0) | $0.00000 ($0.00000) |
@@ -72,12 +72,12 @@ Each cell: dollars for the run, and the cache-read share in brackets.
 | refund-not-delivered | a2-code | 10/10 | yes | 10/10 | 1.0 (1) | 299 (299) | 1.3 (1.2) | $0.00004 ($0.00004) |
 | refund-not-delivered | a3-hybrid | 10/10 | yes | 10/10 | 2.0 (2) | 707 (707) | 1.3 (1.2) | $0.00006 ($0.00006) |
 | refund-already-refunded | a3-do-nothing | 10/10 | yes | 0/10 | 0.0 (0) | 0 (0) | 0.0 (0.0) | $0.00000 ($0.00000) |
-| refund-already-refunded | a1-plain | 10/10 | yes | 9/10 | 3.1 (3) | 3,102 (3,148) | 6.3 (5.8) | $0.00027 ($0.00027) |
+| refund-already-refunded | a1-plain | 10/10 | yes | 10/10 | 3.1 (3) | 3,102 (3,148) | 6.3 (5.8) | $0.00027 ($0.00027) |
 | refund-already-refunded | a2-agent-approval | 10/10 | yes | 10/10 | 3.4 (3) | 3,466 (3,232) | 7.4 (6.1) | $0.00027 ($0.00027) |
 | refund-already-refunded | a2-workflow | 10/10 | yes | 10/10 | 3.2 (3) | 3,201 (3,205) | 7.1 (5.5) | $0.00022 ($0.00022) |
 | refund-already-refunded | a2-router | 10/10 | yes | 10/10 | 4.1 (4) | 2,671 (2,563) | 5.8 (5.3) | $0.00026 ($0.00020) |
-| refund-already-refunded | a2-code | 10/10 | yes | 0/10 | 1.0 (1) | 299 (299) | 1.4 (1.1) | $0.00004 ($0.00004) |
-| refund-already-refunded | a3-hybrid | 10/10 | yes | 0/10 | 2.0 (2) | 707 (707) | 1.3 (1.3) | $0.00006 ($0.00006) |
+| refund-already-refunded | a2-code | 10/10 | yes | 10/10 | 1.0 (1) | 299 (299) | 1.4 (1.1) | $0.00004 ($0.00004) |
+| refund-already-refunded | a3-hybrid | 10/10 | yes | 10/10 | 2.0 (2) | 707 (707) | 1.3 (1.3) | $0.00006 ($0.00006) |
 | refund-other-customers-order | a3-do-nothing | 10/10 | yes | 0/10 | 0.0 (0) | 0 (0) | 0.0 (0.0) | $0.00000 ($0.00000) |
 | refund-other-customers-order | a1-plain | 10/10 | yes | 0/10 | 3.5 (3) | 3,629 (3,256) | 7.0 (5.8) | $0.00026 ($0.00020) |
 | refund-other-customers-order | a2-agent-approval | 10/10 | yes | 0/10 | 3.2 (3) | 3,342 (3,256) | 7.7 (6.7) | $0.00022 ($0.00018) |
@@ -103,7 +103,7 @@ Each cell: dollars for the run, and the cache-read share in brackets.
 | address-suspended-account | a1-plain | 10/10 | yes | 1/10 | 2.7 (3) | 2,266 (2,451) | 5.3 (5.2) | $0.00027 ($0.00028) |
 | address-suspended-account | a2-agent-approval | 10/10 | yes | 0/10 | 2.2 (2) | 1,844 (1,698) | 4.9 (4.0) | $0.00021 ($0.00021) |
 | address-suspended-account | a2-workflow | 10/10 | yes | 0/10 | 2.5 (2) | 2,076 (1,651) | 4.8 (3.9) | $0.00025 ($0.00021) |
-| address-suspended-account | a2-router | 10/10 | yes | 0/10 | 3.5 (3) | 2,134 (1,854) | 4.2 (3.8) | $0.00023 ($0.00021) |
+| address-suspended-account | a2-router | 10/10 | yes | 1/10 | 3.5 (3) | 2,134 (1,854) | 4.2 (3.8) | $0.00023 ($0.00021) |
 | address-suspended-account | a2-code | 10/10 | yes | 0/10 | 1.0 (1) | 301 (301) | 1.3 (1.2) | $0.00006 ($0.00006) |
 | address-suspended-account | a3-hybrid | 10/10 | yes | 0/10 | 2.0 (2) | 712 (712) | 1.5 (1.4) | $0.00007 ($0.00007) |
 | preferences-two-changes | a3-do-nothing | 0/10 | no | 0/10 | 0.0 (0) | 0 (0) | 0.0 (0.0) | $0.00000 ($0.00000) |
@@ -122,7 +122,7 @@ Each cell: dollars for the run, and the cache-read share in brackets.
 | preferences-one-unsupported | a3-hybrid | 0/10 | no | 0/10 | 1.0 (1) | 403 (403) | 0.2 (0.2) | $0.00002 ($0.00002) |
 | refund-over-limit-approved | a3-do-nothing | 0/10 | no | 0/10 | 0.0 (0) | 0 (0) | 0.0 (0.0) | $0.00000 ($0.00000) |
 | refund-over-limit-approved | a1-plain | 0/10 | no | 0/10 | 4.1 (4) | 4,745 (4,799) | 8.6 (8.2) | $0.00022 ($0.00021) |
-| refund-over-limit-approved | a2-agent-approval | 10/10 | yes | 10/10 | 4.2 (4) | 4,895 (4,756) | 8.2 (7.8) | $0.00026 ($0.00020) |
+| refund-over-limit-approved | a2-agent-approval | 10/10 | yes | 0/10 | 4.2 (4) | 4,895 (4,756) | 8.2 (7.8) | $0.00026 ($0.00020) |
 | refund-over-limit-approved | a2-workflow | 10/10 | yes | 10/10 | 4.2 (4) | 4,977 (4,799) | 8.1 (7.5) | $0.00025 ($0.00020) |
 | refund-over-limit-approved | a2-router | 0/10 | no | 0/10 | 5.1 (5) | 4,453 (4,418) | 7.9 (7.5) | $0.00030 ($0.00028) |
 | refund-over-limit-approved | a2-code | 10/10 | yes | 10/10 | 1.0 (1) | 304 (304) | 1.3 (1.1) | $0.00005 ($0.00005) |
@@ -143,7 +143,7 @@ Each cell: dollars for the run, and the cache-read share in brackets.
 | refund-partial-lost-response | a3-hybrid | 10/10 | yes | 10/10 | 2.0 (2) | 729 (729) | 2.4 (2.3) | $0.00006 ($0.00006) |
 | refund-over-limit-approved-lost-response | a3-do-nothing | 0/10 | no | 0/10 | 0.0 (0) | 0 (0) | 0.0 (0.0) | $0.00000 ($0.00000) |
 | refund-over-limit-approved-lost-response | a1-plain | 0/10 | no | 0/10 | 4.1 (4) | 4,816 (4,802) | 9.4 (9.1) | $0.00024 ($0.00021) |
-| refund-over-limit-approved-lost-response | a2-agent-approval | 10/10 | yes | 9/10 | 4.2 (4) | 4,879 (4,762) | 7.7 (7.7) | $0.00022 ($0.00020) |
+| refund-over-limit-approved-lost-response | a2-agent-approval | 10/10 | yes | 0/10 | 4.2 (4) | 4,879 (4,762) | 7.7 (7.7) | $0.00022 ($0.00020) |
 | refund-over-limit-approved-lost-response | a2-workflow | 10/10 | yes | 10/10 | 4.2 (4) | 4,868 (4,802) | 9.7 (8.6) | $0.00025 ($0.00020) |
 | refund-over-limit-approved-lost-response | a2-router | 0/10 | no | 0/10 | 5.3 (5) | 4,373 (4,280) | 8.7 (7.6) | $0.00033 ($0.00029) |
 | refund-over-limit-approved-lost-response | a2-code | 10/10 | yes | 10/10 | 1.0 (1) | 304 (304) | 2.2 (2.3) | $0.00005 ($0.00005) |
@@ -155,11 +155,11 @@ A run is one pass of one design over all the tasks. Run 1 of every design ran be
 
 | design | runs | state check | pass^k | expected outcome (judge) | no false hold | refund id in reply | median $/run (min to max) | median cache-read share | mean model calls/task | median latency s/task | run errors |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 plain agent | 5 | 154/160 | 0.94 | 137/160 | 24/24 | 0/24 | $0.00931 ($0.00826 to $0.01103) | 42% | 3.24 | 5.9 | 0 |
-| 2 agent with approval middleware | 5 | 150/160 | 0.91 | 132/160 | 20/20 | 0/20 | $0.00885 ($0.00812 to $0.01018) | 43% | 3.20 | 5.4 | 0 |
-| 3 agent inside a workflow | 5 | 151/160 | 0.94 | 135/160 | 21/21 | 0/21 | $0.00875 ($0.00802 to $0.00899) | 42% | 3.18 | 5.6 | 0 |
-| 4 router and three agents | 5 | 140/160 | 0.88 | 125/160 | 20/20 | 0/20 | $0.00895 ($0.00852 to $0.00986) | 25% | 4.08 | 5.4 | 0 |
-| 5 workflow with no agent | 5 | 125/160 | 0.78 | 45/160 | 15/15 | 15/15 | $0.00151 ($0.00151 to $0.00151) | 0% | 1.00 | 1.1 | 0 |
+| 1 plain agent | 5 | 154/160 | 0.94 | 141/160 | 24/24 | 0/24 | $0.00931 ($0.00826 to $0.01103) | 42% | 3.24 | 5.9 | 0 |
+| 2 agent with approval middleware | 5 | 150/160 | 0.91 | 137/160 | 20/20 | 0/20 | $0.00885 ($0.00812 to $0.01018) | 43% | 3.20 | 5.4 | 0 |
+| 3 agent inside a workflow | 5 | 151/160 | 0.94 | 140/160 | 21/21 | 0/21 | $0.00875 ($0.00802 to $0.00899) | 42% | 3.18 | 5.6 | 0 |
+| 4 router and three agents | 5 | 140/160 | 0.88 | 130/160 | 20/20 | 0/20 | $0.00895 ($0.00852 to $0.00986) | 25% | 4.08 | 5.4 | 0 |
+| 5 workflow with no agent | 5 | 125/160 | 0.78 | 50/160 | 15/15 | 15/15 | $0.00151 ($0.00151 to $0.00151) | 0% | 1.00 | 1.1 | 0 |
 | 6 hybrid | 5 | 120/160 | 0.75 | 23/160 | n/a | n/a | $0.00160 ($0.00150 to $0.00167) | 0% | 1.64 | 1.2 | 0 |
 
 ### oot: cost of each run
@@ -182,25 +182,25 @@ Each cell: dollars for the run, and the cache-read share in brackets.
 | vague | 1 plain agent | 37/40 | 37/40 | $0.00028 |
 | vague | 2 agent with approval middleware | 36/40 | 36/40 | $0.00027 |
 | vague | 3 agent inside a workflow | 35/40 | 35/40 | $0.00026 |
-| vague | 4 router and three agents | 35/40 | 34/40 | $0.00032 |
+| vague | 4 router and three agents | 35/40 | 35/40 | $0.00032 |
 | vague | 5 workflow with no agent | 30/40 | 10/40 | $0.00004 |
 | vague | 6 hybrid | 30/40 | 15/40 | $0.00006 |
-| two_requests | 1 plain agent | 37/40 | 33/40 | $0.00031 |
-| two_requests | 2 agent with approval middleware | 34/40 | 29/40 | $0.00032 |
-| two_requests | 3 agent inside a workflow | 36/40 | 31/40 | $0.00028 |
-| two_requests | 4 router and three agents | 25/40 | 21/40 | $0.00031 |
-| two_requests | 5 workflow with no agent | 15/40 | 10/40 | $0.00005 |
+| two_requests | 1 plain agent | 37/40 | 37/40 | $0.00031 |
+| two_requests | 2 agent with approval middleware | 34/40 | 34/40 | $0.00032 |
+| two_requests | 3 agent inside a workflow | 36/40 | 36/40 | $0.00028 |
+| two_requests | 4 router and three agents | 25/40 | 24/40 | $0.00031 |
+| two_requests | 5 workflow with no agent | 15/40 | 15/40 | $0.00005 |
 | two_requests | 6 hybrid | 10/40 | 5/40 | $0.00003 |
 | policy | 1 plain agent | 40/40 | 35/40 | $0.00021 |
-| policy | 2 agent with approval middleware | 40/40 | 35/40 | $0.00020 |
-| policy | 3 agent inside a workflow | 40/40 | 34/40 | $0.00021 |
-| policy | 4 router and three agents | 40/40 | 35/40 | $0.00019 |
+| policy | 2 agent with approval middleware | 40/40 | 34/40 | $0.00020 |
+| policy | 3 agent inside a workflow | 40/40 | 33/40 | $0.00021 |
+| policy | 4 router and three agents | 40/40 | 34/40 | $0.00019 |
 | policy | 5 workflow with no agent | 40/40 | 0/40 | $0.00004 |
 | policy | 6 hybrid | 40/40 | 0/40 | $0.00006 |
 | unusual | 1 plain agent | 40/40 | 32/40 | $0.00037 |
-| unusual | 2 agent with approval middleware | 40/40 | 32/40 | $0.00033 |
-| unusual | 3 agent inside a workflow | 40/40 | 35/40 | $0.00033 |
-| unusual | 4 router and three agents | 40/40 | 35/40 | $0.00032 |
+| unusual | 2 agent with approval middleware | 40/40 | 33/40 | $0.00033 |
+| unusual | 3 agent inside a workflow | 40/40 | 36/40 | $0.00033 |
+| unusual | 4 router and three agents | 40/40 | 37/40 | $0.00032 |
 | unusual | 5 workflow with no agent | 40/40 | 25/40 | $0.00005 |
 | unusual | 6 hybrid | 40/40 | 3/40 | $0.00006 |
 
@@ -241,7 +241,7 @@ Each cell: dollars for the run, and the cache-read share in brackets.
 | vague-headphones-refunded | a1-plain | 5/5 | yes | 5/5 | 3.4 (3) | 3,362 (3,187) | 6.9 (5.7) | $0.00031 ($0.00034) |
 | vague-headphones-refunded | a2-agent-approval | 5/5 | yes | 5/5 | 3.4 (3) | 3,543 (3,187) | 5.2 (4.9) | $0.00025 ($0.00031) |
 | vague-headphones-refunded | a2-workflow | 5/5 | yes | 5/5 | 3.0 (3) | 3,078 (3,187) | 5.1 (4.7) | $0.00020 ($0.00015) |
-| vague-headphones-refunded | a2-router | 5/5 | yes | 4/5 | 4.4 (4) | 2,895 (2,538) | 5.1 (4.9) | $0.00030 ($0.00032) |
+| vague-headphones-refunded | a2-router | 5/5 | yes | 5/5 | 4.4 (4) | 2,895 (2,538) | 5.1 (4.9) | $0.00030 ($0.00032) |
 | vague-headphones-refunded | a2-code | 5/5 | yes | 0/5 | 1.0 (1) | 293 (293) | 1.1 (1.1) | $0.00004 ($0.00004) |
 | vague-headphones-refunded | a3-hybrid | 5/5 | yes | 0/5 | 2.0 (2) | 694 (694) | 1.4 (1.5) | $0.00006 ($0.00006) |
 | vague-tablecloth-late | a1-plain | 5/5 | yes | 5/5 | 3.0 (3) | 3,198 (3,020) | 5.2 (4.7) | $0.00028 ($0.00023) |
@@ -280,11 +280,11 @@ Each cell: dollars for the run, and the cache-read share in brackets.
 | two-refund-allowed-address-refused | a2-router | 5/5 | yes | 5/5 | 5.0 (5) | 4,382 (4,373) | 6.7 (6.4) | $0.00023 ($0.00020) |
 | two-refund-allowed-address-refused | a2-code | 5/5 | yes | 5/5 | 1.0 (1) | 317 (317) | 1.2 (1.1) | $0.00006 ($0.00006) |
 | two-refund-allowed-address-refused | a3-hybrid | 0/5 | no | 0/5 | 1.0 (1) | 430 (430) | 0.2 (0.2) | $0.00002 ($0.00002) |
-| two-both-refused | a1-plain | 5/5 | yes | 1/5 | 3.0 (3) | 3,236 (3,231) | 7.3 (6.2) | $0.00026 ($0.00021) |
-| two-both-refused | a2-agent-approval | 5/5 | yes | 0/5 | 3.0 (3) | 3,347 (3,426) | 6.4 (6.2) | $0.00020 ($0.00020) |
-| two-both-refused | a2-workflow | 5/5 | yes | 0/5 | 3.0 (3) | 3,245 (3,325) | 6.7 (7.5) | $0.00027 ($0.00022) |
-| two-both-refused | a2-router | 5/5 | yes | 1/5 | 4.0 (4) | 2,936 (3,017) | 6.5 (6.2) | $0.00037 ($0.00037) |
-| two-both-refused | a2-code | 5/5 | yes | 0/5 | 1.0 (1) | 300 (300) | 1.1 (1.0) | $0.00005 ($0.00005) |
+| two-both-refused | a1-plain | 5/5 | yes | 5/5 | 3.0 (3) | 3,236 (3,231) | 7.3 (6.2) | $0.00026 ($0.00021) |
+| two-both-refused | a2-agent-approval | 5/5 | yes | 5/5 | 3.0 (3) | 3,347 (3,426) | 6.4 (6.2) | $0.00020 ($0.00020) |
+| two-both-refused | a2-workflow | 5/5 | yes | 5/5 | 3.0 (3) | 3,245 (3,325) | 6.7 (7.5) | $0.00027 ($0.00022) |
+| two-both-refused | a2-router | 5/5 | yes | 4/5 | 4.0 (4) | 2,936 (3,017) | 6.5 (6.2) | $0.00037 ($0.00037) |
+| two-both-refused | a2-code | 5/5 | yes | 5/5 | 1.0 (1) | 300 (300) | 1.1 (1.0) | $0.00005 ($0.00005) |
 | two-both-refused | a3-hybrid | 5/5 | yes | 0/5 | 1.0 (1) | 409 (409) | 0.2 (0.2) | $0.00002 ($0.00002) |
 | two-address-allowed-refund-refused | a1-plain | 5/5 | yes | 5/5 | 4.0 (4) | 4,928 (4,851) | 8.3 (6.7) | $0.00029 ($0.00021) |
 | two-address-allowed-refund-refused | a2-agent-approval | 5/5 | yes | 5/5 | 4.4 (4) | 5,128 (4,851) | 7.4 (6.5) | $0.00039 ($0.00041) |
@@ -335,15 +335,15 @@ Each cell: dollars for the run, and the cache-read share in brackets.
 | policy-languages | a2-code | 5/5 | yes | 0/5 | 1.0 (1) | 282 (282) | 1.3 (1.2) | $0.00004 ($0.00004) |
 | policy-languages | a3-hybrid | 5/5 | yes | 0/5 | 2.0 (2) | 671 (671) | 1.3 (1.3) | $0.00006 ($0.00006) |
 | policy-suspended-refund | a1-plain | 5/5 | yes | 5/5 | 2.6 (3) | 2,063 (2,405) | 5.3 (4.4) | $0.00025 ($0.00029) |
-| policy-suspended-refund | a2-agent-approval | 5/5 | yes | 5/5 | 2.2 (2) | 1,721 (1,550) | 4.2 (4.6) | $0.00022 ($0.00020) |
-| policy-suspended-refund | a2-workflow | 5/5 | yes | 4/5 | 2.2 (2) | 1,750 (1,550) | 4.4 (4.5) | $0.00023 ($0.00023) |
+| policy-suspended-refund | a2-agent-approval | 5/5 | yes | 4/5 | 2.2 (2) | 1,721 (1,550) | 4.2 (4.6) | $0.00022 ($0.00020) |
+| policy-suspended-refund | a2-workflow | 5/5 | yes | 3/5 | 2.2 (2) | 1,750 (1,550) | 4.4 (4.5) | $0.00023 ($0.00023) |
 | policy-suspended-refund | a2-router | 5/5 | yes | 5/5 | 3.6 (4) | 2,036 (2,195) | 4.6 (4.6) | $0.00024 ($0.00024) |
 | policy-suspended-refund | a2-code | 5/5 | yes | 0/5 | 1.0 (1) | 289 (289) | 1.0 (1.0) | $0.00004 ($0.00004) |
 | policy-suspended-refund | a3-hybrid | 5/5 | yes | 0/5 | 1.0 (1) | 396 (396) | 0.2 (0.2) | $0.00002 ($0.00002) |
 | policy-partial-refund | a1-plain | 5/5 | yes | 5/5 | 2.8 (3) | 2,438 (2,596) | 5.1 (4.4) | $0.00025 ($0.00022) |
 | policy-partial-refund | a2-agent-approval | 5/5 | yes | 5/5 | 2.8 (3) | 2,438 (2,596) | 4.5 (4.5) | $0.00023 ($0.00021) |
 | policy-partial-refund | a2-workflow | 5/5 | yes | 5/5 | 3.0 (3) | 2,620 (2,596) | 5.3 (4.5) | $0.00025 ($0.00021) |
-| policy-partial-refund | a2-router | 5/5 | yes | 5/5 | 3.2 (3) | 1,919 (1,799) | 4.0 (4.0) | $0.00024 ($0.00023) |
+| policy-partial-refund | a2-router | 5/5 | yes | 4/5 | 3.2 (3) | 1,919 (1,799) | 4.0 (4.0) | $0.00024 ($0.00023) |
 | policy-partial-refund | a2-code | 5/5 | yes | 0/5 | 1.0 (1) | 302 (302) | 1.5 (1.1) | $0.00005 ($0.00005) |
 | policy-partial-refund | a3-hybrid | 5/5 | yes | 0/5 | 2.0 (2) | 711 (711) | 1.4 (1.3) | $0.00006 ($0.00006) |
 | policy-shipped-address | a1-plain | 5/5 | yes | 5/5 | 2.0 (2) | 1,459 (1,459) | 3.6 (2.7) | $0.00017 ($0.00017) |
@@ -377,9 +377,9 @@ Each cell: dollars for the run, and the cache-read share in brackets.
 | unusual-change-email | a2-code | 5/5 | yes | 0/5 | 1.0 (1) | 296 (296) | 1.1 (1.1) | $0.00005 ($0.00005) |
 | unusual-change-email | a3-hybrid | 5/5 | yes | 0/5 | 2.0 (2) | 699 (699) | 1.3 (1.3) | $0.00007 ($0.00007) |
 | unusual-complaint | a1-plain | 5/5 | yes | 3/5 | 2.6 (3) | 2,173 (2,476) | 4.3 (4.5) | $0.00026 ($0.00030) |
-| unusual-complaint | a2-agent-approval | 5/5 | yes | 1/5 | 2.4 (2) | 1,983 (1,718) | 4.1 (4.4) | $0.00023 ($0.00022) |
-| unusual-complaint | a2-workflow | 5/5 | yes | 2/5 | 2.0 (2) | 1,680 (1,718) | 3.6 (3.7) | $0.00017 ($0.00014) |
-| unusual-complaint | a2-router | 5/5 | yes | 2/5 | 4.0 (4) | 1,514 (1,514) | 7.5 (7.5) | $0.00027 ($0.00026) |
+| unusual-complaint | a2-agent-approval | 5/5 | yes | 2/5 | 2.4 (2) | 1,983 (1,718) | 4.1 (4.4) | $0.00023 ($0.00022) |
+| unusual-complaint | a2-workflow | 5/5 | yes | 3/5 | 2.0 (2) | 1,680 (1,718) | 3.6 (3.7) | $0.00017 ($0.00014) |
+| unusual-complaint | a2-router | 5/5 | yes | 4/5 | 4.0 (4) | 1,514 (1,514) | 7.5 (7.5) | $0.00027 ($0.00026) |
 | unusual-complaint | a2-code | 5/5 | yes | 5/5 | 1.0 (1) | 300 (300) | 1.2 (1.0) | $0.00005 ($0.00005) |
 | unusual-complaint | a3-hybrid | 5/5 | yes | 3/5 | 3.6 (4) | 2,580 (2,883) | 4.4 (4.6) | $0.00025 ($0.00031) |
 | unusual-invoice | a1-plain | 5/5 | yes | 4/5 | 4.0 (4) | 3,985 (3,595) | 8.6 (8.2) | $0.00047 ($0.00046) |
@@ -498,5 +498,5 @@ Part 2 saved one run of each router (`reports/article-a2/routing/`). These runs 
 | smoke | $0.00289 |
 | p1-03 | $0.18668 |
 | p1-06 | $0.20518 |
-| p1-04 | $0.04789 |
-| total | $0.44265 |
+| p1-04 | $0.10096 |
+| total | $0.49572 |

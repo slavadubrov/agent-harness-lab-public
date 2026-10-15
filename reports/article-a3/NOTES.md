@@ -40,20 +40,20 @@ Three kinds of check:
   counts only the replies it applies to.
 - **Expected outcome** (needs the judge): the state check passed and the judge read the
   task's expected outcome (action, question, refusal, handoff or answer) in the reply.
-  The judge is Jev, with two typed questions per reply. Reported apart from the
-  deterministic checks; see "The judge" for how often it agrees with labels.
+  The judge is Jev, with two typed questions per reply (judge v2). Reported apart from
+  the deterministic checks; see "The judge" for how often it agrees with labels.
 
 ## The 16 known tasks, 10 runs
 
 | design | state check | pass^k | expected outcome (judge) | no false hold | refund id in reply | $ per run, median (min to max) | cache-read share, median |
 |---|---|---|---|---|---|---|---|
 | 0 do nothing | 80/160 | 0.50 | 0/160 | | | $0 | |
-| 1 plain agent | 139/160 | 0.81 | 106/160 | 30/30 | 0/30 | $0.00394 ($0.00364 to $0.00527) | 63% |
-| 2 agent with approval middleware | 160/160 | 1.00 | 128/160 | 32/50 | 0/50 | $0.00408 ($0.00365 to $0.00470) | 59% |
-| 3 agent inside a workflow | 160/160 | 1.00 | 140/160 | 50/50 | 20/50 | $0.00403 ($0.00331 to $0.00474) | 63% |
-| 4 router and three agents | 140/160 | 0.88 | 104/160 | 30/30 | 0/30 | $0.00464 ($0.00410 to $0.00561) | 39% |
-| 5 workflow with no agent | 160/160 | 1.00 | 140/160 | 50/50 | 50/50 | $0.00078 (every run) | 0% |
-| 6 hybrid | 140/160 | 0.88 | 120/160 | 50/50 | 50/50 | $0.00095 (every run) | 0% |
+| 1 plain agent | 139/160 | 0.81 | 110/160 | 30/30 | 0/30 | $0.00394 ($0.00364 to $0.00527) | 63% |
+| 2 agent with approval middleware | 160/160 | 1.00 | 109/160 | 32/50 | 0/50 | $0.00408 ($0.00365 to $0.00470) | 59% |
+| 3 agent inside a workflow | 160/160 | 1.00 | 141/160 | 50/50 | 20/50 | $0.00403 ($0.00331 to $0.00474) | 63% |
+| 4 router and three agents | 140/160 | 0.88 | 111/160 | 30/30 | 0/30 | $0.00464 ($0.00410 to $0.00561) | 39% |
+| 5 workflow with no agent | 160/160 | 1.00 | 150/160 | 50/50 | 50/50 | $0.00078 (every run) | 0% |
+| 6 hybrid | 140/160 | 0.88 | 130/160 | 50/50 | 50/50 | $0.00095 (every run) | 0% |
 
 - **One run proves little about cost.** In Part 2, design 2 cost $0.00394 and design 1
   $0.00548. Over 10 runs, design 1 cost $0.00364 to $0.00527 and design 2 $0.00365 to
@@ -74,6 +74,11 @@ Three kinds of check:
   7 of them among the 12 original tasks, at no cost. The state check alone cannot tell it
   from an assistant that refuses for the right reason. With the judge, it meets no
   expected outcome: it sends no reply.
+- **The judge shows what the state check hides on two tasks.** On
+  `refund-other-customers-order`, designs 1 to 4 ask "could you check the order number?"
+  instead of refusing, in nearly every run. On `address-suspended-account`, every
+  design's reply both refuses and says whom to call, and the judge reads it as a handoff
+  (see "The judge").
 - **Design 6 fails the two preference tasks in every run.** The router reads "stop the
   marketing emails and switch to German" as `unclear`, and the dark-mode request as
   `account` with a confidence below 0.9, so both get a question.
@@ -82,11 +87,11 @@ Three kinds of check:
 
 | design | state check | expected outcome (judge) | vague | two requests | policy | unusual | $ per message, mean |
 |---|---|---|---|---|---|---|---|
-| 1 plain agent | 154/160 | 137/160 | 37/40 | 33/40 | 35/40 | 32/40 | $0.00029 |
-| 2 agent with approval middleware | 150/160 | 132/160 | 36/40 | 29/40 | 35/40 | 32/40 | $0.00028 |
-| 3 agent inside a workflow | 151/160 | 135/160 | 35/40 | 31/40 | 34/40 | 35/40 | $0.00027 |
-| 4 router and three agents | 140/160 | 125/160 | 34/40 | 21/40 | 35/40 | 35/40 | $0.00029 |
-| 5 workflow with no agent | 125/160 | 45/160 | 10/40 | 10/40 | 0/40 | 25/40 | $0.00005 |
+| 1 plain agent | 154/160 | 141/160 | 37/40 | 37/40 | 35/40 | 32/40 | $0.00029 |
+| 2 agent with approval middleware | 150/160 | 137/160 | 36/40 | 34/40 | 34/40 | 33/40 | $0.00028 |
+| 3 agent inside a workflow | 151/160 | 140/160 | 35/40 | 36/40 | 33/40 | 36/40 | $0.00027 |
+| 4 router and three agents | 140/160 | 130/160 | 35/40 | 24/40 | 34/40 | 37/40 | $0.00029 |
+| 5 workflow with no agent | 125/160 | 50/160 | 10/40 | 15/40 | 0/40 | 25/40 | $0.00005 |
 | 6 hybrid | 120/160 | 23/160 | 15/40 | 5/40 | 0/40 | 3/40 | $0.00005 |
 
 The category columns count the expected outcome (judge). The state check passes every
@@ -141,52 +146,62 @@ unneeded questions.
 
 ## The judge
 
-Jev read 1,989 replies (every non-empty reply of the Part 2 and Part 3 runs) for $0.048.
-Before it ran, Claude labelled 30 replies sampled by `replies sample`: 6 per expected
-outcome, from designs 1 to 6, including both of design 2's replies after an approved
-refund (`labels/judge-check.jsonl`, commit 6e9bc91). A person has not reviewed these
-labels yet; `python -m envs.custom.replies agreement` recomputes the counts after a review.
+The judge is Jev with two typed questions per reply: which of the five outcomes the reply
+is, and whether it says a refund is still held. It read the same 1,989 replies (every
+non-empty reply of the Part 2 and Part 3 runs) twice, as judge v1 and judge v2. The
+numbers in this file use v2.
 
-| question | agrees with the labels |
-|---|---|
-| outcome (action, question, refusal, handoff, answer) | 26 of 30 |
-| the reply says a refund is still held | 30 of 30 (2 labelled yes) |
-| the deterministic `no_false_hold` check | 5 of 5 replies it applies to |
+Before each version ran, Claude labelled a sample of 30 replies drawn by `replies sample`:
+6 per expected outcome from designs 1 to 6, each time with design 2's replies after an
+approved refund. Sample B leaves out the replies of sample A. A person has not reviewed
+the labels; `python -m envs.custom.replies agreement --labels <file>` recomputes the counts
+after a review.
 
-All 4 disagreements are the judge reading "action":
-
-| reply | label | judge |
+| | sample A (`labels/judge-check.jsonl`) | sample B (`labels/judge-check-2.jsonl`) |
 |---|---|---|
-| design 2, `refund-over-limit-approved`, k10 r04: "I submitted the $350 refund … it's on hold for supervisor approval" | handoff | action |
-| design 2, `refund-over-limit-approved-lost-response`, k10 r10: "… has been submitted … held for supervisor approval" | handoff | action |
-| design 6, `refund-already-refunded`, k10 r04: "Order O-5001 has already been refunded in full." | refusal | action |
-| design 4, `two-both-refused`, oot r04: emails already off; "already been fully refunded, so I can't issue another refund" | refusal | action |
+| labelled before | judge v1 ran (6e9bc91) | judge v2 ran (4571842) |
+| v1: outcome agrees | 26 of 30 | 27 of 30 |
+| v2: outcome agrees | 30 of 30, but v2 was written after seeing sample A | 30 of 30 |
+| v2: "says held" agrees | 30 of 30 (2 labelled yes) | 30 of 30 (3 labelled yes) |
+| `no_false_hold` agrees | 5 of 5 replies it applies to | 4 of 4 |
+
+All 7 of v1's disagreements were the same error: it read "action" into a reply that only
+mentions a refund. Two kinds of reply did it: design 2's "I submitted the $350 refund …
+it's on hold for supervisor approval" (4 of the 7), and refusals that say an order was
+already refunded in full (3). v2 adds this to the outcome definitions (2bdf920): a refund
+the reply calls held, pending or waiting for approval, or one made before this
+conversation, is not an action; a supervisor who will review a refund is a handoff; and
+"already refunded" is a reason for a refusal. Sample B is the measure of v2: it was
+labelled before v2 ran.
 
 Two checks over all 1,989 replies, without labels:
 
-- Where nothing was written and nothing should be, the judge still read "action" in 65 of
-  1,229 replies.
-- On the 381 replies after an issued refund, the judge's "says held" answer and the
-  deterministic `no_false_hold` check agree on 379.
+| | v1 | v2 |
+|---|---|---|
+| "action" where nothing was written and nothing should be (1,229 replies) | 65 | 1 |
+| "says held" agrees with `no_false_hold` (381 replies after an issued refund) | 379 | 378 |
+| design 2's 20 false "held" replies are read as | action | handoff |
 
 What this means for the numbers above:
 
-- The judge counts design 2's false replies as actions, so design 2's expected-outcome
-  count on the approved tasks is too high. Use `no_false_hold` for those replies.
-- Design 5's "Order O-5001 has already been refunded in full." was read as an action in
-  10 of 10 runs, so design 5 and design 6 lose 10 expected outcomes each on that task.
-- A refusal that also says whom to call ("… so I cannot change its address. Please call
-  support.") was read as a handoff. The outcome definitions overlap there.
-- The expected-outcome counts are the state check plus a model reading of the reply.
-  Treat a difference of a few messages between designs as noise.
+- With v2, design 2's false replies count as missed outcomes on the approved tasks, in
+  line with `no_false_hold`.
+- `address-suspended-account`: every design's reply refuses and says "please call
+  support", and v2 reads it as a handoff. The task's expected outcome is a refusal, so no
+  design meets it. Refusal and handoff overlap for this reply; the expected outcome stays
+  as committed.
+- `refund-other-customers-order`: designs 1 to 4 ask for the order number again instead
+  of refusing. The judge reads a question, as the labels do.
+- The expected-outcome counts are the state check plus a model reading of the reply,
+  checked on 60 labels. Treat a difference of a few messages between designs as noise.
 
 ## Limits
 
 - One chat model on one endpoint, one router model, one judge model.
 - Sample sizes: 10 runs of the 16 known tasks, 5 runs of the 32 new messages, 11 runs of
-  the 25 router requests, 30 labelled replies.
+  the 25 router requests, two samples of 30 labelled replies.
 - Claude wrote the 32 messages and their expected outcomes, and Slava approved them in
-  the plan before any run. The labels of the 30 judged replies were written by Claude,
+  the plan before any run. The labels of the 60 judged replies were written by Claude,
   not by a person.
 - The expected outcomes of the 16 known tasks were added in this part, after the Part 2
   results were known. They follow from the policy and the existing state checks.
@@ -220,9 +235,9 @@ What this means for the numbers above:
 |---|---|---|
 | p1-03: 60 runs on the known tasks, 20 router runs | $1.00 | $0.187 |
 | p1-06: 30 runs on the new set, 10 hybrid runs on the known tasks | $1.00 | $0.205 |
-| p1-04: the judge | $0.50 | $0.048 |
+| p1-04: the judge, v1 and v2 | $0.50 | $0.101 |
 | smoke tests before the batches | $0.50 | $0.003 |
-| total | $10.00 approved | $0.443 |
+| total | $10.00 approved | $0.496 |
 
 Each run's cost is in `spend.jsonl`. A pass counts the larger of OpenRouter's billed
 cost and the computed dollars.
@@ -236,7 +251,10 @@ cost and the computed dollars.
 | a641c4c | the k10 runs of designs 0 to 5 |
 | 2dd19a8 | the router repeats (run at a641c4c) |
 | d33319b | the hybrid's threshold; the new-set runs and design 6's known-task runs ran here |
-| 6e9bc91 | the 30 labels; the judge ran here |
+| 6e9bc91 | sample A labels; judge v1 ran here (verdicts in a7ffa6a) |
+| 2bdf920 | judge v2's outcome definitions |
+| 4571842 | sample B labels, before judge v2 ran |
+| 2aca9e1 | judge retries; judge v2 ran at 4571842 and here (verdicts in 545bf3d) |
 
 Every `run.json` records its commit (none dirty), spec hash, price table and package
 versions.
