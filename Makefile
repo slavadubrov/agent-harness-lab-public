@@ -108,6 +108,7 @@ a3-hybrid-k10: sync
 
 a3-judge: sync
 	$(UV) run python -m envs.custom.replies judge --step p1-04 --budget 0.50 \
+	  --labels reports/article-a3/labels/judge-check-2.jsonl \
 	  reports/article-a2/custom/* reports/article-a3/custom/*/*/r*
 
 report-a3:

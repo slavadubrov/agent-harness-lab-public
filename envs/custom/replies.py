@@ -18,6 +18,12 @@ reports/article-a3/judge/a2/<spec>/, so the Part 2 folders stay as they were.
     python -m envs.custom.replies sample <run folders>            # 30 replies to label
     python -m envs.custom.replies judge --step p1-04 --budget 0.50 <run folders>
     python -m envs.custom.replies agreement                       # judge vs labels
+
+Judge v1 read "action" into replies that only mention a refund: design 2's "submitted …
+on hold" and refusals that say "already refunded" (4 of the first 30 labels). Judge v2
+defines those cases in the outcome criteria. Because v2 was written after seeing the first
+30 labels, its agreement is measured on a second sample of 30
+(labels/judge-check-2.jsonl), labelled before v2 ran.
 """
 
 from __future__ import annotations
@@ -28,6 +34,7 @@ import json
 import random
 import re
 from collections import defaultdict
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
@@ -41,7 +48,9 @@ from harness.spec import REPO_ROOT
 from harness.typesafe_guard import jev_classifier
 
 JUDGE_MODEL = "typesafe/jev-1.13-20260917"
+JUDGE_VERSION = "v2"
 LABELS = REPORTS / "labels" / "judge-check.jsonl"
+LABELS_2 = REPORTS / "labels" / "judge-check-2.jsonl"
 
 HOLD = re.compile(
     r"\b(?:held|on hold|pending|awaiting|waiting for"
@@ -55,15 +64,19 @@ HOLD = re.compile(
 )
 
 OUTCOME_CRITERIA = {
-    "action": "The reply confirms that a change the customer asked for was made: a refund, "
-    "an address change or a setting change. A reply that also declines part of the request "
-    "is still an action.",
+    "action": "The reply says that the assistant made, in this conversation, a change the "
+    "customer asked for: a refund, an address change or a setting change. A reply that also "
+    "declines part of the request is still an action. A refund the reply calls held, pending, "
+    "or waiting for approval or review is not an action, and neither is a refund made before "
+    "this conversation.",
     "question": "The reply asks the customer for information that is needed before anything "
     "can be done, and confirms no change.",
     "refusal": "The reply says that the request cannot be done and gives a reason from the "
-    "shop's policy, and confirms no change.",
-    "handoff": "The reply says that a person or another team will take the case over, or "
-    "tells the customer whom to contact, and confirms no change.",
+    "shop's policy or the account, for example that the order was already refunded or is not "
+    "delivered, and confirms no change.",
+    "handoff": "The reply says that a person or another team will take the case over, for "
+    "example a supervisor who will review a refund, or tells the customer whom to contact, and "
+    "confirms no change.",
     "answer": "The reply answers a question the customer asked with information, and confirms "
     "no change.",
 }
@@ -134,7 +147,11 @@ async def judge_folder(classifier, folder: Path, rec: UsageRecorder) -> list[dic
     sem = asyncio.Semaphore(8)
 
     async def one(row: dict[str, Any]) -> dict[str, Any]:
-        out: dict[str, Any] = {"task_id": row["task_id"], "model": JUDGE_MODEL}
+        out: dict[str, Any] = {
+            "task_id": row["task_id"],
+            "model": JUDGE_MODEL,
+            "judge_version": JUDGE_VERSION,
+        }
         if not row["final_answer"]:
             return {**out, "outcome": "none"}
         state = judge_state(TASKS_BY_ID[row["task_id"]].user_message, row["final_answer"])
@@ -162,14 +179,15 @@ async def judge_folder(classifier, folder: Path, rec: UsageRecorder) -> list[dic
 
 
 async def judge_main(args) -> int:
-    if not LABELS.exists():
-        raise SystemExit(f"Label the sample first ({LABELS}); the judge runs after the labels.")
+    labels = Path(args.labels)
+    if not labels.exists():
+        raise SystemExit(f"Label the sample first ({labels}); the judge runs after the labels.")
     load_api_key()
     version, prices = load_price_table(PRICE_TABLE)
     classifier = jev_classifier(JUDGE_MODEL, "openrouter-decisions", 30.0)
     most = 0.0
     for folder in map(Path, args.folders):
-        if judge_path(folder).exists():
+        if judge_path(folder).exists() and not args.force:
             continue
         used = spent(LEDGER, args.step)
         if not within_budget(used, most, args.budget):
@@ -191,10 +209,14 @@ def _folder_id(folder: Path) -> str:
     return str(folder.resolve().relative_to(REPO_ROOT))
 
 
-def sample(folders: list[Path], per_kind: int = 6, seed: int = 3) -> list[dict[str, Any]]:
+def sample(
+    folders: list[Path], per_kind: int = 6, seed: int = 3, exclude: Iterable[dict[str, Any]] = ()
+) -> list[dict[str, Any]]:
     """Replies to label: ``per_kind`` per expected outcome, spread over the designs (1 to 6),
-    always with design 2's replies after an approved refund in both approval tasks."""
+    always with design 2's replies after an approved refund in both approval tasks. Replies
+    in ``exclude`` (an earlier sample) are never picked."""
     rng = random.Random(seed)
+    taken = {(r["folder"], r["task_id"]) for r in exclude}
     pool: dict[str, dict[str, list[dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
     for folder in folders:
         run = json.loads((folder / "run.json").read_text())
@@ -202,7 +224,7 @@ def sample(folders: list[Path], per_kind: int = 6, seed: int = 3) -> list[dict[s
         if name == "a3-do-nothing":
             continue
         for row in read_jsonl(folder / "results.jsonl"):
-            if row["final_answer"]:
+            if row["final_answer"] and (_folder_id(folder), row["task_id"]) not in taken:
                 task = TASKS_BY_ID[row["task_id"]]
                 pool[task.outcome][name].append({"folder": _folder_id(folder), **row})
     picked: list[dict[str, Any]] = []
@@ -273,23 +295,31 @@ def main() -> None:
     sub = p.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("sample")
     s.add_argument("folders", nargs="+")
+    s.add_argument("--out", default=str(LABELS))
+    s.add_argument("--exclude", default="", help="an earlier labels file to leave out")
+    s.add_argument("--seed", type=int, default=3)
     j = sub.add_parser("judge")
     j.add_argument("folders", nargs="+")
     j.add_argument("--step", required=True)
     j.add_argument("--budget", type=float, required=True)
-    sub.add_parser("agreement")
+    j.add_argument("--labels", default=str(LABELS), help="must exist before the judge runs")
+    j.add_argument("--force", action="store_true", help="replace existing verdicts")
+    a = sub.add_parser("agreement")
+    a.add_argument("--labels", default=str(LABELS))
     args = p.parse_args()
     if args.cmd == "sample":
-        if LABELS.exists():
-            raise SystemExit(f"{LABELS} exists; labels are written once, before the judge runs")
-        LABELS.parent.mkdir(parents=True, exist_ok=True)
-        rows = sample([Path(f) for f in args.folders])
-        LABELS.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
-        print(f"wrote {len(rows)} replies to {LABELS}")
+        out = Path(args.out)
+        if out.exists():
+            raise SystemExit(f"{out} exists; labels are written once, before the judge runs")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        exclude = read_jsonl(Path(args.exclude)) if args.exclude else []
+        rows = sample([Path(f) for f in args.folders], seed=args.seed, exclude=exclude)
+        out.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
+        print(f"wrote {len(rows)} replies to {out}")
     elif args.cmd == "judge":
         raise SystemExit(asyncio.run(judge_main(args)))
     else:
-        print(json.dumps(agreement(read_jsonl(LABELS)), indent=2))
+        print(json.dumps(agreement(read_jsonl(Path(args.labels))), indent=2))
 
 
 if __name__ == "__main__":

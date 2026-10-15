@@ -62,3 +62,24 @@ def test_judge_verdicts_for_part_2_runs_stay_out_of_the_part_2_folders():
     assert judge_path(a2) == REPORTS / "judge" / "a2" / "a1-plain" / "judge.jsonl"
     a3 = REPORTS / "custom" / "k10" / "a1-plain" / "r01"
     assert judge_path(a3) == a3 / "judge.jsonl"
+
+
+def test_a_second_sample_leaves_out_the_replies_already_labelled():
+    from collections import Counter
+
+    from envs.custom.batch import REPORTS
+    from envs.custom.replies import LABELS, read_jsonl, sample
+    from envs.custom.tasks import TASKS_BY_ID
+
+    folders = sorted(REPORTS.glob("custom/*/*/r*"))
+    first = read_jsonl(LABELS)
+    second = sample(folders, seed=4, exclude=first)
+    key = lambda r: (r["folder"], r["task_id"])  # noqa: E731
+    assert not {key(r) for r in second} & {key(r) for r in first}
+    assert Counter(TASKS_BY_ID[r["task_id"]].outcome for r in second) == {
+        "action": 6,
+        "question": 6,
+        "refusal": 6,
+        "handoff": 6,
+        "answer": 6,
+    }
