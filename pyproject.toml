@@ -40,10 +40,4 @@ select = ["E", "F", "I", "B", "UP"]
 ignore = ["E501"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["atlas", "harness", "envs", "evaluator"]
-
-[tool.pyright]
-# atlas/ imports the blog's explainer_contract: run pyright with it, see `make atlas-check`.
-include = ["atlas"]
-typeCheckingMode = "strict"
-pythonVersion = "3.12"
+known-first-party = ["harness", "envs", "evaluator"]

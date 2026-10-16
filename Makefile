@@ -1,4 +1,4 @@
-# agent-harness-lab — Part 1 (a1-*), Part 2 (a2-*) and Part 3 (a3-*) targets. Needs uv and OPENROUTER_API_KEY (or OPEN_ROUTER_API_KEY) in .env or the environment.
+# agent-harness-lab — Part 1 (a1-*) and Part 2 (a2-*) targets. Needs uv and OPENROUTER_API_KEY (or OPEN_ROUTER_API_KEY) in .env or the environment.
 SHELL := /bin/bash
 UV ?= uv
 SPEC ?= harness/spec/base.yaml
@@ -16,16 +16,8 @@ TAU3_CONCURRENCY ?= 4
 
 CUSTOM_SPECS := harness/spec/base.yaml harness/spec/plain.yaml harness/spec/glm-5.3-flash.yaml harness/spec/mimo-v2.6-flash.yaml
 A2_SPECS := harness/spec/plain.yaml harness/spec/approval-agent.yaml harness/spec/workflows/refund-approval.yaml harness/spec/workflows/support-router.yaml harness/spec/workflows/support-code.yaml
-# Part 3: design 0 (do nothing), then designs 1-5. Dollars use the pinned Part 2 prices.
-A3_SPECS := harness/spec/workflows/do-nothing.yaml $(A2_SPECS)
-ROUTERS := harness/spec/workflows/support-router.yaml harness/spec/workflows/support-router-clarify.yaml
-HYBRID := harness/spec/workflows/hybrid.yaml
-PRICES := harness/prices/openrouter-2026-10-05.json
-# The Atlas export imports the blog's explainer_contract package (not public).
-CONTRACT ?= ../notes/packages/explainer_contract
-WITH_CONTRACT = $(UV) run --with-editable $(CONTRACT)
 
-.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 a3-k10 a3-routes a3-threshold a3-oot a3-hybrid-k10 a3-judge report-a3 atlas-export atlas-check
+.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2
 
 help:
 	@echo "make a1-custom          run the custom environment dev set with SPEC (default base.yaml)"
@@ -37,15 +29,6 @@ help:
 	@echo "make a2-matrix          run the Part 2 task set with plain, approval agent, workflow, router"
 	@echo "make a2-routes          score both routers' classifiers on 25 labelled requests"
 	@echo "make report-a2          rebuild reports/article-a2/README.md"
-	@echo "make a3-k10             Part 3: designs 0-5 on the 16 tasks, 10 runs, cap \$$1"
-	@echo "make a3-routes          Part 3: both routers on the 25 requests, 10 more runs"
-	@echo "make a3-threshold       the hybrid's threshold from the a2-router-clarify runs"
-	@echo "make a3-oot             Part 3: designs 1-6 on the 32 new messages, 5 runs, cap \$$1"
-	@echo "make a3-hybrid-k10      Part 3: design 6 on the 16 tasks, 10 runs (same cap)"
-	@echo "make a3-judge           judge every saved reply, cap \$$0.50"
-	@echo "make report-a3          rebuild reports/article-a3/README.md"
-	@echo "make atlas-export       write atlas/data and atlas/schema (needs CONTRACT)"
-	@echo "make atlas-check        pyright --strict on atlas/ and the export tests"
 	@echo "make test | fmt | lint"
 
 sync:
@@ -86,34 +69,6 @@ a2-routes: sync
 report-a2:
 	$(UV) run python scripts/report_a2.py
 
-a3-k10: sync
-	$(UV) run python -m envs.custom.batch --batch k10 --suite a2 --runs 10 \
-	  --step p1-03 --budget 1.00 --specs $(A3_SPECS)
-
-a3-routes: sync
-	$(UV) run python -m envs.custom.route_eval --runs 10 --out reports/article-a3/routing \
-	  --step p1-03 --budget 1.00 --price-table $(PRICES) --spec $(ROUTERS)
-
-a3-threshold:
-	$(UV) run python -m envs.custom.route_eval --choose-threshold \
-	  reports/article-a2/routing/a2-router-clarify reports/article-a3/routing/a2-router-clarify/r*
-
-a3-oot: sync
-	$(UV) run python -m envs.custom.batch --batch oot --suite oot --runs 5 \
-	  --step p1-06 --budget 1.00 --specs $(A2_SPECS) $(HYBRID)
-
-a3-hybrid-k10: sync
-	$(UV) run python -m envs.custom.batch --batch k10 --suite a2 --runs 10 \
-	  --step p1-06 --budget 1.00 --specs $(HYBRID)
-
-a3-judge: sync
-	$(UV) run python -m envs.custom.replies judge --step p1-04 --budget 0.50 \
-	  --labels reports/article-a3/labels/judge-check-2.jsonl \
-	  reports/article-a2/custom/* reports/article-a3/custom/*/*/r*
-
-report-a3:
-	$(UV) run python scripts/report_a3.py
-
 # Sparse checkout of the tau2 data the retail runs need, at the pinned commit.
 tau3-data:
 	@if [ "$$(git -C $(TAU2_DIR) rev-parse HEAD 2>/dev/null)" != "$(TAU2_COMMIT)" ]; then \
@@ -149,10 +104,3 @@ a1-tau3-matrix:
 
 report:
 	$(UV) run python scripts/report_a1.py
-
-atlas-export: sync
-	$(WITH_CONTRACT) python -m atlas.export
-
-atlas-check: sync
-	$(WITH_CONTRACT) --with pyright==1.1.414 pyright
-	$(WITH_CONTRACT) python -m pytest -q tests/test_export.py
