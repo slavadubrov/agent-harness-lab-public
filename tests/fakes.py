@@ -173,16 +173,3 @@ class NativeScriptModel(BaseChatModel):
 
     def bind_tools(self, tools, **kwargs):
         return self
-
-
-# -- stand-ins for the hybrid's model nodes ------------------------------------------------
-
-
-def fixed_route(state, ctx, route: str, confidence: float) -> dict[str, Any]:
-    """The router's answer, fixed (replaces the Jev classifier node)."""
-    return {"route": route, "route_confidence": confidence}
-
-
-def fixed_read(state, ctx, **fields: Any) -> dict[str, Any]:
-    """The message's fields, fixed (replaces the structured model call)."""
-    return fields

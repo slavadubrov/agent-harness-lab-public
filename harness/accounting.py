@@ -6,13 +6,6 @@ never from an estimate. Dollars are tokens x the per-token price of the pinned
 OpenRouter endpoint. OpenRouter's own billed cost per chat call
 (``response_metadata["cost"]``) is recorded next to it as a cross-check.
 
-A run can name a pinned price table (``harness/prices/*.json``) instead of the live
-price, so its dollars stay comparable with the runs that recorded that table.
-
-Every call records when it started (seconds after the recorder was created). For a
-workflow, the recorder also keeps each attempt of the named nodes, so a node that a
-retry policy ran twice appears twice.
-
 This recorder is a LangChain callback, so it runs inside the harness process. That is
 fine for these baselines; a later part of the series moves it to a separate evaluator.
 """
@@ -23,18 +16,12 @@ import json
 import threading
 import time
 import urllib.request
-from collections.abc import Iterable
 from dataclasses import asdict, dataclass
-from pathlib import Path
 from typing import Any
 from uuid import UUID
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.outputs import LLMResult
-
-from harness.spec import REPO_ROOT
-
-TOOL_OUTPUT_CHARS = 300
 
 
 @dataclass(frozen=True)
@@ -72,14 +59,6 @@ def fetch_price(model_id: str, provider_tag: str) -> Price:
     raise LookupError(f"No endpoint tagged {provider_tag!r} for {model_id}")
 
 
-def load_price_table(path: str | Path) -> tuple[str, list[Price]]:
-    """A pinned price table: its version and its prices. A relative path is read from the
-    repo root."""
-    path = Path(path)
-    data = json.loads((path if path.is_absolute() else REPO_ROOT / path).read_text())
-    return data["version"], [Price(**p) for p in data["prices_usd_per_token"]]
-
-
 def dollars(usage: dict[str, Any], price: Price) -> float:
     inp = usage.get("input_tokens", 0) or 0
     out = usage.get("output_tokens", 0) or 0
@@ -111,7 +90,6 @@ class ModelCall:
     error: str | None = None
     # The request raised (for example HTTP 429): no response, no tokens.
     failed: bool = False
-    t_start: float = 0.0
 
 
 def error_text(error: BaseException) -> str:
@@ -126,19 +104,6 @@ class ToolCall:
     name: str
     latency_s: float
     error: str | None = None
-    t_start: float = 0.0
-    args: dict[str, Any] | None = None
-    output: str | None = None  # the first TOOL_OUTPUT_CHARS characters
-
-
-@dataclass
-class NodeCall:
-    """One attempt of one workflow node."""
-
-    name: str
-    t_start: float
-    latency_s: float
-    error: str | None = None
 
 
 @dataclass
@@ -146,7 +111,6 @@ class Totals:
     input_tokens: int = 0
     output_tokens: int = 0
     reasoning_tokens: int = 0
-    cache_read_tokens: int = 0
     dollars: float = 0.0
     openrouter_cost: float = 0.0
     model_calls: int = 0
@@ -159,9 +123,7 @@ class Totals:
     unpriced_calls: int = 0
 
 
-def _failed_call(
-    kind: str, node: str | None, latency: float, t_start: float, error: BaseException
-) -> ModelCall:
+def _failed_call(kind: str, node: str | None, latency: float, error: BaseException) -> ModelCall:
     return ModelCall(
         kind=kind,
         node=node,
@@ -176,28 +138,21 @@ def _failed_call(
         response_id=None,
         error=error_text(error),
         failed=True,
-        t_start=t_start,
     )
 
 
 class UsageRecorder(BaseCallbackHandler):
-    """Record every chat-model call, Jev classifier call and tool call, and each attempt of
-    the workflow nodes named in ``nodes``."""
+    """Record every chat-model call, Jev classifier call and tool call."""
 
     raise_error = True
     run_inline = True
 
-    def __init__(self, prices: list[Price], nodes: Iterable[str] = ()) -> None:
+    def __init__(self, prices: list[Price]) -> None:
         self.prices = prices
-        self.nodes = set(nodes)
         self.model_calls: list[ModelCall] = []
         self.tool_calls: list[ToolCall] = []
-        self.node_calls: list[NodeCall] = []
         self._lock = threading.Lock()
-        self.t0 = time.perf_counter()
         self._starts: dict[UUID, tuple[float, str | None]] = {}
-        self._tool_args: dict[UUID, dict[str, Any] | None] = {}
-        self._node_runs: set[UUID] = set()
 
     def _price(self, model: str | None) -> Price | None:
         if not model:
@@ -212,11 +167,10 @@ class UsageRecorder(BaseCallbackHandler):
         with self._lock:
             self._starts[run_id] = (time.perf_counter(), node)
 
-    def _stop(self, run_id: UUID) -> tuple[float, str | None, float]:
-        """Latency, node name, and the start as seconds after the recorder was created."""
+    def _stop(self, run_id: UUID) -> tuple[float, str | None]:
         with self._lock:
             t0, node = self._starts.pop(run_id, (time.perf_counter(), None))
-        return time.perf_counter() - t0, node, t0 - self.t0
+        return time.perf_counter() - t0, node
 
     # -- chat models -------------------------------------------------------------------
 
@@ -224,7 +178,7 @@ class UsageRecorder(BaseCallbackHandler):
         self._start(run_id, (metadata or {}).get("langgraph_node"))
 
     def on_llm_end(self, response: LLMResult, *, run_id, **kw):
-        latency, node, t_start = self._stop(run_id)
+        latency, node = self._stop(run_id)
         gen = (
             response.generations[0][0] if response.generations and response.generations[0] else None
         )
@@ -251,43 +205,27 @@ class UsageRecorder(BaseCallbackHandler):
             latency_s=latency,
             response_id=meta.get("id"),
             error="; ".join(errors) or None,
-            t_start=t_start,
         )
         with self._lock:
             self.model_calls.append(call)
 
     def on_llm_error(self, error, *, run_id, **kw):
-        latency, node, t_start = self._stop(run_id)
+        latency, node = self._stop(run_id)
         with self._lock:
-            self.model_calls.append(_failed_call("chat", node, latency, t_start, error))
+            self.model_calls.append(_failed_call("chat", node, latency, error))
 
     # -- Jev classifier (a Runnable traced with run_type="llm", so it reports as a chain) --
-    # -- and workflow nodes (a node's own run is named after the node) ---------------------
 
     def on_chain_start(self, serialized, inputs, *, run_id, metadata=None, **kw):
-        meta = metadata or {}
-        name = kw.get("name")
-        if name in self.nodes and meta.get("langgraph_node") == name:
-            self._node_runs.add(run_id)
-            self._start(run_id, name)
-        elif meta.get("ls_provider") == "typesafe":
-            self._start(run_id, meta.get("langgraph_node"))
-
-    def _node_done(self, run_id: UUID, error: BaseException | None) -> None:
-        self._node_runs.discard(run_id)
-        latency, name, t_start = self._stop(run_id)
-        call = NodeCall(name or "?", t_start, latency, error_text(error) if error else None)
-        with self._lock:
-            self.node_calls.append(call)
+        if (metadata or {}).get("ls_provider") == "typesafe":
+            self._start(run_id, (metadata or {}).get("langgraph_node"))
 
     def on_chain_end(self, outputs, *, run_id, **kw):
-        if run_id in self._node_runs:
-            return self._node_done(run_id, None)
         if run_id not in self._starts:
             return
         from langchain_typesafe import ClassifierResponse
 
-        latency, node, t_start = self._stop(run_id)
+        latency, node = self._stop(run_id)
         if not isinstance(outputs, ClassifierResponse):
             return
         usage = {
@@ -308,43 +246,31 @@ class UsageRecorder(BaseCallbackHandler):
             latency_s=latency,
             response_id=outputs.request_id,
             error=None if price else f"no price for model {outputs.model!r}",
-            t_start=t_start,
         )
         with self._lock:
             self.model_calls.append(call)
 
     def on_chain_error(self, error, *, run_id, **kw):
-        if run_id in self._node_runs:
-            return self._node_done(run_id, error)
         if run_id not in self._starts:
             return
-        latency, node, t_start = self._stop(run_id)
+        latency, node = self._stop(run_id)
         with self._lock:
-            self.model_calls.append(_failed_call("classifier", node, latency, t_start, error))
+            self.model_calls.append(_failed_call("classifier", node, latency, error))
 
     # -- tools -------------------------------------------------------------------------
 
-    def on_tool_start(self, serialized, input_str, *, run_id, inputs=None, **kw):
+    def on_tool_start(self, serialized, input_str, *, run_id, **kw):
         self._start(run_id, (serialized or {}).get("name"))
-        with self._lock:
-            self._tool_args[run_id] = inputs
-
-    def _tool_done(self, run_id: UUID, output: Any, error: BaseException | None) -> None:
-        latency, name, t_start = self._stop(run_id)
-        with self._lock:
-            args = self._tool_args.pop(run_id, None)
-        text = None if error else str(getattr(output, "content", output))[:TOOL_OUTPUT_CHARS]
-        call = ToolCall(
-            name or "?", latency, error_text(error) if error else None, t_start, args, text
-        )
-        with self._lock:
-            self.tool_calls.append(call)
 
     def on_tool_end(self, output, *, run_id, **kw):
-        self._tool_done(run_id, output, None)
+        latency, name = self._stop(run_id)
+        with self._lock:
+            self.tool_calls.append(ToolCall(name or "?", latency))
 
     def on_tool_error(self, error, *, run_id, **kw):
-        self._tool_done(run_id, None, error)
+        latency, name = self._stop(run_id)
+        with self._lock:
+            self.tool_calls.append(ToolCall(name or "?", latency, error_text(error)))
 
     # -- aggregation -------------------------------------------------------------------
 
@@ -362,7 +288,6 @@ class UsageRecorder(BaseCallbackHandler):
                 t.failed_calls += 1
                 continue
             t.input_tokens += c.input_tokens
-            t.cache_read_tokens += c.cache_read_tokens
             t.output_tokens += c.output_tokens
             t.reasoning_tokens += c.reasoning_tokens
             t.dollars += c.dollars or 0.0
@@ -384,5 +309,4 @@ class UsageRecorder(BaseCallbackHandler):
             return {
                 "model_calls": [asdict(c) for c in self.model_calls[since[0] :]],
                 "tool_calls": [asdict(c) for c in self.tool_calls[since[1] :]],
-                "node_calls": [asdict(c) for c in self.node_calls],
             }
