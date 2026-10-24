@@ -17,6 +17,7 @@ OPENROUTER_API_KEY and stops at ``--budget`` dollars, counting every call.
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import os
 import re
@@ -561,7 +562,8 @@ def cmd_campaign(args: argparse.Namespace) -> None:
         folder = out / name
         folder.mkdir(parents=True, exist_ok=True)
         rows = []
-        with (folder / "episodes.jsonl").open("a") as episodes:
+        # Full captures repeat the system prompt in every request: gzip keeps them small.
+        with gzip.open(folder / "episodes.jsonl.gz", "at") as episodes:
             for trial in range(1, args.trials + 1):
                 for task in tasks:
                     if args.live and budget.spent() >= args.budget:

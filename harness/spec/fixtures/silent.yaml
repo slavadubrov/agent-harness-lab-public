@@ -1,0 +1,4 @@
+# Fixture for the evaluator's tests, not a harness: plain.yaml with a model that never replies.
+extends: ../plain.yaml
+name: fixture-silent
+model: {provider: import, ref: "targets.fixtures:SilentModel"}

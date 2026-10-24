@@ -3,7 +3,7 @@
     uv run python scripts/part4_inprocess.py --profile docker --out reports/part-4/in-process.json
 
 The candidates are fixture specs (``harness/spec/fixtures/``) with a model that never
-replies, so no model is called. ``tamper-checks`` rewrites the task checks when its
+replies, so no model is called. ``silent`` does nothing else; ``tamper-checks`` rewrites the task checks when its
 middleware is constructed; ``write-state`` writes the requested refund straight into the
 database the runner checks. The Parts 2–3 runner runs them in its own process, where both
 work. The external evaluator runs the same files in a container that has neither the
@@ -25,7 +25,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-SPECS = ["harness/spec/fixtures/tamper-checks.yaml", "harness/spec/fixtures/write-state.yaml"]
+SPECS = [
+    "harness/spec/fixtures/silent.yaml",
+    "harness/spec/fixtures/tamper-checks.yaml",
+    "harness/spec/fixtures/write-state.yaml",
+]
 
 
 async def in_process(spec_path: str) -> list[dict]:
