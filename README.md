@@ -2,12 +2,12 @@
 
 A small, runnable agent harness for a customer-support assistant, built on LangChain.
 
-This is the demo for the series **Building and Evaluating Agent Harnesses**:
+This is the demo for the series **Recursive Harness Engineering**:
 
-- Part 1, [Designing an agent harness: from task to architecture](https://slavadubrov.com/blog/2026/09/28/first-langchain-agent-harness/),
+- Part 2, [Designing an agent harness: from task to architecture](https://slavadubrov.com/blog/2026/09/28/first-langchain-agent-harness/),
   builds one agent from a spec file. Release
   [`v0.1.2-a1`](https://github.com/slavadubrov/agent-harness-lab-public/tree/v0.1.2-a1).
-- Part 2, [When an agent needs a workflow](https://slavadubrov.com/blog/2026/10/05/agent-to-workflow/),
+- Part 3, [When an agent needs a workflow](https://slavadubrov.com/blog/2026/10/05/agent-to-workflow/),
   adds a supervisor approval for large refunds and compares three ways to build it:
   the plain agent, the agent with an approval pause, and a LangGraph workflow around the
   agent. Release `v0.2.0-a2`.
@@ -21,6 +21,18 @@ check the final database.
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/overview.dark.svg">
   <img alt="A spec file goes into build_harness, which returns one LangChain agent. The custom support tasks and the τ³-bench retail tasks run that agent and write results, traces and run metadata under reports/article-a1." src="docs/img/overview.svg">
 </picture>
+
+## External evaluator prototype
+
+[`evaluator/`](evaluator/README.md) adds an offline JSONL observation protocol,
+runner-owned synthetic state/actions, and adversarial fixtures for Part 4.
+It is **process separation only**, not a sandbox for untrusted code. Its local
+results cannot authorize adoption. Existing support/tau3 integration and tested
+filesystem/network containment remain open; see the documented limitations.
+
+```bash
+uv run --frozen python -m evaluator --trusted-fixtures --output /tmp/observations.json
+```
 
 ## What is inside
 
