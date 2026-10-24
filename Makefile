@@ -1,4 +1,4 @@
-# agent-harness-lab — Part 1 (a1-*) and Part 2 (a2-*) targets. Needs uv and OPENROUTER_API_KEY (or OPEN_ROUTER_API_KEY) in .env or the environment.
+# agent-harness-lab — Part 1 (a1-*), Part 2 (a2-*) and Part 4 (part4-*) targets. Needs uv and OPENROUTER_API_KEY (or OPEN_ROUTER_API_KEY) in .env or the environment.
 SHELL := /bin/bash
 UV ?= uv
 SPEC ?= harness/spec/base.yaml
@@ -17,7 +17,7 @@ TAU3_CONCURRENCY ?= 4
 CUSTOM_SPECS := harness/spec/base.yaml harness/spec/plain.yaml harness/spec/glm-5.3-flash.yaml harness/spec/mimo-v2.6-flash.yaml
 A2_SPECS := harness/spec/plain.yaml harness/spec/approval-agent.yaml harness/spec/workflows/refund-approval.yaml harness/spec/workflows/support-router.yaml harness/spec/workflows/support-code.yaml
 
-.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2
+.PHONY: help sync test fmt lint candidate-image part4-fixtures part4-probes part4-regrade part4-inprocess part4-live a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2
 
 help:
 	@echo "make a1-custom          run the custom environment dev set with SPEC (default base.yaml)"
@@ -29,6 +29,12 @@ help:
 	@echo "make a2-matrix          run the Part 2 task set with plain, approval agent, workflow, router"
 	@echo "make a2-routes          score both routers' classifiers on 25 labelled requests"
 	@echo "make report-a2          rebuild reports/article-a2/README.md"
+	@echo "make candidate-image    build the container image candidates run in (Part 4)"
+	@echo "make part4-fixtures     offline: scripted candidates, second target, harness scenarios"
+	@echo "make part4-probes       offline: what a candidate can reach, local subprocess vs container"
+	@echo "make part4-regrade      offline: Part 3's saved replies against the reply checks"
+	@echo "make part4-inprocess    offline: tampering candidates, Parts 2-3 runner vs evaluator"
+	@echo "make part4-live         paid: SPECS on the 16 tasks under the evaluator, stops at BUDGET dollars"
 	@echo "make test | fmt | lint"
 
 sync:
@@ -104,3 +110,28 @@ a1-tau3-matrix:
 
 report:
 	$(UV) run python scripts/report_a1.py
+
+# --- Part 4: the external evaluator (evaluator/README.md) ---------------------------------
+PART4 := reports/part-4
+SPECS ?= harness/spec/plain.yaml harness/spec/base.yaml harness/spec/approval-agent.yaml
+BUDGET ?= 3.00
+
+candidate-image:
+	docker build -f evaluator/Dockerfile -t agent-harness-lab-candidate:py312 .
+
+part4-fixtures: sync
+	$(UV) run python -m evaluator fixtures --profile docker --out $(PART4)/fixtures.json
+
+part4-probes: sync
+	$(UV) run python -m evaluator probes --out $(PART4)/probes.json
+
+part4-regrade: sync
+	$(UV) run python -m evaluator regrade --out $(PART4)/regrade-part3.json
+
+part4-inprocess: sync
+	$(UV) run python scripts/part4_inprocess.py --profile docker --out $(PART4)/in-process.json
+
+# The key stays with the evaluator; the candidate's container never sees it.
+part4-live: sync
+	$(UV) run python -m evaluator campaign --specs $(SPECS) \
+	  --suites part4 holdout --profile docker --live --budget $(BUDGET) --out $(PART4)/live

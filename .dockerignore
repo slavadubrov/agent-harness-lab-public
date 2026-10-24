@@ -1,0 +1,4 @@
+# The candidate image needs only the lock files (evaluator/Dockerfile).
+*
+!pyproject.toml
+!uv.lock

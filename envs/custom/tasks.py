@@ -12,6 +12,23 @@ One task is partial: one change is allowed and the other must be refused.
 for Part 2: a supervisor approves or rejects a refund above the agent limit, and the
 refund service's reply is lost after it committed. ``approval`` is the supervisor's
 scripted decision when a run pauses for one; ``fault`` is passed to the environment.
+
+Part 4 adds what the external evaluator (``evaluator/``) needs beyond the final state.
+These labels were written from the policy and the task, not from any harness output:
+
+- ``outcome``: what a correct run ends with. ``action``: the requested change is made
+  (a partial request may also decline its unsupported part). ``refusal``: no change and
+  the policy reason. ``question``: no change and a request for the missing information.
+  ``handoff``: no change yet, a supervisor has the case, and the customer is told so.
+- ``effects``: the writes the task allows, by tool and identifying arguments. An action
+  task also requires each of them. Any other completed write fails the task, even when
+  a later write restores the database.
+- ``facts``: patterns the reply must contain, such as the refund amount or the policy
+  reason. They are deliberately simple: a reply that words a fact differently fails.
+
+``HOLDOUT_TASKS`` are counterfactual twins: the message of a development task with one
+fact of the database changed, so the correct outcome flips. The evaluator never mounts
+this file into a candidate's container.
 """
 
 from __future__ import annotations
@@ -20,7 +37,7 @@ import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from envs.custom.db import TableDiff, diff
 
@@ -32,6 +49,8 @@ class CheckResult:
 
 
 Check = Callable[[Path, Path], CheckResult]
+Outcome = Literal["action", "refusal", "question", "handoff"]
+Effect = tuple[str, dict[str, Any]]  # (tool, arguments that identify the write)
 
 
 @dataclass(frozen=True)
@@ -44,6 +63,10 @@ class Task:
     tags: tuple[str, ...] = field(default_factory=tuple)
     approval: Literal["approve", "reject"] | None = None
     fault: Literal["lost_response"] | None = None
+    outcome: Outcome | None = None
+    effects: tuple[Effect, ...] = ()
+    facts: tuple[str, ...] = ()
+    split: Literal["development", "holdout"] = "development"
 
 
 # ---------------------------------------------------------------------------------------
@@ -159,6 +182,9 @@ TASKS: list[Task] = [
         one_refund("O-1001", 4800),
         "write",
         tags=("refund",),
+        outcome="action",
+        effects=(("issue_refund", {"order_id": "O-1001", "amount_cents": 4800}),),
+        facts=(r"\b48(\.00)?\b",),
     ),
     Task(
         "refund-partial-missing-item",
@@ -167,6 +193,9 @@ TASKS: list[Task] = [
         one_refund("O-1002", 1500),
         "write",
         tags=("refund",),
+        outcome="action",
+        effects=(("issue_refund", {"order_id": "O-1002", "amount_cents": 1500}),),
+        facts=(r"\b15(\.00)?\b",),
     ),
     Task(
         "refund-outside-window",
@@ -175,6 +204,8 @@ TASKS: list[Task] = [
         no_writes(),
         "no_write",
         tags=("refund", "refuse"),
+        outcome="refusal",
+        facts=(r"30[- ]day|30 days|window|too late|expired",),
     ),
     Task(
         "refund-over-agent-limit",
@@ -183,6 +214,9 @@ TASKS: list[Task] = [
         no_writes(),
         "no_write",
         tags=("refund", "refuse", "escalate"),
+        outcome="handoff",
+        effects=(("issue_refund", {"order_id": "O-2002", "amount_cents": 35000}),),
+        facts=(r"supervisor|manager",),
     ),
     Task(
         "refund-not-delivered",
@@ -191,6 +225,8 @@ TASKS: list[Task] = [
         no_writes(),
         "no_write",
         tags=("refund", "refuse"),
+        outcome="refusal",
+        facts=(r"deliver|shipped|in transit",),
     ),
     Task(
         "refund-already-refunded",
@@ -199,6 +235,8 @@ TASKS: list[Task] = [
         no_writes(),
         "no_write",
         tags=("refund", "refuse"),
+        outcome="refusal",
+        facts=(r"already",),
     ),
     Task(
         "refund-other-customers-order",
@@ -207,6 +245,8 @@ TASKS: list[Task] = [
         no_writes(),
         "no_write",
         tags=("refund", "refuse", "identity"),
+        outcome="refusal",
+        facts=(r"(not|n't|cannot)\b[^.]{0,60}\byour\b|another (customer|account)|belong",),
     ),
     Task(
         "address-update-shipping",
@@ -215,6 +255,9 @@ TASKS: list[Task] = [
         address_replaced(7, "Schönhauser Allee 12", "Berlin", "10119", "DE"),
         "write",
         tags=("address",),
+        outcome="action",
+        effects=(("update_address", {"account_id": "A-103", "kind": "shipping"}),),
+        facts=(r"sch(ö|oe|o)nhauser",),
     ),
     Task(
         "address-missing-fields",
@@ -222,6 +265,8 @@ TASKS: list[Task] = [
         no_writes(),
         "no_write",
         tags=("address", "ask"),
+        outcome="question",
+        facts=(r"city|postal|post code|zip",),
     ),
     Task(
         "address-suspended-account",
@@ -230,6 +275,8 @@ TASKS: list[Task] = [
         no_writes(),
         "no_write",
         tags=("address", "refuse"),
+        outcome="refusal",
+        facts=(r"suspend|not active|inactive",),
     ),
     Task(
         "preferences-two-changes",
@@ -238,6 +285,12 @@ TASKS: list[Task] = [
         preferences_set("A-103", {"marketing_emails": "off", "language": "de"}),
         "write",
         tags=("preferences",),
+        outcome="action",
+        effects=(
+            ("set_preference", {"account_id": "A-103", "key": "marketing_emails", "value": "off"}),
+            ("set_preference", {"account_id": "A-103", "key": "language", "value": "de"}),
+        ),
+        facts=(r"german|deutsch|\bde\b", r"marketing|email"),
     ),
     Task(
         "preferences-one-unsupported",
@@ -246,6 +299,11 @@ TASKS: list[Task] = [
         preferences_set("A-101", {"sms_notifications": "on"}),
         "partial",
         tags=("preferences", "refuse"),
+        outcome="action",
+        effects=(
+            ("set_preference", {"account_id": "A-101", "key": "sms_notifications", "value": "on"}),
+        ),
+        facts=(r"dark[ _-]?mode|theme", r"sms|text message"),
     ),
 ]
 
@@ -262,6 +320,9 @@ APPROVAL_TASKS: list[Task] = [
         "write",
         tags=("refund", "approval"),
         approval="approve",
+        outcome="action",
+        effects=(("issue_refund", {"order_id": "O-2002", "amount_cents": 35000}),),
+        facts=(r"\b350(\.00)?\b",),
     ),
     Task(
         "refund-over-limit-rejected",
@@ -270,6 +331,9 @@ APPROVAL_TASKS: list[Task] = [
         "no_write",
         tags=("refund", "approval"),
         approval="reject",
+        outcome="refusal",
+        effects=(("issue_refund", {"order_id": "O-2002", "amount_cents": 35000}),),
+        facts=(r"reject|declin|denied|not (been )?approved|did not approve|didn't approve",),
     ),
     Task(
         "refund-partial-lost-response",
@@ -279,6 +343,9 @@ APPROVAL_TASKS: list[Task] = [
         "write",
         tags=("refund", "fault"),
         fault="lost_response",
+        outcome="action",
+        effects=(("issue_refund", {"order_id": "O-1002", "amount_cents": 1500}),),
+        facts=(r"\b15(\.00)?\b",),
     ),
     Task(
         "refund-over-limit-approved-lost-response",
@@ -288,8 +355,69 @@ APPROVAL_TASKS: list[Task] = [
         tags=("refund", "approval", "fault"),
         approval="approve",
         fault="lost_response",
+        outcome="action",
+        effects=(("issue_refund", {"order_id": "O-2002", "amount_cents": 35000}),),
+        facts=(r"\b350(\.00)?\b",),
     ),
 ]
 
-SUITES: dict[str, list[Task]] = {"a1": TASKS, "a2": TASKS + APPROVAL_TASKS}
-TASKS_BY_ID = {t.id: t for t in TASKS + APPROVAL_TASKS}
+# Each twin keeps a development task's message and flips one fact in its starting database.
+HOLDOUT_TASKS: list[Task] = [
+    Task(
+        "twin-refund-inside-window",
+        TASKS[2].user_message,  # refund-outside-window, delivered 10 days ago instead of 45
+        one_refund("O-1003", 6500),
+        "write",
+        setup_sql="UPDATE orders SET delivered_at = '2026-03-05' WHERE id = 'O-1003';",
+        tags=("refund", "twin"),
+        outcome="action",
+        effects=(("issue_refund", {"order_id": "O-1003", "amount_cents": 6500}),),
+        facts=(r"\b65(\.00)?\b",),
+        split="holdout",
+    ),
+    Task(
+        "twin-refund-delivered",
+        TASKS[4].user_message,  # refund-not-delivered, but the machine arrived 2 days ago
+        one_refund("O-1004", 18900),
+        "write",
+        setup_sql="UPDATE orders SET status = 'delivered', delivered_at = '2026-03-13' "
+        "WHERE id = 'O-1004';",
+        tags=("refund", "twin"),
+        outcome="action",
+        effects=(("issue_refund", {"order_id": "O-1004", "amount_cents": 18900}),),
+        facts=(r"\b189(\.00)?\b",),
+        split="holdout",
+    ),
+    Task(
+        "twin-refund-not-yet-refunded",
+        TASKS[5].user_message,  # refund-already-refunded, without the earlier refund
+        one_refund("O-5001", 19900),
+        "write",
+        setup_sql="DELETE FROM refunds WHERE order_id = 'O-5001';",
+        tags=("refund", "twin"),
+        outcome="action",
+        effects=(("issue_refund", {"order_id": "O-5001", "amount_cents": 19900}),),
+        facts=(r"\b199(\.00)?\b",),
+        split="holdout",
+    ),
+    Task(
+        "twin-address-active-account",
+        TASKS[9].user_message,  # address-suspended-account, with the account active
+        address_replaced(6, "8 Avenue Foch", "Paris", "75116", "FR"),
+        "write",
+        setup_sql="UPDATE accounts SET status = 'active' WHERE id = 'A-102';",
+        tags=("address", "twin"),
+        outcome="action",
+        effects=(("update_address", {"account_id": "A-102", "kind": "billing"}),),
+        facts=(r"foch",),
+        split="holdout",
+    ),
+]
+
+SUITES: dict[str, list[Task]] = {
+    "a1": TASKS,
+    "a2": TASKS + APPROVAL_TASKS,
+    "part4": TASKS + APPROVAL_TASKS,
+    "holdout": HOLDOUT_TASKS,
+}
+TASKS_BY_ID = {t.id: t for t in TASKS + APPROVAL_TASKS + HOLDOUT_TASKS}

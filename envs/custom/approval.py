@@ -22,7 +22,8 @@ from langchain.agents.middleware import HumanInTheLoopMiddleware
 from langgraph.types import interrupt
 from pydantic import BaseModel
 
-from envs.custom.refunds import call_refund_service, decide, needs_approval, operations
+from envs.custom import service
+from envs.custom.refunds import call_refund_service, needs_approval, operations
 from envs.custom.tools import AccountContext
 from harness.workflow import NodeContext
 
@@ -42,21 +43,8 @@ def refund_approval_middleware() -> HumanInTheLoopMiddleware:
 def supervise(
     ctx: AccountContext, payload: dict[str, Any], decision: Literal["approve", "reject"]
 ) -> dict[str, Any]:
-    """The supervisor's desk: record a decision for every refund in an approval request
-    and return the value to resume the paused run with."""
-    if payload.get("kind") == "refund_approval":  # the workflow's approval node
-        items = [(h["order_id"], h["amount_cents"]) for h in payload["held"]]
-    else:  # a HumanInTheLoopMiddleware request
-        items = [
-            (a["args"]["order_id"], int(a["args"]["amount_cents"]))
-            for a in payload["action_requests"]
-        ]
-    for order_id, amount_cents in items:
-        decide(ctx.db_path, ctx.case_id, order_id, amount_cents, decision)
-    out: dict[str, Any] = {"type": decision}
-    if decision == "reject":
-        out["message"] = "A supervisor rejected this refund. Nothing was issued."
-    return {"decisions": [dict(out) for _ in items]}
+    """The supervisor's desk (``envs/custom/service.py``), for this process's runner."""
+    return service.supervise(ctx.db_path, ctx.case_id, payload, decision)
 
 
 # -- workflow ------------------------------------------------------------------------

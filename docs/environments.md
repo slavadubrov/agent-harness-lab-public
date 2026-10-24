@@ -108,4 +108,7 @@ This has two effects on the results:
 - The prompt, tools and policy come from τ³-bench. The results are not comparable with
   the custom ones, even with the same spec file.
 - Tool retry and the Jev guard wrap the tools node, so they never run here. Under τ³,
-  `base` and `plain` differ only in SGR.
+  `base` and `plain` differ only in SGR. A report must call the guard bypassed on this
+  path, never a passed check: the external evaluator records it that way
+  (`--external-tools` in [`targets/harness_target.py`](../targets/harness_target.py)
+  reproduces the adapter's loop under the evaluator).

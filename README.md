@@ -22,17 +22,20 @@ check the final database.
   <img alt="A spec file goes into build_harness, which returns one LangChain agent. The custom support tasks and the τ³-bench retail tasks run that agent and write results, traces and run metadata under reports/article-a1." src="docs/img/overview.svg">
 </picture>
 
-## External evaluator prototype
+## External evaluator (Part 4)
 
-[`evaluator/`](evaluator/README.md) adds an offline JSONL observation protocol,
-runner-owned synthetic state/actions, and adversarial fixtures for Part 4.
-It is **process separation only**, not a sandbox for untrusted code. Its local
-results cannot authorize adoption. Existing support/tau3 integration and tested
-filesystem/network containment remain open; see the documented limitations.
+[`evaluator/`](evaluator/README.md) runs a harness in a container with no network and
+keeps the database, the tools, the model and Jev connections, the records and the checks
+outside it. Each task is graded twice: on the final database, as in Parts 2 and 3, and on
+its obligations, the writes it requires and forbids and what the reply must say.
 
 ```bash
-uv run --frozen python -m evaluator --trusted-fixtures --output /tmp/observations.json
+make candidate-image   # once; needs Docker
+make part4-fixtures    # offline
+make part4-probes      # offline
 ```
+
+Results: [`reports/part-4/`](reports/part-4/README.md).
 
 ## What is inside
 
@@ -42,6 +45,8 @@ uv run --frozen python -m evaluator --trusted-fixtures --output /tmp/observation
 | [`harness/spec/`](harness/spec/) | Agent specs (`base.yaml`, `plain.yaml`, `approval-agent.yaml`, …) and workflow specs in `workflows/` |
 | [`envs/custom/`](envs/custom/) | 16 support tasks, a SQLite database, 5 account tools, the refund service, a policy MCP server, the supervisor approval steps and the router evaluation |
 | [`envs/tau3/`](envs/tau3/) | Adapter that runs the same harness on 8 τ³-bench retail tasks |
+| [`evaluator/`](evaluator/) | The external evaluator: protocol, container profile, tool and model brokering, checks |
+| [`targets/`](targets/) | What runs inside the evaluator's container: the harness adapter, a second target without LangChain, test fixtures |
 | [`reports/article-a1/`](reports/article-a1/), [`reports/article-a2/`](reports/article-a2/) | Saved results, traces and package versions for each part |
 | [`tests/`](tests/) | Offline tests with fake models |
 
@@ -124,10 +129,9 @@ rerun of the same specs on this repository; its τ³-bench results differ by one
 - There is no limit on total time or spending per task.
 - The supervisor is a script, and the checkpointer is in memory: a paused case does not
   survive a restart. A real approval step needs a persistent checkpointer.
-- The checks read the database only, not the reply. Part 2's reply findings come from
-  reading the traces.
-- The checks and the cost accounting run in the same process as the agent.
-- One run per task. Later articles add a separate evaluator and repeated runs.
+- The Parts 2–3 runner checks the database only, not the reply, and runs in the same
+  process as the agent. The external evaluator checks both, from outside.
+- One run per task. A later article adds repeated runs.
 
 A spec can import Python code and start MCP server commands. Treat a spec file as code
 and review it before you run it.
