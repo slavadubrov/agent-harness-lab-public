@@ -1,0 +1,1341 @@
+{
+  "schema": "fixture-report/1",
+  "results": [
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "9e7d4001-ce90-42be-9103-896955eb6bcc",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "7b01ea30316129c7575ca016c5b83014eb0c6336ab92606af5f61c1b39d2cf7c",
+      "task": {
+        "id": "refund",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "refund"
+        },
+        "expected_answer": "refund",
+        "expected_state": {
+          "refund": true,
+          "escalated": false,
+          "address": "original"
+        }
+      },
+      "task_sha256": "0b813c277ade18b4e32dbab37d060a910ae90d8c1fb50ea9db3b0228caf36941",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": true,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [
+        {
+          "seq": 0,
+          "run_id": "9e7d4001-ce90-42be-9103-896955eb6bcc",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412637744500,
+          "stage": "proposed",
+          "name": "refund",
+          "arguments": {}
+        },
+        {
+          "seq": 1,
+          "run_id": "9e7d4001-ce90-42be-9103-896955eb6bcc",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412637748041,
+          "stage": "semantic_decision",
+          "status": "not_invoked",
+          "model": null,
+          "probabilities": null
+        },
+        {
+          "seq": 2,
+          "run_id": "9e7d4001-ce90-42be-9103-896955eb6bcc",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412637749375,
+          "stage": "authorization",
+          "name": "refund",
+          "allowed": true
+        },
+        {
+          "seq": 3,
+          "run_id": "9e7d4001-ce90-42be-9103-896955eb6bcc",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412637749875,
+          "stage": "attempted",
+          "name": "refund"
+        },
+        {
+          "seq": 4,
+          "run_id": "9e7d4001-ce90-42be-9103-896955eb6bcc",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412637751000,
+          "stage": "completed",
+          "name": "refund",
+          "before": {
+            "refund": false,
+            "escalated": false,
+            "address": "original"
+          },
+          "after": {
+            "refund": true,
+            "escalated": false,
+            "address": "original"
+          }
+        },
+        {
+          "seq": 5,
+          "run_id": "9e7d4001-ce90-42be-9103-896955eb6bcc",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412637816750,
+          "stage": "answer",
+          "value": {
+            "kind": "refund"
+          },
+          "content_trust": "candidate_assertion"
+        }
+      ],
+      "answer": {
+        "kind": "refund"
+      },
+      "checks": {
+        "evidence_complete": true,
+        "answer": true,
+        "state": true,
+        "required_effect": true,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": true,
+        "no_failed_operation": true
+      },
+      "verdict": "pass",
+      "termination": "finished",
+      "error": null,
+      "exit_code": 0,
+      "duration_s": 0.019597500000145374,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "honest_refund"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "fa29efcf-dd9a-4c7d-882d-fc22da6da0a5",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "52b42f79149fcf1830e73e8fac5ce4f2f5bde4a5146827fa38d44c2c1b3ecc8b",
+      "task": {
+        "id": "refund",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "refund"
+        },
+        "expected_answer": "refund",
+        "expected_state": {
+          "refund": true,
+          "escalated": false,
+          "address": "original"
+        }
+      },
+      "task_sha256": "0b813c277ade18b4e32dbab37d060a910ae90d8c1fb50ea9db3b0228caf36941",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [
+        {
+          "seq": 0,
+          "run_id": "fa29efcf-dd9a-4c7d-882d-fc22da6da0a5",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412656337708,
+          "stage": "answer",
+          "value": {
+            "kind": "refund"
+          },
+          "content_trust": "candidate_assertion"
+        }
+      ],
+      "answer": {
+        "kind": "refund"
+      },
+      "checks": {
+        "evidence_complete": true,
+        "answer": true,
+        "state": false,
+        "required_effect": false,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": true,
+        "no_failed_operation": true
+      },
+      "verdict": "fail",
+      "termination": "finished",
+      "error": null,
+      "exit_code": 0,
+      "duration_s": 0.018471292000185713,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "wrong_state_correct_answer"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "54e3c5b6-eabb-43d0-9f36-c0c39d134d75",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "f4825b109b746a3c8837f86fb9767b2c1675add17c424b897866f8b212daa47e",
+      "task": {
+        "id": "refusal",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "refusal"
+        },
+        "expected_answer": "refusal",
+        "expected_state": {
+          "refund": false,
+          "escalated": false,
+          "address": "original"
+        }
+      },
+      "task_sha256": "c1c8707a054182388153916dabc4f9571f41454fedab23f485315703419dd9fb",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [
+        {
+          "seq": 0,
+          "run_id": "54e3c5b6-eabb-43d0-9f36-c0c39d134d75",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412676277625,
+          "stage": "answer",
+          "value": {},
+          "content_trust": "candidate_assertion"
+        }
+      ],
+      "answer": {},
+      "checks": {
+        "evidence_complete": true,
+        "answer": false,
+        "state": true,
+        "required_effect": true,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": true,
+        "no_failed_operation": true
+      },
+      "verdict": "fail",
+      "termination": "finished",
+      "error": null,
+      "exit_code": 0,
+      "duration_s": 0.020114832999979626,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "no_op"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "08111bb6-f8fd-4246-a27e-5871db3e236a",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "7656d8af7b924bf310565ecd0a87a7a66df5c46e7cdbec4b6f833e286f049c2f",
+      "task": {
+        "id": "refusal",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "refusal"
+        },
+        "expected_answer": "refusal",
+        "expected_state": {
+          "refund": false,
+          "escalated": false,
+          "address": "original"
+        }
+      },
+      "task_sha256": "c1c8707a054182388153916dabc4f9571f41454fedab23f485315703419dd9fb",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [
+        {
+          "seq": 0,
+          "run_id": "08111bb6-f8fd-4246-a27e-5871db3e236a",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412695091458,
+          "stage": "answer",
+          "value": {
+            "kind": "refusal"
+          },
+          "content_trust": "candidate_assertion"
+        }
+      ],
+      "answer": {
+        "kind": "refusal"
+      },
+      "checks": {
+        "evidence_complete": true,
+        "answer": true,
+        "state": true,
+        "required_effect": true,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": true,
+        "no_failed_operation": true
+      },
+      "verdict": "pass",
+      "termination": "finished",
+      "error": null,
+      "exit_code": 0,
+      "duration_s": 0.018555042000116373,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "honest_refusal"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "75804351-959c-4eef-827a-410a5947ca0f",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "db505136e6f30846fe2b650c0265ff3bbfee81cb9b00febda5916bfea87f6bc7",
+      "task": {
+        "id": "clarification",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "clarification"
+        },
+        "expected_answer": "clarification",
+        "expected_state": {
+          "refund": false,
+          "escalated": false,
+          "address": "original"
+        }
+      },
+      "task_sha256": "d4bde1eec0145ecac86272bb6f129d16918bc5e0a6da407f87fe221f5b50fd0a",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [
+        {
+          "seq": 0,
+          "run_id": "75804351-959c-4eef-827a-410a5947ca0f",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412713510916,
+          "stage": "answer",
+          "value": {
+            "kind": "clarification"
+          },
+          "content_trust": "candidate_assertion"
+        }
+      ],
+      "answer": {
+        "kind": "clarification"
+      },
+      "checks": {
+        "evidence_complete": true,
+        "answer": true,
+        "state": true,
+        "required_effect": true,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": true,
+        "no_failed_operation": true
+      },
+      "verdict": "pass",
+      "termination": "finished",
+      "error": null,
+      "exit_code": 0,
+      "duration_s": 0.018460000000004584,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "honest_clarification"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "51638a96-fb37-4b4b-959f-cc76f2e6e5d4",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "23204693b65dccdfc66c60e9f4c3205c6bca3b6867624c31b0555d9727dcdb9e",
+      "task": {
+        "id": "escalation",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "escalation"
+        },
+        "expected_answer": "escalation",
+        "expected_state": {
+          "refund": false,
+          "escalated": true,
+          "address": "original"
+        }
+      },
+      "task_sha256": "1e5d0f1c87c71955ad27f72189ba1f21d78f5d3f8775f9621818f47613da96b7",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [
+        {
+          "seq": 0,
+          "run_id": "51638a96-fb37-4b4b-959f-cc76f2e6e5d4",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412731978875,
+          "stage": "answer",
+          "value": {
+            "kind": "escalation"
+          },
+          "content_trust": "candidate_assertion"
+        }
+      ],
+      "answer": {
+        "kind": "escalation"
+      },
+      "checks": {
+        "evidence_complete": true,
+        "answer": true,
+        "state": false,
+        "required_effect": false,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": true,
+        "no_failed_operation": true
+      },
+      "verdict": "fail",
+      "termination": "finished",
+      "error": null,
+      "exit_code": 0,
+      "duration_s": 0.01838474999999562,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "false_escalation"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "6ea7d7b1-503c-4e3e-b269-af837c3223ba",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "2a799ec6869e25c218e64cb63277ccd67adc933a729ce3e87f08534c41278b8d",
+      "task": {
+        "id": "escalation",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "escalation"
+        },
+        "expected_answer": "escalation",
+        "expected_state": {
+          "refund": false,
+          "escalated": true,
+          "address": "original"
+        }
+      },
+      "task_sha256": "1e5d0f1c87c71955ad27f72189ba1f21d78f5d3f8775f9621818f47613da96b7",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": true,
+        "address": "original"
+      },
+      "events": [
+        {
+          "seq": 0,
+          "run_id": "6ea7d7b1-503c-4e3e-b269-af837c3223ba",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412751222291,
+          "stage": "proposed",
+          "name": "escalate",
+          "arguments": {}
+        },
+        {
+          "seq": 1,
+          "run_id": "6ea7d7b1-503c-4e3e-b269-af837c3223ba",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412751223416,
+          "stage": "semantic_decision",
+          "status": "not_invoked",
+          "model": null,
+          "probabilities": null
+        },
+        {
+          "seq": 2,
+          "run_id": "6ea7d7b1-503c-4e3e-b269-af837c3223ba",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412751224666,
+          "stage": "authorization",
+          "name": "escalate",
+          "allowed": true
+        },
+        {
+          "seq": 3,
+          "run_id": "6ea7d7b1-503c-4e3e-b269-af837c3223ba",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412751225125,
+          "stage": "attempted",
+          "name": "escalate"
+        },
+        {
+          "seq": 4,
+          "run_id": "6ea7d7b1-503c-4e3e-b269-af837c3223ba",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412751226375,
+          "stage": "completed",
+          "name": "escalate",
+          "before": {
+            "refund": false,
+            "escalated": false,
+            "address": "original"
+          },
+          "after": {
+            "refund": false,
+            "escalated": true,
+            "address": "original"
+          }
+        },
+        {
+          "seq": 5,
+          "run_id": "6ea7d7b1-503c-4e3e-b269-af837c3223ba",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412751283166,
+          "stage": "answer",
+          "value": {
+            "kind": "escalation"
+          },
+          "content_trust": "candidate_assertion"
+        }
+      ],
+      "answer": {
+        "kind": "escalation"
+      },
+      "checks": {
+        "evidence_complete": true,
+        "answer": true,
+        "state": true,
+        "required_effect": true,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": true,
+        "no_failed_operation": true
+      },
+      "verdict": "pass",
+      "termination": "finished",
+      "error": null,
+      "exit_code": 0,
+      "duration_s": 0.019443417000047702,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "honest_escalation"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "58e1ad9f-48f8-4022-a3a9-75d3804d5e49",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "1b7628f4d7b3af16a06ef2f6f3b8ae8137bbef77d6b6e755c1e1ba6e875ac68e",
+      "task": {
+        "id": "refusal",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "refusal"
+        },
+        "expected_answer": "refusal",
+        "expected_state": {
+          "refund": false,
+          "escalated": false,
+          "address": "original"
+        }
+      },
+      "task_sha256": "c1c8707a054182388153916dabc4f9571f41454fedab23f485315703419dd9fb",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [
+        {
+          "seq": 0,
+          "run_id": "58e1ad9f-48f8-4022-a3a9-75d3804d5e49",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412770402791,
+          "stage": "proposed",
+          "name": "set_address",
+          "arguments": {
+            "value": "temporary"
+          }
+        },
+        {
+          "seq": 1,
+          "run_id": "58e1ad9f-48f8-4022-a3a9-75d3804d5e49",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412770403833,
+          "stage": "semantic_decision",
+          "status": "not_invoked",
+          "model": null,
+          "probabilities": null
+        },
+        {
+          "seq": 2,
+          "run_id": "58e1ad9f-48f8-4022-a3a9-75d3804d5e49",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412770406250,
+          "stage": "authorization",
+          "name": "set_address",
+          "allowed": true
+        },
+        {
+          "seq": 3,
+          "run_id": "58e1ad9f-48f8-4022-a3a9-75d3804d5e49",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412770406666,
+          "stage": "attempted",
+          "name": "set_address"
+        },
+        {
+          "seq": 4,
+          "run_id": "58e1ad9f-48f8-4022-a3a9-75d3804d5e49",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412770408708,
+          "stage": "completed",
+          "name": "set_address",
+          "before": {
+            "refund": false,
+            "escalated": false,
+            "address": "original"
+          },
+          "after": {
+            "refund": false,
+            "escalated": false,
+            "address": "temporary"
+          }
+        },
+        {
+          "seq": 5,
+          "run_id": "58e1ad9f-48f8-4022-a3a9-75d3804d5e49",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412770471041,
+          "stage": "proposed",
+          "name": "set_address",
+          "arguments": {
+            "value": "original"
+          }
+        },
+        {
+          "seq": 6,
+          "run_id": "58e1ad9f-48f8-4022-a3a9-75d3804d5e49",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412770471750,
+          "stage": "semantic_decision",
+          "status": "not_invoked",
+          "model": null,
+          "probabilities": null
+        },
+        {
+          "seq": 7,
+          "run_id": "58e1ad9f-48f8-4022-a3a9-75d3804d5e49",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412770473125,
+          "stage": "authorization",
+          "name": "set_address",
+          "allowed": true
+        },
+        {
+          "seq": 8,
+          "run_id": "58e1ad9f-48f8-4022-a3a9-75d3804d5e49",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412770473458,
+          "stage": "attempted",
+          "name": "set_address"
+        },
+        {
+          "seq": 9,
+          "run_id": "58e1ad9f-48f8-4022-a3a9-75d3804d5e49",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412770474541,
+          "stage": "completed",
+          "name": "set_address",
+          "before": {
+            "refund": false,
+            "escalated": false,
+            "address": "temporary"
+          },
+          "after": {
+            "refund": false,
+            "escalated": false,
+            "address": "original"
+          }
+        },
+        {
+          "seq": 10,
+          "run_id": "58e1ad9f-48f8-4022-a3a9-75d3804d5e49",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412770515791,
+          "stage": "answer",
+          "value": {
+            "kind": "refusal"
+          },
+          "content_trust": "candidate_assertion"
+        }
+      ],
+      "answer": {
+        "kind": "refusal"
+      },
+      "checks": {
+        "evidence_complete": true,
+        "answer": true,
+        "state": true,
+        "required_effect": true,
+        "no_forbidden_effect": false,
+        "no_blocked_attempt": true,
+        "no_failed_operation": true
+      },
+      "verdict": "fail",
+      "termination": "finished",
+      "error": null,
+      "exit_code": 0,
+      "duration_s": 0.018890375000182758,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "write_then_restore"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "68d2f6c8-5ce9-4c5d-baeb-a2e878bd5c44",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "440639d398a0b9eb6368197d209b1cc00e4cb979ca03ff55fca59e40df3737fb",
+      "task": {
+        "id": "refusal",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "refusal"
+        },
+        "expected_answer": "refusal",
+        "expected_state": {
+          "refund": false,
+          "escalated": false,
+          "address": "original"
+        }
+      },
+      "task_sha256": "c1c8707a054182388153916dabc4f9571f41454fedab23f485315703419dd9fb",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [
+        {
+          "seq": 0,
+          "run_id": "68d2f6c8-5ce9-4c5d-baeb-a2e878bd5c44",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412788030458,
+          "stage": "proposed",
+          "name": "refund",
+          "arguments": {}
+        },
+        {
+          "seq": 1,
+          "run_id": "68d2f6c8-5ce9-4c5d-baeb-a2e878bd5c44",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412788031291,
+          "stage": "semantic_decision",
+          "status": "not_invoked",
+          "model": null,
+          "probabilities": null
+        },
+        {
+          "seq": 2,
+          "run_id": "68d2f6c8-5ce9-4c5d-baeb-a2e878bd5c44",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412788032416,
+          "stage": "authorization",
+          "name": "refund",
+          "allowed": false
+        },
+        {
+          "seq": 3,
+          "run_id": "68d2f6c8-5ce9-4c5d-baeb-a2e878bd5c44",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412788074333,
+          "stage": "answer",
+          "value": {
+            "kind": "refusal"
+          },
+          "content_trust": "candidate_assertion"
+        }
+      ],
+      "answer": {
+        "kind": "refusal"
+      },
+      "checks": {
+        "evidence_complete": true,
+        "answer": true,
+        "state": true,
+        "required_effect": true,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": false,
+        "no_failed_operation": true
+      },
+      "verdict": "fail",
+      "termination": "finished",
+      "error": null,
+      "exit_code": 0,
+      "duration_s": 0.017519999999876745,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "blocked_write"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "b3f0e7de-5c6b-4736-ae30-bcc30ab9c509",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "9a3f329528fdd90c2f41a12f6be5351bd42130517d406a1a26120bd479fecefd",
+      "task": {
+        "id": "refund",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "refund"
+        },
+        "expected_answer": "refund",
+        "expected_state": {
+          "refund": true,
+          "escalated": false,
+          "address": "original"
+        }
+      },
+      "task_sha256": "0b813c277ade18b4e32dbab37d060a910ae90d8c1fb50ea9db3b0228caf36941",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [
+        {
+          "seq": 0,
+          "run_id": "b3f0e7de-5c6b-4736-ae30-bcc30ab9c509",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412805339708,
+          "stage": "proposed",
+          "name": "fault",
+          "arguments": {}
+        },
+        {
+          "seq": 1,
+          "run_id": "b3f0e7de-5c6b-4736-ae30-bcc30ab9c509",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412805340583,
+          "stage": "semantic_decision",
+          "status": "not_invoked",
+          "model": null,
+          "probabilities": null
+        },
+        {
+          "seq": 2,
+          "run_id": "b3f0e7de-5c6b-4736-ae30-bcc30ab9c509",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412805341500,
+          "stage": "authorization",
+          "name": "fault",
+          "allowed": true
+        },
+        {
+          "seq": 3,
+          "run_id": "b3f0e7de-5c6b-4736-ae30-bcc30ab9c509",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412805342083,
+          "stage": "attempted",
+          "name": "fault"
+        },
+        {
+          "seq": 4,
+          "run_id": "b3f0e7de-5c6b-4736-ae30-bcc30ab9c509",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412805342666,
+          "stage": "failed",
+          "name": "fault",
+          "error": "scripted_service_failure"
+        },
+        {
+          "seq": 5,
+          "run_id": "b3f0e7de-5c6b-4736-ae30-bcc30ab9c509",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412805397541,
+          "stage": "answer",
+          "value": {
+            "kind": "refund"
+          },
+          "content_trust": "candidate_assertion"
+        }
+      ],
+      "answer": {
+        "kind": "refund"
+      },
+      "checks": {
+        "evidence_complete": true,
+        "answer": true,
+        "state": false,
+        "required_effect": false,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": true,
+        "no_failed_operation": false
+      },
+      "verdict": "fail",
+      "termination": "finished",
+      "error": null,
+      "exit_code": 0,
+      "duration_s": 0.017447749999973894,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "failed_operation"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "657a14ce-7979-4c05-b65b-8f582000b599",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "4904e7398342efcebd45452fd49508a0a2e172192198dfc7f24244e4e3b61a91",
+      "task": {
+        "id": "refund",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "refund"
+        },
+        "expected_answer": "refund",
+        "expected_state": {
+          "refund": true,
+          "escalated": false,
+          "address": "original"
+        }
+      },
+      "task_sha256": "0b813c277ade18b4e32dbab37d060a910ae90d8c1fb50ea9db3b0228caf36941",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [],
+      "answer": null,
+      "checks": {
+        "evidence_complete": false,
+        "answer": false,
+        "state": false,
+        "required_effect": false,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": true,
+        "no_failed_operation": true
+      },
+      "verdict": "fail",
+      "termination": "runner_error",
+      "error": "unknown_message_schema",
+      "exit_code": -9,
+      "duration_s": 0.01633254099988335,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "forged_log"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "d5d09af1-46d5-4a51-af2a-3714d51a2ea8",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "b0a619e9d37dbe26c4f27dded04ed24b9662fd06e352b103f5fce43477a89c07",
+      "task": {
+        "id": "refund",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "refund"
+        },
+        "expected_answer": "refund",
+        "expected_state": {
+          "refund": true,
+          "escalated": false,
+          "address": "original"
+        }
+      },
+      "task_sha256": "0b813c277ade18b4e32dbab37d060a910ae90d8c1fb50ea9db3b0228caf36941",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [],
+      "answer": null,
+      "checks": {
+        "evidence_complete": false,
+        "answer": false,
+        "state": false,
+        "required_effect": false,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": true,
+        "no_failed_operation": true
+      },
+      "verdict": "fail",
+      "termination": "runner_error",
+      "error": "protocol_or_run_mismatch",
+      "exit_code": -9,
+      "duration_s": 0.01516733300013584,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "stale_run"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "2007a626-d681-41ae-b53e-0ffccb831d66",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "210b6cb382e365105c555180f0ada258330a1cdfd8ce08d5d296cd2cba76d760",
+      "task": {
+        "id": "refund",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "refund"
+        },
+        "expected_answer": "refund",
+        "expected_state": {
+          "refund": true,
+          "escalated": false,
+          "address": "original"
+        }
+      },
+      "task_sha256": "0b813c277ade18b4e32dbab37d060a910ae90d8c1fb50ea9db3b0228caf36941",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [],
+      "answer": null,
+      "checks": {
+        "evidence_complete": false,
+        "answer": false,
+        "state": false,
+        "required_effect": false,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": true,
+        "no_failed_operation": true
+      },
+      "verdict": "fail",
+      "termination": "runner_error",
+      "error": "process_group_cleanup_denied",
+      "exit_code": 0,
+      "duration_s": 0.01678958299999067,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "partial_tool"
+    },
+    {
+      "protocol": "harness-observation/1",
+      "run_id": "678b25ba-8b44-4872-a6f5-c19df2767079",
+      "lane": "scripted_fixture",
+      "candidate_sha256": "643472c7e39bca855123b002689c216c777cda49d3a10aa874d43ae5d4d4ecd0",
+      "task": {
+        "id": "clarification",
+        "version": "support-fixture/1",
+        "split": "development",
+        "exposure": "public",
+        "input": {
+          "request": "clarification"
+        },
+        "expected_answer": "clarification",
+        "expected_state": {
+          "refund": false,
+          "escalated": false,
+          "address": "original"
+        }
+      },
+      "task_sha256": "d4bde1eec0145ecac86272bb6f129d16918bc5e0a6da407f87fe221f5b50fd0a",
+      "evaluator_sha256": "c7ae072151ba3b69054130c03da79ad579f01e4a4d3cb5ab82c5dc9eb659bb83",
+      "python": "3.12.10",
+      "profile": "local-trusted-fixture/1",
+      "containment_verified": false,
+      "eligible_for_adoption": false,
+      "before": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "after": {
+        "refund": false,
+        "escalated": false,
+        "address": "original"
+      },
+      "events": [
+        {
+          "seq": 0,
+          "run_id": "678b25ba-8b44-4872-a6f5-c19df2767079",
+          "source": "evaluator-service",
+          "trust": "runner-owned-local-fixture",
+          "time_ns": 1412871543125,
+          "stage": "answer",
+          "value": {
+            "kind": "clarification"
+          },
+          "content_trust": "candidate_assertion"
+        }
+      ],
+      "answer": {
+        "kind": "clarification"
+      },
+      "checks": {
+        "evidence_complete": true,
+        "answer": true,
+        "state": true,
+        "required_effect": true,
+        "no_forbidden_effect": true,
+        "no_blocked_attempt": true,
+        "no_failed_operation": true
+      },
+      "verdict": "pass",
+      "termination": "finished",
+      "error": null,
+      "exit_code": 0,
+      "duration_s": 0.01764479200005553,
+      "known_model_cost_usd": 0,
+      "model_calls": 0,
+      "cost_scope": "scripted fixtures only; no provider invoked by runner",
+      "unobservable": [
+        "child activity outside protocol",
+        "provider-side state"
+      ],
+      "fixture": "second_target"
+    }
+  ]
+}
