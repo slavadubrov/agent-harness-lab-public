@@ -134,4 +134,6 @@ part4-inprocess: sync
 # The key stays with the evaluator; the candidate's container never sees it.
 part4-live: sync
 	$(UV) run python -m evaluator campaign --specs $(SPECS) \
-	  --suites part4 holdout --profile docker --live --budget $(BUDGET) --out $(PART4)/live
+	  --suites part4 holdout --trials 3 --profile docker --live --budget $(BUDGET) --out $(PART4)/live
+	$(UV) run python -m evaluator campaign --specs harness/spec/base.yaml --external-tools \
+	  --suites part4 holdout --trials 3 --profile docker --live --budget $(BUDGET) --out $(PART4)/live
