@@ -1,0 +1,5 @@
+# Fixture for the evaluator's tests, not a harness: plain.yaml with targets/fixtures.py:ToolResultAsUserMessage.
+extends: ../plain.yaml
+name: fixture-tool-result-as-user
+middleware:
+  - {type: import, ref: "targets.fixtures:ToolResultAsUserMessage"}

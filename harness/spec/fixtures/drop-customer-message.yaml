@@ -1,0 +1,5 @@
+# Fixture for the evaluator's tests, not a harness: plain.yaml with targets/fixtures.py:DropCustomerMessage.
+extends: ../plain.yaml
+name: fixture-drop-customer-message
+middleware:
+  - {type: import, ref: "targets.fixtures:DropCustomerMessage"}

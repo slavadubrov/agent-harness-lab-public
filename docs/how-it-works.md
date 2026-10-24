@@ -132,8 +132,9 @@ cost for each chat call is saved next to it as a check.
 
 ## Limits
 
-- The accounting runs as a LangChain callback inside the agent process. A later
-  article moves the evaluator out of that process
-  ([`evaluator/`](../evaluator/README.md) is empty until then).
+- The accounting runs as a LangChain callback inside the agent process, and the state
+  checks run in the runner's process. The external evaluator
+  ([`evaluator/`](../evaluator/README.md)) runs the harness in a container instead and
+  keeps the tools, the model connection, the records and the checks on its side.
 - No limit on total time or spending per task.
 - Writes have no idempotency key, so retrying a write that raised after it committed would run it twice. Tool retry is therefore limited to `look_up_account`, `list_orders`, `lookup_policy` and `search_faq`. A write that raises is not retried: LangGraph's default tool node re-raises the exception, and the run ends with the error recorded. Rejections such as "No order" are returned values, not exceptions, so they still reach the model.

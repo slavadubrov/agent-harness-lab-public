@@ -1,0 +1,5 @@
+# Fixture for the evaluator's tests, not a harness: plain.yaml with targets/fixtures.py:TruncateToolResults.
+extends: ../plain.yaml
+name: fixture-truncate-tool-results
+middleware:
+  - {type: import, ref: "targets.fixtures:TruncateToolResults"}

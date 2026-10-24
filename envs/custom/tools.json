@@ -1,0 +1,217 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "look_up_account",
+      "description": "Find an account by email or account id. Returns status, addresses and preferences.",
+      "parameters": {
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Account email address."
+          },
+          "account_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Account id, for example A-100."
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "list_orders",
+      "description": "List the orders of an account with delivery age and the amount already refunded.",
+      "parameters": {
+        "properties": {
+          "account_id": {
+            "description": "Account id, for example A-100.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "issue_refund",
+      "description": "Issue a refund on an order. This writes to the database and cannot be undone.\n\n    Refunds above $200.00 are held until a supervisor approves them.",
+      "parameters": {
+        "properties": {
+          "order_id": {
+            "description": "Order id, for example O-1001.",
+            "type": "string"
+          },
+          "amount_cents": {
+            "description": "Refund amount in cents.",
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "reason": {
+            "description": "Short reason for the refund.",
+            "minLength": 3,
+            "type": "string"
+          }
+        },
+        "required": [
+          "order_id",
+          "amount_cents",
+          "reason"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "update_address",
+      "description": "Replace the shipping or billing address of an account. This writes to the database.",
+      "parameters": {
+        "properties": {
+          "account_id": {
+            "description": "Account id.",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Which address to replace.",
+            "enum": [
+              "shipping",
+              "billing"
+            ],
+            "type": "string"
+          },
+          "line1": {
+            "description": "Street and number.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "city": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "postal_code": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "country": {
+            "description": "ISO 3166-1 alpha-2.",
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "kind",
+          "line1",
+          "city",
+          "postal_code",
+          "country"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "set_preference",
+      "description": "Set one account preference. This writes to the database.",
+      "parameters": {
+        "properties": {
+          "account_id": {
+            "description": "Account id.",
+            "type": "string"
+          },
+          "key": {
+            "description": "Preference name.",
+            "enum": [
+              "marketing_emails",
+              "sms_notifications",
+              "language",
+              "paperless_billing"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "description": "New value, for example on, off, or a language code.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "key",
+          "value"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "lookup_policy",
+      "description": "Return the full company policy text for one topic.\n\n    Topics: identity, refunds, addresses, preferences, escalation.\n    ",
+      "parameters": {
+        "properties": {
+          "topic": {
+            "enum": [
+              "identity",
+              "refunds",
+              "addresses",
+              "preferences",
+              "escalation"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "topic"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "search_faq",
+      "description": "Search the help-center FAQ with a short free-text query.",
+      "parameters": {
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object"
+      }
+    }
+  }
+]

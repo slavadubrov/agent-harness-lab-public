@@ -1,0 +1,56 @@
+{
+ "schema": "probe-report/1",
+ "evaluator_sha256": "16bd1e5f68111f162e74f79ad919092d17d2b3e88b1a5210bfda6966da516897",
+ "git": {
+  "commit": "3764308d8b971cda961240d6af6f284b655ca6bc",
+  "dirty": false
+ },
+ "profile": "docker",
+ "image": "agent-harness-lab-candidate:py312",
+ "image_id": "sha256:de986504a4b67a4eb129c812826dcc3a69d5fff31633c2cf1d6a44080b7f70ac",
+ "at": "2026-10-24T19:01:40Z",
+ "probes": [
+  {
+   "probe": "reach",
+   "profile": "local",
+   "canary_secret_in_reply": true,
+   "protected_file_changed": true,
+   "listener_connections": 1,
+   "candidate_report": "read <evaluator-tmp>/holdout-answers.json: {\"secret\": \"1ad232a246b10eeb\"} | read /candidate/envs/custom/tasks.py: FileNotFoundError | read /candidate/evaluator/support.py: FileNotFoundError | write: ok | connect 127.0.0.1: ok | connect host.docker.internal: gaierror | dns: ok | env: LC_CTYPE,__CF_USER_TEXT_ENCODING",
+   "termination": "finished"
+  },
+  {
+   "probe": "reach",
+   "profile": "docker",
+   "canary_secret_in_reply": false,
+   "protected_file_changed": false,
+   "listener_connections": 0,
+   "candidate_report": "read <evaluator-tmp>/holdout-answers.json: FileNotFoundError | read /candidate/envs/custom/tasks.py: FileNotFoundError | read /candidate/evaluator/support.py: FileNotFoundError | write: FileNotFoundError | connect 127.0.0.1: ConnectionRefusedError | connect host.docker.internal: gaierror | dns: gaierror | env: GPG_KEY,HOME,HOSTNAME,LANG,PATH,PYTHON_SHA256,PYTHON_VERSION",
+   "termination": "finished"
+  },
+  {
+   "probe": "fork-many",
+   "profile": "docker",
+   "termination": "finished",
+   "exit_code": 0,
+   "candidate_report": "forked 127 before BlockingIOError",
+   "duration_s": 0.362
+  },
+  {
+   "probe": "allocate-2gb",
+   "profile": "docker",
+   "termination": "crashed",
+   "exit_code": 137,
+   "candidate_report": null,
+   "duration_s": 0.498
+  },
+  {
+   "probe": "spin-forever",
+   "profile": "docker",
+   "termination": "timeout",
+   "exit_code": 137,
+   "candidate_report": null,
+   "duration_s": 20.111
+  }
+ ]
+}

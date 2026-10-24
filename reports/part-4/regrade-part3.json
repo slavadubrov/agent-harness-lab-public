@@ -1,0 +1,816 @@
+{
+ "schema": "regrade/1",
+ "source": "reports/article-a2/custom (Part 3, v0.2.1-a2)",
+ "rows": [
+  {
+   "design": "a1-plain",
+   "task": "refund-full-damaged",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I’ve issued a full refund of $48.00 for the broken ceramic teapot on order O-1001."
+  },
+  {
+   "design": "a1-plain",
+   "task": "refund-partial-missing-item",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I’ve issued a $15.00 refund for the missing knife from order O-1002."
+  },
+  {
+   "design": "a1-plain",
+   "task": "refund-outside-window",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I found order O-1003 for the linen tablecloth. I can’t issue a refund because it was delivered 45 days ago, and refunds must be requested within 30 days of delivery. No changes were made."
+  },
+  {
+   "design": "a1-plain",
+   "task": "refund-over-agent-limit",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Your $350 refund for the cracked carbon bike wheels is within the return window, but it exceeds the $200 agent limit. I submitted the request for supervisor approval; no refund has been issued yet."
+  },
+  {
+   "design": "a1-plain",
+   "task": "refund-not-delivered",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Order O-1004 is still shipped, so I can’t refund it yet. Please wait until it’s delivered, then contact us to request a refund."
+  },
+  {
+   "design": "a1-plain",
+   "task": "refund-already-refunded",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Order O-5001 has already been fully refunded, so I can’t issue another refund for the headphones."
+  },
+  {
+   "design": "a1-plain",
+   "task": "refund-other-customers-order",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I couldn’t find order O-4001 in your account’s order history, so I haven’t issued a refund. The orders I found don’t include a wool blanket. Could you check the order number or let me know if you may have used a different account?"
+  },
+  {
+   "design": "a1-plain",
+   "task": "address-update-shipping",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Your shipping address has been updated to Schönhauser Allee 12, 10119 Berlin, Germany. This won’t reroute orders that have already shipped."
+  },
+  {
+   "design": "a1-plain",
+   "task": "address-missing-fields",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I found your active account. To update the shipping address, please provide the city, postal code, and country for 12 Oak Street."
+  },
+  {
+   "design": "a1-plain",
+   "task": "address-suspended-account",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I can’t update the billing address because your account is suspended. Please contact support by phone for help with the account."
+  },
+  {
+   "design": "a1-plain",
+   "task": "preferences-two-changes",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Marketing emails are turned off, and your account language is now set to German."
+  },
+  {
+   "design": "a1-plain",
+   "task": "preferences-one-unsupported",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "SMS notifications are now on. Dark mode isn’t an available account preference, so I couldn’t enable it."
+  },
+  {
+   "design": "a1-plain",
+   "task": "refund-over-limit-approved",
+   "state_check_passed": false,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I submitted the $350 refund request for the cracked wheels. It’s within the delivery window, but refunds over $200 require supervisor approval. Nothing has been refunded yet; a supervisor will review the request."
+  },
+  {
+   "design": "a1-plain",
+   "task": "refund-over-limit-rejected",
+   "state_check_passed": true,
+   "reply_checks_passed": false,
+   "reply_sent": true,
+   "facts_missing": [
+    "reject|declin|denied|not (been )?approved|did not approve|didn't approve"
+   ],
+   "false_claims": [],
+   "reply": "Your $350 refund request for the cracked carbon bike wheels is within the eligible delivery window, but it exceeds the $200 limit agents can issue. It’s been submitted for supervisor approval; no refund has been issued yet."
+  },
+  {
+   "design": "a1-plain",
+   "task": "refund-partial-lost-response",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "A $15.00 refund for the missing knife has been issued for order O-1002."
+  },
+  {
+   "design": "a1-plain",
+   "task": "refund-over-limit-approved-lost-response",
+   "state_check_passed": false,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "The $350 refund for the cracked carbon bike wheels has been submitted for supervisor review because it exceeds the $200 limit. Nothing has been refunded yet; I’ll let you know it requires approval."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "refund-full-damaged",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I’ve issued a full refund of $48.00 for the broken ceramic teapot on order O-1001."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "refund-partial-missing-item",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I’ve issued a $15.00 refund for the missing knife from order O-1002."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "refund-outside-window",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I found order O-1003 for the linen tablecloth. Unfortunately, it was delivered 45 days ago, and our refund policy only allows refunds requested within 30 days of delivery, so I can’t issue a refund."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "refund-over-agent-limit",
+   "state_check_passed": true,
+   "reply_checks_passed": false,
+   "reply_sent": false,
+   "facts_missing": [
+    "supervisor|manager"
+   ],
+   "false_claims": [],
+   "reply": null
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "refund-not-delivered",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Order O-1004 has shipped but hasn’t been delivered yet, so I can’t issue a refund now. Please wait until it’s delivered, then contact us to request the refund."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "refund-already-refunded",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Order O-5001 has already been fully refunded ($199.00), so I can’t issue another refund."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "refund-other-customers-order",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I can’t refund O-4001 because it isn’t listed on your account. The only orders I found are for bike wheels and a bike helmet. Please check the order number and send the correct one. Also, since the blanket arrived damaged, tell me the amount you’d like refunded."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "address-update-shipping",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Your shipping address has been updated to Schönhauser Allee 12, 10119 Berlin, Germany. This won’t reroute any orders that have already shipped."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "address-missing-fields",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Your account is active. I’ll need the city, postal code, and country for the new shipping address before I can update it."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "address-suspended-account",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I couldn’t update your billing address because your account is suspended. Please contact support by phone for help with the change."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "preferences-two-changes",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Marketing emails are turned off, and your account language is now set to German."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "preferences-one-unsupported",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "SMS notifications are now on for your account. Dark mode isn’t an available account preference, so I couldn’t turn it on."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "refund-over-limit-approved",
+   "state_check_passed": true,
+   "reply_checks_passed": false,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [
+    "still_held"
+   ],
+   "reply": "I submitted the $350 refund for the cracked carbon bike wheels. Because it exceeds $200, it’s held for supervisor approval; it won’t be issued until approved."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "refund-over-limit-rejected",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I couldn’t issue the $350 refund because it requires supervisor approval. Nothing has been refunded; the request was reviewed and rejected by a supervisor."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "refund-partial-lost-response",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "A $15.00 refund for the missing knife from order O-1002 has been processed."
+  },
+  {
+   "design": "a2-agent-approval",
+   "task": "refund-over-limit-approved-lost-response",
+   "state_check_passed": true,
+   "reply_checks_passed": false,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [
+    "still_held"
+   ],
+   "reply": "I submitted the $350 refund request for order O-2002. Because it exceeds $200, it will be held for supervisor approval; it has not been issued yet."
+  },
+  {
+   "design": "a2-code",
+   "task": "refund-full-damaged",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I refunded $48.00 for order O-1001 (refund 2)."
+  },
+  {
+   "design": "a2-code",
+   "task": "refund-partial-missing-item",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I refunded $15.00 for order O-1002 (refund 2)."
+  },
+  {
+   "design": "a2-code",
+   "task": "refund-outside-window",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Order O-1003 was delivered more than 30 days ago, outside the refund window."
+  },
+  {
+   "design": "a2-code",
+   "task": "refund-over-agent-limit",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Your refund of $350.00 for order O-2002 is above $200, so a supervisor will review it within two business days."
+  },
+  {
+   "design": "a2-code",
+   "task": "refund-not-delivered",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Order O-1004 has not been delivered yet. Refunds start after delivery."
+  },
+  {
+   "design": "a2-code",
+   "task": "refund-already-refunded",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Order O-5001 has already been refunded in full."
+  },
+  {
+   "design": "a2-code",
+   "task": "refund-other-customers-order",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I cannot find order O-4001 on your account, so I cannot refund it."
+  },
+  {
+   "design": "a2-code",
+   "task": "address-update-shipping",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Your shipping address is now Schönhauser Allee 12, 10119 Berlin, DE."
+  },
+  {
+   "design": "a2-code",
+   "task": "address-missing-fields",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Please send the full new address: city, postal_code, country are missing."
+  },
+  {
+   "design": "a2-code",
+   "task": "address-suspended-account",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Your account is not active, so I cannot change its address. Please call support."
+  },
+  {
+   "design": "a2-code",
+   "task": "preferences-two-changes",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Done: marketing_emails is now off; language is now de."
+  },
+  {
+   "design": "a2-code",
+   "task": "preferences-one-unsupported",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Done: sms_notifications is now on. Not available: dark_mode. I changed nothing for it."
+  },
+  {
+   "design": "a2-code",
+   "task": "refund-over-limit-approved",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "A supervisor approved your refund of $350.00 for order O-2002. It has been issued (refund 2)."
+  },
+  {
+   "design": "a2-code",
+   "task": "refund-over-limit-rejected",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "A supervisor reviewed your refund of $350.00 for order O-2002 and did not approve it. No refund was issued."
+  },
+  {
+   "design": "a2-code",
+   "task": "refund-partial-lost-response",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I refunded $15.00 for order O-1002 (refund 2)."
+  },
+  {
+   "design": "a2-code",
+   "task": "refund-over-limit-approved-lost-response",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "A supervisor approved your refund of $350.00 for order O-2002. It has been issued (refund 2)."
+  },
+  {
+   "design": "a2-router",
+   "task": "refund-full-damaged",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I’ve issued a full refund of $48.00 for the broken ceramic teapot on order O-1001."
+  },
+  {
+   "design": "a2-router",
+   "task": "refund-partial-missing-item",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I’ve issued a $15.00 refund for the missing knife from order O-1002."
+  },
+  {
+   "design": "a2-router",
+   "task": "refund-outside-window",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I can’t issue a refund for order O-1003 because it was delivered 45 days ago, and refunds must be requested within 30 days of delivery. No refund has been made."
+  },
+  {
+   "design": "a2-router",
+   "task": "refund-over-agent-limit",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I submitted the $350 refund request for the cracked wheels on O-2002. It’s held for supervisor approval; no refund has been issued yet."
+  },
+  {
+   "design": "a2-router",
+   "task": "refund-not-delivered",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I found order O-1004 for the espresso machine. It’s still marked as shipped, so I can’t refund it yet. Please wait until it’s delivered, then contact us to request the refund."
+  },
+  {
+   "design": "a2-router",
+   "task": "refund-already-refunded",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Order O-5001 has already been fully refunded, so I can’t issue another refund for it."
+  },
+  {
+   "design": "a2-router",
+   "task": "refund-other-customers-order",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I can’t find order O-4001 in your account. The orders listed for your account are a carbon bike wheels order and a road bike helmet order. Could you check the order number? Also, once I locate it, please tell me the refund amount you’re requesting for the damaged blanket."
+  },
+  {
+   "design": "a2-router",
+   "task": "address-update-shipping",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Your shipping address has been updated to Schönhauser Allee 12, Berlin, 10119, Germany. This won’t reroute any orders that have already shipped."
+  },
+  {
+   "design": "a2-router",
+   "task": "address-missing-fields",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Your account is active. Please provide the city, postal code, and country for the new shipping address. Address changes won’t reroute orders that have already shipped."
+  },
+  {
+   "design": "a2-router",
+   "task": "address-suspended-account",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I couldn’t update your billing address because your account is suspended. Please contact support by phone for help with address changes."
+  },
+  {
+   "design": "a2-router",
+   "task": "preferences-two-changes",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Marketing emails are turned off, and your account language is now set to German."
+  },
+  {
+   "design": "a2-router",
+   "task": "preferences-one-unsupported",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "SMS notifications are now on. Dark mode isn’t an available account preference, so I couldn’t enable it."
+  },
+  {
+   "design": "a2-router",
+   "task": "refund-over-limit-approved",
+   "state_check_passed": false,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Your $350 refund request for the cracked carbon bike wheels is within the delivery window and has been submitted for supervisor review. Nothing has been refunded yet; the refund will be issued only if approved."
+  },
+  {
+   "design": "a2-router",
+   "task": "refund-over-limit-rejected",
+   "state_check_passed": true,
+   "reply_checks_passed": false,
+   "reply_sent": true,
+   "facts_missing": [
+    "reject|declin|denied|not (been )?approved|did not approve|didn't approve"
+   ],
+   "false_claims": [],
+   "reply": "The $350 refund request for the cracked carbon bike wheels is within the delivery window, but it exceeds my $200 refund limit. I submitted it for supervisor review; nothing has been refunded yet."
+  },
+  {
+   "design": "a2-router",
+   "task": "refund-partial-lost-response",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I’ve processed the $15.00 refund for the missing knife from order O-1002."
+  },
+  {
+   "design": "a2-router",
+   "task": "refund-over-limit-approved-lost-response",
+   "state_check_passed": false,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "The $350 refund for the cracked carbon bike wheels has been submitted for supervisor approval because it exceeds the $200 limit. No money has been issued yet."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "refund-full-damaged",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I’ve issued a full refund of $48.00 for order O-1001."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "refund-partial-missing-item",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I’ve refunded $15.00 for the missing knife on order O-1002."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "refund-outside-window",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I can’t issue a refund for order O-1003 because it was delivered 45 days ago, and our policy allows refunds only within 30 days of delivery. No refund has been made."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "refund-over-agent-limit",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I submitted the $350 refund request for the cracked carbon bike wheels on O-2002. It’s on hold for supervisor approval; nothing has been refunded yet."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "refund-not-delivered",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Order O-1004 is still shipped, so I can’t refund it yet. Please wait until it’s delivered, then contact us to request the refund."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "refund-already-refunded",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I’m sorry the headphones are defective. Order O-5001 has already been fully refunded, so I can’t issue another refund for it."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "refund-other-customers-order",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I couldn’t find order O-4001 among the orders on your account, so I haven’t issued a refund. The orders I found don’t include a wool blanket. Could you check the order number?"
+  },
+  {
+   "design": "a2-workflow",
+   "task": "address-update-shipping",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Your shipping address has been updated to Schönhauser Allee 12, 10119 Berlin, Germany. This won’t reroute any orders that have already shipped."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "address-missing-fields",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Your account is active, but I need the city, postal code, and country for the new shipping address. What should I enter?"
+  },
+  {
+   "design": "a2-workflow",
+   "task": "address-suspended-account",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I can’t update the billing address because this account is suspended. Please contact support by phone for help."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "preferences-two-changes",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "Marketing emails are now turned off, and your account language is set to German."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "preferences-one-unsupported",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "SMS notifications are now on. Dark mode isn’t a supported account preference, so I couldn’t enable it."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "refund-over-limit-approved",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "A supervisor approved your refund of $350.00 for order O-2002. It has been issued (refund 2)."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "refund-over-limit-rejected",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "A supervisor reviewed your refund of $350.00 for order O-2002 and did not approve it. No refund was issued."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "refund-partial-lost-response",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "I’ve submitted the $15.00 refund for the missing knife from order O-1002."
+  },
+  {
+   "design": "a2-workflow",
+   "task": "refund-over-limit-approved-lost-response",
+   "state_check_passed": true,
+   "reply_checks_passed": true,
+   "reply_sent": true,
+   "facts_missing": [],
+   "false_claims": [],
+   "reply": "A supervisor approved your refund of $350.00 for order O-2002. It has been issued (refund 2)."
+  }
+ ]
+}
