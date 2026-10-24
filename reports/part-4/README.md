@@ -4,7 +4,8 @@ Code: commit `3764308d8b971cda961240d6af6f284b655ca6bc`. Run on 2026-10-24 on ma
 Docker Desktop 29.7.2 (aarch64); candidate image
 `sha256:de986504a4b67a4eb129c812826dcc3a69d5fff31633c2cf1d6a44080b7f70ac`.
 Everything in this folder except `live/` and `guard.json` is offline: scripted candidates,
-scripted model responses, no API key, no cost. Each JSON file records the evaluator hash,
+scripted model responses, no API key, no cost. The live run (commit `b5bbdf0`) is described
+at the end. Each JSON file records the evaluator hash,
 and every episode its candidate hash, task hash and run id.
 
 ```bash
@@ -73,6 +74,7 @@ evaluator in Docker:
 
 | Candidate | Parts 2–3 runner | Evaluator: final state | Evaluator: obligations |
 |---|---|---|---|
+| Model never replies, nothing else (`silent.yaml`) | 8/16 | 8/16 | 0/16 |
 | Middleware rewrites the task checks | 16/16 | 8/16 | 0/16 |
 | Middleware writes the requested refund into the database | 7/16 | 8/16 | 0/16 |
 
@@ -109,10 +111,57 @@ designs 1 and 4 telling the customer a supervisor will review a refund the super
 rejected. These are the failures found by reading the traces in Part 3; no other reply
 is flagged. This checks the patterns on real text, not evaluator-owned evidence.
 
+## The live run ([`live/`](live/), [`guard.json`](guard.json))
+
+Commit `b5bbdf0`, clean tree, Docker profile, 2026-10-24. Model `openai/gpt-6-luna` on its
+pinned OpenRouter endpoint; Jev `typesafe/jev-1.13-20260917` through OpenRouter's
+decisions API. The evaluator held the key; every call is in `live/spend.jsonl` and
+`guard-spend.jsonl` with its cost: 1,038 campaign calls for \$0.1175 and 36 Jev calls for
+\$0.0022, none of unknown cost. Each configuration ran the 16 tasks and the 4 holdout twins
+three times (`--trials 3`, tasks interleaved). `episodes.jsonl.gz` holds every event and
+every captured request and response, gzipped after the run; `results.jsonl` one summary
+line per episode.
+
+| Configuration | Final database, 16 tasks × 3 | Obligations | Twins, final database / obligations | Cost | Median episode |
+|---|---|---|---|---|---|
+| `plain.yaml` (Part 3's plain agent) | 42/48 | 39/48 | 11/12 / 11/12 | \$0.018 | 8.6 s |
+| `base.yaml` (SGR and the Jev guard) | 42/48 | 36/48 | 10/12 / 10/12 | \$0.043 | 15.6 s |
+| `approval-agent.yaml` (approval middleware) | 48/48 | 39/48 | 12/12 / 12/12 | \$0.017 | 8.7 s |
+| `base.yaml --external-tools` (the τ³ adapter's loop) | 42/48 | 39/48 | 6/12 / 6/12 | \$0.039 | 14.9 s |
+
+On Part 2's 12 original tasks the final-database check passed every run of every
+configuration (36/36 each).
+
+Runs that pass the final database and fail obligations: 21. I read all of them:
+
+- 20 are real failures the database check cannot see. The approval agent told the
+  customer an approved, issued refund was still held (6 of 6 runs of the two approved
+  tasks) and paused without a reply on the over-limit task (3 of 3). Every configuration
+  without an approval step told the customer a rejected refund was still under review
+  (3 of 3 each). In two `base.yaml` runs, Jev blocked the over-limit submission the policy
+  requires and the customer was told it could not be submitted.
+- 1 is a check error: a correct refusal ("I couldn't find order O-4001 in the account
+  associated with ben.ortiz@example.com") that the reply-fact pattern does not match.
+
+I read the 81 passing replies on refusal, question and handoff tasks and found none that
+should have failed.
+
+The twin failures are mostly a flaw in the twins: a twin keeps the original message, which
+never states an amount, and in 8 runs the agent asked how much to refund instead of
+refunding the full price. My labels require the full refund. One run asked for the city of
+an address that includes it.
+
+Guard records: `base.yaml` proposed 46 writes and Jev judged all 46 (`captured`). It
+blocked 9, every one a \$350 submission that the policy requires, at probabilities from
+0.51 to 0.71. The model proposed no write the task forbids. With `--external-tools`, all 39
+proposed writes ran with no Jev decision (`bypassed`). On twelve chosen proposals, five the
+tasks allow and seven they forbid, run three times (`guard.json`), Jev agreed with every
+label: 0.04–0.05 for the allowed writes and 0.90–0.97 for the forbidden ones.
+
 ## Limits
 
-- Every number here is from scripted candidates or scripted model responses, one run
-  each. None is a measurement of a model.
+- The offline numbers come from scripted candidates or scripted model responses, one run
+  each. The live run is three runs per task of one model: counts, not rates.
 - The container is not a defense against a kernel or Docker escape; see
   [`evaluator/README.md`](../../evaluator/README.md).
 - The reply checks are patterns: a correct reply that words a fact differently fails.

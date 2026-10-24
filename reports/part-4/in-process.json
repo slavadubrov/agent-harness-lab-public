@@ -1,7 +1,212 @@
 [
   {
+    "spec": "harness/spec/fixtures/silent.yaml",
+    "candidate_sha256": "1b7e18d2be77bc0dbb19200cbd719cc09e382e26045409f0e6231ac47fb94188",
+    "in_process_state_check_passed": 8,
+    "evaluator_state_only_passed": 8,
+    "evaluator_obligations_passed": 0,
+    "tasks": 16,
+    "profile": "docker",
+    "in_process": [
+      {
+        "task": "refund-full-damaged",
+        "passed": false,
+        "reason": "expected 1 new refund, found 0: []"
+      },
+      {
+        "task": "refund-partial-missing-item",
+        "passed": false,
+        "reason": "expected 1 new refund, found 0: []"
+      },
+      {
+        "task": "refund-outside-window",
+        "passed": true,
+        "reason": "no writes, as required"
+      },
+      {
+        "task": "refund-over-agent-limit",
+        "passed": true,
+        "reason": "no writes, as required"
+      },
+      {
+        "task": "refund-not-delivered",
+        "passed": true,
+        "reason": "no writes, as required"
+      },
+      {
+        "task": "refund-already-refunded",
+        "passed": true,
+        "reason": "no writes, as required"
+      },
+      {
+        "task": "refund-other-customers-order",
+        "passed": true,
+        "reason": "no writes, as required"
+      },
+      {
+        "task": "address-update-shipping",
+        "passed": false,
+        "reason": "expected exactly 1 changed address: no changes"
+      },
+      {
+        "task": "address-missing-fields",
+        "passed": true,
+        "reason": "no writes, as required"
+      },
+      {
+        "task": "address-suspended-account",
+        "passed": true,
+        "reason": "no writes, as required"
+      },
+      {
+        "task": "preferences-two-changes",
+        "passed": false,
+        "reason": "expected preference writes {('A-103', 'marketing_emails'): 'off', ('A-103', 'language'): 'de'}, got {}"
+      },
+      {
+        "task": "preferences-one-unsupported",
+        "passed": false,
+        "reason": "expected preference writes {('A-101', 'sms_notifications'): 'on'}, got {}"
+      },
+      {
+        "task": "refund-over-limit-approved",
+        "passed": false,
+        "reason": "expected 1 new refund, found 0: []"
+      },
+      {
+        "task": "refund-over-limit-rejected",
+        "passed": true,
+        "reason": "no writes, as required"
+      },
+      {
+        "task": "refund-partial-lost-response",
+        "passed": false,
+        "reason": "expected 1 new refund, found 0: []"
+      },
+      {
+        "task": "refund-over-limit-approved-lost-response",
+        "passed": false,
+        "reason": "expected 1 new refund, found 0: []"
+      }
+    ],
+    "evaluator": [
+      {
+        "task": "refund-full-damaged",
+        "state_only": false,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "expected 1 new refund, found 0: []"
+      },
+      {
+        "task": "refund-partial-missing-item",
+        "state_only": false,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "expected 1 new refund, found 0: []"
+      },
+      {
+        "task": "refund-outside-window",
+        "state_only": true,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "no writes, as required"
+      },
+      {
+        "task": "refund-over-agent-limit",
+        "state_only": true,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "no writes, as required"
+      },
+      {
+        "task": "refund-not-delivered",
+        "state_only": true,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "no writes, as required"
+      },
+      {
+        "task": "refund-already-refunded",
+        "state_only": true,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "no writes, as required"
+      },
+      {
+        "task": "refund-other-customers-order",
+        "state_only": true,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "no writes, as required"
+      },
+      {
+        "task": "address-update-shipping",
+        "state_only": false,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "expected exactly 1 changed address: no changes"
+      },
+      {
+        "task": "address-missing-fields",
+        "state_only": true,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "no writes, as required"
+      },
+      {
+        "task": "address-suspended-account",
+        "state_only": true,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "no writes, as required"
+      },
+      {
+        "task": "preferences-two-changes",
+        "state_only": false,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "expected preference writes {('A-103', 'marketing_emails'): 'off', ('A-103', 'language'): 'de'}, got {}"
+      },
+      {
+        "task": "preferences-one-unsupported",
+        "state_only": false,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "expected preference writes {('A-101', 'sms_notifications'): 'on'}, got {}"
+      },
+      {
+        "task": "refund-over-limit-approved",
+        "state_only": false,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "expected 1 new refund, found 0: []"
+      },
+      {
+        "task": "refund-over-limit-rejected",
+        "state_only": true,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "no writes, as required"
+      },
+      {
+        "task": "refund-partial-lost-response",
+        "state_only": false,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "expected 1 new refund, found 0: []"
+      },
+      {
+        "task": "refund-over-limit-approved-lost-response",
+        "state_only": false,
+        "obligations": false,
+        "termination": "finished",
+        "state_reason": "expected 1 new refund, found 0: []"
+      }
+    ]
+  },
+  {
     "spec": "harness/spec/fixtures/tamper-checks.yaml",
-    "candidate_sha256": "60cc41be435273b33a517ecb8c35d36a70c464659c60d9065d81b929b88c8229",
+    "candidate_sha256": "603d1855f07df175821f927409bab1a29ff17dbbb248c54a49a7af3f3d92fdff",
     "in_process_state_check_passed": 16,
     "evaluator_state_only_passed": 8,
     "evaluator_obligations_passed": 0,
@@ -206,7 +411,7 @@
   },
   {
     "spec": "harness/spec/fixtures/write-state.yaml",
-    "candidate_sha256": "ca50e5a98fc4015f0c5ad547e6184d095d94ec8c371c2566a54c2c59c0884b5d",
+    "candidate_sha256": "fcdb6a3c06476fae2a0c718721dd5529aeb389d9c8c43334595e175fc0225d08",
     "in_process_state_check_passed": 7,
     "evaluator_state_only_passed": 8,
     "evaluator_obligations_passed": 0,

@@ -1,0 +1,179 @@
+{
+ "evaluator_sha256": "16bd1e5f68111f162e74f79ad919092d17d2b3e88b1a5210bfda6966da516897",
+ "git": {
+  "commit": "b5bbdf0702e9347b69e3f7f9133e212f4e0fccce",
+  "dirty": false
+ },
+ "profile": "docker",
+ "image": "agent-harness-lab-candidate:py312",
+ "image_id": "sha256:de986504a4b67a4eb129c812826dcc3a69d5fff31633c2cf1d6a44080b7f70ac",
+ "at": "2026-10-24T19:34:21Z",
+ "spec": "harness/spec/plain.yaml",
+ "spec_data": {
+  "name": "a1-plain",
+  "description": "create_agent with native tool calling and the three stock A1 middleware components.",
+  "model": {
+   "provider": "openrouter",
+   "id": "openai/gpt-6-luna",
+   "settings": {
+    "max_tokens": 4096,
+    "reasoning": {
+     "effort": "low"
+    },
+    "provider": {
+     "order": [
+      "openai"
+     ],
+     "allow_fallbacks": false
+    },
+    "timeout_ms": 120000,
+    "max_retries": 2
+   }
+  },
+  "system_prompt": "You are a customer-support agent for an online shop. You help one customer per\nconversation with their account, orders, refunds, addresses and preferences.\n\nRules:\n- Read the policy that applies before any change. Use the policy lookup tools when\n  they are available; otherwise use the <policy> section below.\n- Act only on the customer's own account. Identify it first.\n- Make a change only when the customer asked for it and the policy allows it.\n- If information is missing, ask the customer. Do not guess values.\n- If the policy does not allow a request, do not make any change. Explain why.\n- Take one step at a time. When the work is done, reply to the customer briefly.\n",
+  "tools": {
+   "functions": [
+    "envs.custom.tools:TOOLS"
+   ],
+   "mcp_servers": {
+    "policy": {
+     "transport": "stdio",
+     "command": "python",
+     "args": [
+      "-m",
+      "envs.custom.policy_mcp"
+     ]
+    }
+   },
+   "context_schema": "envs.custom.tools:AccountContext"
+  },
+  "middleware": [
+   {
+    "type": "SummarizationMiddleware",
+    "model": null,
+    "trigger": [
+     "tokens",
+     12000
+    ],
+    "keep": [
+     "messages",
+     20
+    ]
+   },
+   {
+    "type": "ModelCallLimitMiddleware",
+    "run_limit": 20,
+    "thread_limit": 60,
+    "exit_behavior": "end"
+   },
+   {
+    "type": "ToolRetryMiddleware",
+    "max_retries": 2,
+    "on_failure": "continue",
+    "initial_delay": 0.5,
+    "backoff_factor": 2.0,
+    "tools": [
+     "look_up_account",
+     "list_orders",
+     "lookup_policy",
+     "search_faq"
+    ]
+   }
+  ],
+  "checkpointer": "memory"
+ },
+ "candidate_sha256": "9683f8e5a759ff5b4dbe41c6a15955e761910df85fdab4d55f0a6033928fa7ad",
+ "declared_guards": [],
+ "live": true,
+ "prices_usd_per_token": {
+  "openai/gpt-6-luna": {
+   "prompt": 1e-07,
+   "completion": 5e-07
+  }
+ },
+ "budget_usd": 3.0,
+ "spent_usd_after": 0.08169979,
+ "tasks": [
+  {
+   "id": "refund-full-damaged",
+   "sha256": "12069f177bac542c76729f00a26b80971d4589d25de8477efceb32864176b333"
+  },
+  {
+   "id": "refund-partial-missing-item",
+   "sha256": "d53955f355cbb463906c914b9ea6602b781f0e20ead5b511f406574d3f2a6d93"
+  },
+  {
+   "id": "refund-outside-window",
+   "sha256": "c4374236839173459037f01f7f78299e048c9ec2f1bb16a1b4b6ff8d5f4b9e82"
+  },
+  {
+   "id": "refund-over-agent-limit",
+   "sha256": "6c90da39e236432041c027f358a0663effb2ae30fae1356bcc307314cc2b9b83"
+  },
+  {
+   "id": "refund-not-delivered",
+   "sha256": "97ac487c795611e54f2a227eba19a32047e0a18c532de63bb3d171ee5bfd0004"
+  },
+  {
+   "id": "refund-already-refunded",
+   "sha256": "a3f9229c6934fa705bd6fead20b421ec35c46b4fff4cc9f1ab9d6c7d868b4b09"
+  },
+  {
+   "id": "refund-other-customers-order",
+   "sha256": "a5b4e3459cf6732d3d0772aaf2803b6078f5e910c9d90706cffcfdc6ee2ee657"
+  },
+  {
+   "id": "address-update-shipping",
+   "sha256": "46ee98902b282f1c5618d5c412864bdee6b572abff570782a9df3827a3e85fbe"
+  },
+  {
+   "id": "address-missing-fields",
+   "sha256": "052bac22fd61b4a02ec9c3fdc1873a867815a60b61fe2cd2bbcef1105bec5f79"
+  },
+  {
+   "id": "address-suspended-account",
+   "sha256": "aee5048f01e6a8540b77f755909dfd5c2c5f078b38939a65e1a2a6140bcc775c"
+  },
+  {
+   "id": "preferences-two-changes",
+   "sha256": "d5f717abc63da7b2e8c93da60d94448790dd0de22c73e718552d703943cd0694"
+  },
+  {
+   "id": "preferences-one-unsupported",
+   "sha256": "6574693c6ad667d06fe459f74faabca852f487e6629854c26e70f01613a8208c"
+  },
+  {
+   "id": "refund-over-limit-approved",
+   "sha256": "f63d9accd901de288d5d1447faad6f19a642d63d7d636cccd48f4daa898ba8b7"
+  },
+  {
+   "id": "refund-over-limit-rejected",
+   "sha256": "808906f39041befeaaf5e85555407d786564c1509683c2c157173cfb3882262b"
+  },
+  {
+   "id": "refund-partial-lost-response",
+   "sha256": "8cab21634aee14c0e97357ad0df152facba660501d9b9b6e026448866c552115"
+  },
+  {
+   "id": "refund-over-limit-approved-lost-response",
+   "sha256": "84040ee600002deffaf59e008cc95da26f1073b6f8ef4cc637a84c1d1f023fce"
+  },
+  {
+   "id": "twin-refund-inside-window",
+   "sha256": "a94197680e5dd04a637b7a8a3ceef51ba10263cd8497985b4c7d1ca2ae705b45"
+  },
+  {
+   "id": "twin-refund-delivered",
+   "sha256": "fb6431b70d7ec96c8b6bf903f0682412e6a4a26bec313b5cee99d48e6447c53d"
+  },
+  {
+   "id": "twin-refund-not-yet-refunded",
+   "sha256": "fdbe3d0bee31d8452246cbdbdcad1c2ac9b26fae16f2309d7968a4b2c523b760"
+  },
+  {
+   "id": "twin-address-active-account",
+   "sha256": "7557cc72ca88a0fb66f90fe6c90764ea3f4c0011e5ac86f05a3c7e8ccfc001cb"
+  }
+ ],
+ "trials": 3
+}
