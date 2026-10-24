@@ -368,3 +368,19 @@ def test_guard_command_keeps_label_prediction_and_effect(tmp_path, monkeypatch):
         "allow",
         False,
     )
+
+
+def test_episode_record_keeps_the_fields_later_parts_consume():
+    """The result contract: what an improver or an audit may read from an episode."""
+    e = run("false-handoff", "refund-over-agent-limit")
+    assert e["schema"] == "episode/1"
+    assert {"id", "split", "outcome", "sha256"} <= set(e["task"])
+    assert {"label", "sha256", "entry"} <= set(e["candidate"])
+    assert {"name", "containment", "image", "image_id", "flags"} <= set(e["profile"])
+    assert {"state_only", "obligations"} == set(e["verdict"])
+    assert {"known_cost_usd", "unknown_cost_calls", "model_calls"} <= set(e["usage"])
+    for key in ("run_id", "evaluator_sha256", "events", "events_sha256", "reply"):
+        assert key in e
+    for key in ("termination", "error", "checks", "details", "guard", "assembly"):
+        assert key in e
+    assert all(ev["source"] == "evaluator" for ev in e["events"])

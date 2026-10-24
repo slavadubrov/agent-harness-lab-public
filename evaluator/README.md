@@ -137,7 +137,8 @@ is an experiment with one changed input, not a reproduction of the original deci
 split and hash; candidate hash and entry; evaluator hash; profile, image id and flags;
 every event; reply; termination; checks and both verdicts; refund operations; guard
 records; assembly checks; model and classifier calls with known cost and the number of
-calls whose cost is unknown. `runner.accepts()` accepts a stored pass only for the exact
+calls whose cost is unknown. `test_episode_record_keeps_the_fields_later_parts_consume`
+pins these fields for anything that reads results later. `runner.accepts()` accepts a stored pass only for the exact
 candidate files, task definition and evaluator version that produced it. A hash names
 what ran; it does not prove who ran it. Accept results only from the evaluator's own
 storage, never from a candidate.
