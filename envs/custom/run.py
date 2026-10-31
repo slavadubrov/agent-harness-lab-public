@@ -219,7 +219,11 @@ async def main_async(args) -> int:
     if unknown := set(wanted) - {t.id for t in suite}:
         raise SystemExit(f"unknown task ids for suite {args.suite}: {sorted(unknown)}")
     tasks = [t for t in suite if t.id in wanted]
-    run_dir = BUILD / f"{spec.name}-{time.strftime('%Y%m%d-%H%M%S')}"
+    run_dir = (
+        Path(args.workdir).resolve()
+        if args.workdir
+        else BUILD / f"{spec.name}-{time.strftime('%Y%m%d-%H%M%S')}"
+    )
     # A --tasks run is partial: it writes to build/ unless --out says otherwise, so it
     # never replaces the committed full-run files in reports/.
     reports = REPO_ROOT / "reports" / f"article-{args.suite}" / "custom"
@@ -290,6 +294,7 @@ def main() -> None:
     p.add_argument("--tasks", default="", help="comma-separated task ids (default: all)")
     p.add_argument("--out", default="")
     p.add_argument("--concurrency", type=int, default=4)
+    p.add_argument("--workdir", default="", help="where each task's start and final databases go")
     raise SystemExit(asyncio.run(main_async(p.parse_args())))
 
 

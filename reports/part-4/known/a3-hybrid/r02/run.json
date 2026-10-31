@@ -1,0 +1,263 @@
+{
+  "env": "custom",
+  "label": "run 2 of 10",
+  "suite": "a2",
+  "batch": "k10",
+  "run": 2,
+  "runs": 10,
+  "spec_hash": "9926c819eb5a1fd05f7208b5b78f9b777ad5d77e2960a58d07adfa3fd0ffbe20",
+  "price_table": "openrouter-2026-10-05",
+  "live_prices_match": true,
+  "started_at": "2026-10-15T14:43:12Z",
+  "finished_at": "2026-10-15T14:43:18Z",
+  "spec": {
+    "kind": "workflow",
+    "name": "a3-hybrid",
+    "description": "Jev sends known requests to code, the rest to an agent, unclear ones to a question.",
+    "engine": {
+      "name": "langgraph",
+      "ref": null,
+      "kwargs": {}
+    },
+    "state_schema": "envs.custom.code_workflow:HybridCase",
+    "context_schema": "envs.custom.tools:AccountContext",
+    "nodes": {
+      "route": {
+        "type": "classifier",
+        "model": "typesafe/jev-1.13-20260917",
+        "endpoint": "openrouter-decisions",
+        "price_model_id": "typesafe/jev-1.13",
+        "price_provider_tag": "typesafe",
+        "instructions": "Which team should handle this customer request?",
+        "choices": {
+          "refund": "Refunds, returns, damaged or missing items, money back.",
+          "account": "Address changes and account preferences (email, SMS, language, billing).",
+          "other": "Anything else that is one clear request.",
+          "unclear": "Two or more different requests in one message, or too vague to act on."
+        },
+        "input": "{request}",
+        "output": "route",
+        "confidence_output": "route_confidence",
+        "probabilities_output": "route_probabilities",
+        "timeout_s": 30.0
+      },
+      "decide": {
+        "type": "function",
+        "ref": "envs.custom.code_workflow:choose_path",
+        "kwargs": {
+          "threshold": 0.9
+        },
+        "retry": null
+      },
+      "read": {
+        "type": "structured",
+        "model": {
+          "provider": "openrouter",
+          "id": "openai/gpt-6-luna",
+          "settings": {
+            "max_tokens": 1024,
+            "temperature": null,
+            "reasoning": {
+              "effort": "low"
+            },
+            "provider": {
+              "order": [
+                "openai"
+              ],
+              "allow_fallbacks": false
+            },
+            "timeout_ms": 120000,
+            "max_retries": 2
+          },
+          "ref": null,
+          "kwargs": {}
+        },
+        "output_schema": "envs.custom.code_workflow:Request",
+        "prompt": "Read this message to an online shop's customer support and fill in the fields.\n\n{request}\n",
+        "writes": {
+          "kind": "kind",
+          "amount_cents": "amount_cents",
+          "address": "address",
+          "settings": "settings"
+        },
+        "method": "function_calling"
+      },
+      "handle": {
+        "type": "function",
+        "ref": "envs.custom.code_workflow:handle",
+        "kwargs": {},
+        "retry": {
+          "max_attempts": 3,
+          "initial_interval": 0.5,
+          "retry_on": [
+            "builtins:ConnectionError"
+          ]
+        }
+      },
+      "agent": {
+        "type": "agent",
+        "agent": {
+          "spec": "harness/spec/plain.yaml",
+          "override": {}
+        },
+        "message": "{request}",
+        "output": "answer"
+      },
+      "clarify": {
+        "type": "function",
+        "ref": "envs.custom.approval:ask_to_clarify",
+        "kwargs": {},
+        "retry": null
+      },
+      "find_held": {
+        "type": "function",
+        "ref": "envs.custom.approval:find_held",
+        "kwargs": {},
+        "retry": null
+      },
+      "approval": {
+        "type": "function",
+        "ref": "envs.custom.approval:wait_for_supervisor",
+        "kwargs": {},
+        "retry": null
+      },
+      "issue": {
+        "type": "function",
+        "ref": "envs.custom.approval:issue_approved",
+        "kwargs": {},
+        "retry": {
+          "max_attempts": 3,
+          "initial_interval": 0.5,
+          "retry_on": [
+            "builtins:ConnectionError"
+          ]
+        }
+      },
+      "reply": {
+        "type": "function",
+        "ref": "envs.custom.approval:reply",
+        "kwargs": {},
+        "retry": null
+      }
+    },
+    "edges": [
+      [
+        "START",
+        "route"
+      ],
+      [
+        "route",
+        "decide"
+      ],
+      [
+        "read",
+        "handle"
+      ],
+      [
+        "handle",
+        "find_held"
+      ],
+      [
+        "agent",
+        "find_held"
+      ],
+      [
+        "approval",
+        "issue"
+      ],
+      [
+        "issue",
+        "reply"
+      ],
+      [
+        "reply",
+        "END"
+      ],
+      [
+        "clarify",
+        "END"
+      ]
+    ],
+    "conditional_edges": [
+      {
+        "source": "decide",
+        "field": "path",
+        "router": null,
+        "routes": {
+          "code": "read",
+          "agent": "agent",
+          "clarify": "clarify"
+        },
+        "default": null
+      },
+      {
+        "source": "find_held",
+        "field": "next_step",
+        "router": null,
+        "routes": {
+          "approval": "approval"
+        },
+        "default": "END"
+      }
+    ],
+    "checkpointer": "memory",
+    "source": "harness/spec/workflows/hybrid.yaml"
+  },
+  "prices_usd_per_token": [
+    {
+      "model_id": "openai/gpt-6-luna",
+      "provider_tag": "openai",
+      "prompt": 1e-07,
+      "completion": 5e-07,
+      "input_cache_read": 1e-08,
+      "input_cache_write": 1.25e-07,
+      "fetched_at": "2026-10-05T20:59:10Z",
+      "source": "https://openrouter.ai/api/v1/models/openai/gpt-6-luna/endpoints"
+    },
+    {
+      "model_id": "typesafe/jev-1.13",
+      "provider_tag": "typesafe",
+      "prompt": 4.2e-08,
+      "completion": 0.0,
+      "input_cache_read": 0.0,
+      "input_cache_write": 0.0,
+      "fetched_at": "2026-10-05T21:00:38Z",
+      "source": "https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints"
+    }
+  ],
+  "packages": {
+    "langchain": "1.4.2",
+    "langchain-core": "1.6.5",
+    "langgraph": "1.2.12",
+    "langchain-mcp-adapters": "0.3.2",
+    "langchain-openai": "1.6.5",
+    "langchain-openrouter": "0.2.9",
+    "langchain-typesafe": "0.0.1a3",
+    "mcp": "1.30.0",
+    "pydantic": "2.12.5",
+    "tau2": "1.0.1",
+    "litellm": "1.82.6"
+  },
+  "git": {
+    "sha": "d33319b1d14361e82bd968d36f1c5a86504fe403",
+    "dirty": false
+  },
+  "tasks": [
+    "refund-full-damaged",
+    "refund-partial-missing-item",
+    "refund-outside-window",
+    "refund-over-agent-limit",
+    "refund-not-delivered",
+    "refund-already-refunded",
+    "refund-other-customers-order",
+    "address-update-shipping",
+    "address-missing-fields",
+    "address-suspended-account",
+    "preferences-two-changes",
+    "preferences-one-unsupported",
+    "refund-over-limit-approved",
+    "refund-over-limit-rejected",
+    "refund-partial-lost-response",
+    "refund-over-limit-approved-lost-response"
+  ]
+}

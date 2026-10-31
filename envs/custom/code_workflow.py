@@ -178,3 +178,8 @@ def handle(state: CodeCase, ctx: NodeContext) -> dict[str, Any]:
     if state.kind == "preferences":
         return {"answer": _preferences(state, ctx, account)}
     return {"answer": "I have passed your message to a colleague, who will reply soon."}
+
+
+def do_nothing(state: CaseState, ctx: NodeContext) -> dict[str, Any]:
+    """The baseline of ``do-nothing.yaml``: no model call, no write and no reply."""
+    return {}

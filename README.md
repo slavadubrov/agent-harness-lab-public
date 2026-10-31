@@ -1,16 +1,21 @@
 # agent-harness-lab
 
-A small, runnable agent harness for a customer-support assistant, built on LangChain.
+A small, runnable agent harness for a customer-support assistant, built on LangChain,
+and an evaluator for it.
 
-This is the demo for the series **Building and Evaluating Agent Harnesses**:
+This is the demo for the series **Recursive Harness Engineering**:
 
-- Part 1, [Designing an agent harness: from task to architecture](https://slavadubrov.com/blog/2026/09/28/first-langchain-agent-harness/),
+- Part 2, [Designing an agent harness: from task to architecture](https://slavadubrov.com/blog/2026/09/28/first-langchain-agent-harness/),
   builds one agent from a spec file. Release
   [`v0.1.2-a1`](https://github.com/slavadubrov/agent-harness-lab-public/tree/v0.1.2-a1).
-- Part 2, [When an agent needs a workflow](https://slavadubrov.com/blog/2026/10/05/agent-to-workflow/),
-  adds a supervisor approval for large refunds and compares three ways to build it:
-  the plain agent, the agent with an approval pause, and a LangGraph workflow around the
-  agent. Release `v0.2.0-a2`.
+- Part 3, [Agent or workflow: five designs for one support assistant](https://slavadubrov.com/blog/2026/10/08/agent-to-workflow/),
+  adds a supervisor approval for large refunds and compares five designs, from the plain
+  agent to a workflow with no agent. Release
+  [`v0.2.1-a2`](https://github.com/slavadubrov/agent-harness-lab-public/tree/v0.2.1-a2).
+- Part 4, on evaluating a harness, grades the same designs with the model held fixed:
+  checks on actions and replies, 10 runs per design, and 32 messages none of them was
+  written for. The evaluator in [`evaluator/`](evaluator/) is built on the separate
+  [harness-evals](https://github.com/slavadubrov/harness-evals) package.
 
 The assistant handles refunds, address changes and account preferences. One YAML file
 defines an agent: model, prompt, tools and middleware. A workflow file connects agents,
@@ -30,7 +35,8 @@ check the final database.
 | [`harness/spec/`](harness/spec/) | Agent specs (`base.yaml`, `plain.yaml`, `approval-agent.yaml`, …) and workflow specs in `workflows/` |
 | [`envs/custom/`](envs/custom/) | 16 support tasks, a SQLite database, 5 account tools, the refund service, a policy MCP server, the supervisor approval steps and the router evaluation |
 | [`envs/tau3/`](envs/tau3/) | Adapter that runs the same harness on 8 τ³-bench retail tasks |
-| [`reports/article-a1/`](reports/article-a1/), [`reports/article-a2/`](reports/article-a2/) | Saved results, traces and package versions for each part |
+| [`evaluator/`](evaluator/) | Part 4: the support use case for harness-evals, and adapters for saved and live runs |
+| [`reports/article-a1/`](reports/article-a1/), [`reports/article-a2/`](reports/article-a2/), [`reports/part-4/`](reports/part-4/) | Saved results, traces and package versions for each part |
 | [`tests/`](tests/) | Offline tests with fake models |
 
 ## How one task runs
@@ -59,6 +65,7 @@ check the final database.
 
 `glm-5.3-flash.yaml` and `mimo-v2.6-flash.yaml` are `base.yaml` with another model.
 `workflows/support-router-clarify.yaml` adds a route that asks the customer to clarify.
+`workflows/do-nothing.yaml` makes no model call, no write and no reply: Part 4's baseline.
 
 ## Run it
 
@@ -70,26 +77,30 @@ git clone https://github.com/slavadubrov/agent-harness-lab-public
 cd agent-harness-lab-public
 cp .env.example .env                        # set OPENROUTER_API_KEY
 make test                                   # offline, no key needed
-make a2-matrix                              # Part 2: five specs on the 16 custom tasks
-make a2-routes                              # Part 2: score both routers on 25 labelled requests
+make a2-matrix                              # Part 3: five specs on the 16 custom tasks
+make a2-routes                              # Part 3: score both routers on 25 labelled requests
 make a2-custom SPEC=harness/spec/workflows/refund-approval.yaml   # one spec
-make a1-custom SPEC=harness/spec/plain.yaml # Part 1: 12 custom tasks
-make a1-tau3   SPEC=harness/spec/plain.yaml # Part 1: 8 τ³-bench retail tasks
+make a1-custom SPEC=harness/spec/plain.yaml # Part 2: 12 custom tasks
+make a1-tau3   SPEC=harness/spec/plain.yaml # Part 2: 8 τ³-bench retail tasks
+make part4-regrade                          # Part 4: grade the saved runs, offline
+make part4-live TRIALS=5                    # Part 4: new runs of the five designs, paid
 ```
 
 Without `SPEC`, the `a1-*` targets use `base.yaml`. Each run prints one line per task
 and replaces the files under `reports/article-<part>/<env>/<spec>/`. Use `git diff` to
-compare your run with the saved one. `make help` lists every target. The Part 2 runs cost
+compare your run with the saved one. `make help` lists every target. The Part 3 runs cost
 about $0.02 in total on 2026-10-05 prices.
 
 ## Results
 
-[`reports/article-a2/NOTES.md`](reports/article-a2/NOTES.md) and
-[`reports/article-a1/NOTES.md`](reports/article-a1/NOTES.md) summarize the saved runs of
-each part; the `README.md` next to each has the per-task tables. Each row is a single run
-per task, so small differences between rows are not measured effects.
+[`reports/article-a2/NOTES.md`](reports/article-a2/NOTES.md) (Part 3) and
+[`reports/article-a1/NOTES.md`](reports/article-a1/NOTES.md) (Part 2) summarize the saved
+single runs; the `README.md` next to each has the per-task tables. Each row is a single
+run per task, so small differences between rows are not measured effects.
+[`reports/part-4/RESULTS.md`](reports/part-4/RESULTS.md) grades 10 runs per design with
+intervals, and [`reports/part-4/README.md`](reports/part-4/README.md) says how they were made.
 
-The article quotes the runs saved at tag
+Part 2 quotes the runs saved at tag
 [`v0.1.2-a1`](https://github.com/slavadubrov/agent-harness-lab-public/tree/v0.1.2-a1/reports/article-a1).
 [`reports/article-a1-rerun-2026-09-26/`](reports/article-a1-rerun-2026-09-26/) keeps a later
 rerun of the same specs on this repository; its τ³-bench results differ by one task per spec.
@@ -112,10 +123,10 @@ rerun of the same specs on this repository; its τ³-bench results differ by one
 - There is no limit on total time or spending per task.
 - The supervisor is a script, and the checkpointer is in memory: a paused case does not
   survive a restart. A real approval step needs a persistent checkpointer.
-- The checks read the database only, not the reply. Part 2's reply findings come from
-  reading the traces.
-- The checks and the cost accounting run in the same process as the agent.
-- One run per task. Later articles add a separate evaluator and repeated runs.
+- The runner's own checks read the database only. Part 4's evaluator adds checks on
+  the refunds, the reply and the expected outcome, and runs live designs in a separate
+  process; it does not sandbox them.
+- The cost accounting runs in the same process as the agent.
 
 A spec can import Python code and start MCP server commands. Treat a spec file as code
 and review it before you run it.

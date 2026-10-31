@@ -6,8 +6,9 @@ never from an estimate. Dollars are tokens x the per-token price of the pinned
 OpenRouter endpoint. OpenRouter's own billed cost per chat call
 (``response_metadata["cost"]``) is recorded next to it as a cross-check.
 
-This recorder is a LangChain callback, so it runs inside the harness process. That is
-fine for these baselines; a later part of the series moves it to a separate evaluator.
+This recorder is a LangChain callback, so it runs inside the harness process. The Part 4
+evaluator (evaluator/) still reads tokens and cost from it; only the database checks moved
+out of the harness process.
 """
 
 from __future__ import annotations
