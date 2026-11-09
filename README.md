@@ -13,8 +13,8 @@ This is the demo for the series **Recursive Harness Engineering**:
   agent to a workflow with no agent. Release
   [`v0.2.1-a2`](https://github.com/slavadubrov/agent-harness-lab-public/tree/v0.2.1-a2).
 - Part 4, on evaluating a harness, grades the same designs with the model held fixed:
-  checks on actions and replies, 10 runs per design, and 32 messages none of them was
-  written for. The evaluator in [`evaluator/`](evaluator/) is built on the separate
+  checks on actions and replies, 10 runs per design, 32 messages none of them was
+  written for, and success, cost and latency side by side with intervals. The evaluator in [`evaluator/`](evaluator/) is built on the separate
   [harness-evals](https://github.com/slavadubrov/harness-evals) package.
 
 The assistant handles refunds, address changes and account preferences. One YAML file
