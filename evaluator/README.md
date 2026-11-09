@@ -36,7 +36,9 @@ prices). It runs the 16 known tasks unless `SPLIT=new`. With
 tokens, each with a 95% interval that resamples whole tasks. It then lists the frontier:
 the designs no other design beats on both success and cost per task, or on both success
 and p95 latency. `make part4-regrade` also draws those plots, graded with the judge, to
-`reports/part-4/frontier-{known,new}-{cost,latency}.svg`.
+`reports/part-4/frontier-{known,new}-{cost,latency}.svg`. It also draws where each design
+fails, graded with the judge: tasks in rows and, in a panel per design, the kinds of check
+or the runs in columns (`reports/part-4/failures-{known,new}-by-{check,run}.svg`).
 
 A design that misses the bar is replaced by any candidate that clears it. Between two
 designs that clear the bar, a comparison adopts the candidate for higher success, or for

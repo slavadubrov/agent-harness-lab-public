@@ -9,6 +9,7 @@ in it calls a model.
 | `new/<spec>/r01..r05/` | 5 runs of each design on 32 new messages the designs were not written for |
 | `labels/` | 60 replies with labels, used to measure the judge and the held-reply check |
 | `frontier-*.svg` | Success with the judge against cost per task and against p95 latency, with intervals on both axes |
+| `failures-*.svg` | Where each design fails, graded with the judge: tasks by kind of check, or tasks by run |
 
 Each run folder has `results.jsonl` (one row per task), `traces.jsonl` (every message,
 model call, tool call and event), `run.json` (spec, prices, package versions, commit) and
