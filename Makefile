@@ -1,4 +1,4 @@
-# agent-harness-lab — Part 1 (a1-*) and Part 2 (a2-*) targets. Needs uv and OPENROUTER_API_KEY (or OPEN_ROUTER_API_KEY) in .env or the environment.
+# agent-harness-lab — targets for Parts 2 (a1-*), 3 (a2-*) and 4 (part4-*). Needs uv and OPENROUTER_API_KEY (or OPEN_ROUTER_API_KEY) in .env or the environment.
 SHELL := /bin/bash
 UV ?= uv
 SPEC ?= harness/spec/base.yaml
@@ -17,7 +17,7 @@ TAU3_CONCURRENCY ?= 4
 CUSTOM_SPECS := harness/spec/base.yaml harness/spec/plain.yaml harness/spec/glm-5.3-flash.yaml harness/spec/mimo-v2.6-flash.yaml
 A2_SPECS := harness/spec/plain.yaml harness/spec/approval-agent.yaml harness/spec/workflows/refund-approval.yaml harness/spec/workflows/support-router.yaml harness/spec/workflows/support-code.yaml
 
-.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2
+.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 part4-regrade part4-agreement part4-compare part4-live
 
 help:
 	@echo "make a1-custom          run the custom environment dev set with SPEC (default base.yaml)"
@@ -29,6 +29,10 @@ help:
 	@echo "make a2-matrix          run the Part 2 task set with plain, approval agent, workflow, router"
 	@echo "make a2-routes          score both routers' classifiers on 25 labelled requests"
 	@echo "make report-a2          rebuild reports/article-a2/README.md"
+	@echo "make part4-regrade      offline: grade the saved Part 4 runs, write reports/part-4/RESULTS.md"
+	@echo "make part4-agreement    offline: the judge and the held-reply check against labels"
+	@echo "make part4-compare      offline: BASE=<spec> CANDIDATE=<spec> [SPLIT=dev|new] [LEVEL=...]"
+	@echo "make part4-live         paid: TRIALS=5 PART4_SPECS=\"<spec files>\" [SPLIT=dev|new]"
 	@echo "make test | fmt | lint"
 
 sync:
@@ -104,3 +108,21 @@ a1-tau3-matrix:
 
 report:
 	$(UV) run python scripts/report_a1.py
+
+# Part 4: the evaluator (evaluator/, built on harness-evals).
+TRIALS ?= 5
+SPLIT ?= dev
+LEVEL ?= obligations
+PART4_SPECS ?= $(A2_SPECS)
+
+part4-regrade: sync
+	$(UV) run python -m evaluator regrade
+
+part4-agreement: sync
+	$(UV) run python -m evaluator agreement
+
+part4-compare: sync
+	$(UV) run python -m evaluator compare $(BASE) $(CANDIDATE) --split $(SPLIT) --level $(LEVEL)
+
+part4-live: sync
+	$(UV) run python -m evaluator live --trials $(TRIALS) --split $(SPLIT) $(PART4_SPECS)

@@ -15,6 +15,8 @@ dependencies = [
     # τ³-bench (package name tau2), pinned to commit b7ea907 (v1.0.1 + 46 commits).
     "tau2 @ git+https://github.com/sierra-research/tau2-bench@b7ea9074c1cba482b30687fecdb5c8425fd6f619",
     "langchain-typesafe[experimental]==0.0.1a3",
+    # The Part 4 evaluator (evaluator/); pinned to tag v0.2.0 in [tool.uv.sources].
+    "harness-evals",
 ]
 
 [dependency-groups]
@@ -25,6 +27,9 @@ dev = [
 
 [tool.uv]
 package = false
+
+[tool.uv.sources]
+harness-evals = { git = "https://github.com/slavadubrov/harness-evals", rev = "v0.2.0" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

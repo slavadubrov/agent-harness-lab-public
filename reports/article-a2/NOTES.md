@@ -86,7 +86,8 @@ confidence is below the threshold.
 - The code workflow's rules were written from the policy with the 16 tasks in view. It
   was not run on the 25 routing requests or on other wordings; a request of another kind
   goes to a colleague (`kind: other`), and a message that names no order gets a question.
-- One run per task and 25 routing requests. Repeated runs come in a later part.
+- One run per task and 25 routing requests. Part 4 grades 10 runs per design
+  (`reports/part-4/`).
 - The labels were written by the author, not by independent annotators.
 - The 0.8 threshold was not chosen on separate data. It shows the trade-off on these 25
   requests; a threshold for real traffic needs a held-out set.

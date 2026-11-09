@@ -1,0 +1,911 @@
+{
+ "frozen": {
+  "model": "openai/gpt-6-luna",
+  "endpoint": "openrouter, provider openai, no fallbacks"
+ },
+ "splits": {
+  "dev": {
+   "state": {
+    "a3-do-nothing": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.5,
+     "success_ci": [
+      0.25,
+      0.75
+     ],
+     "pass^k": 0.5,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0,
+     "cost_per_success": 0.0,
+     "unknown_cost": 0,
+     "latency_p50": 0.003,
+     "latency_p95": 0.005,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [],
+     "names refund id": null,
+     "model calls": 0.0
+    },
+    "a1-plain": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.86875,
+     "success_ci": [
+      0.68125,
+      1.0
+     ],
+     "pass^k": 0.8125,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0002603913125,
+     "cost_per_success": 0.0002997310071942446,
+     "unknown_cost": 0,
+     "latency_p50": 7.336,
+     "latency_p95": 11.551,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.625
+    },
+    "a2-agent-approval": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 1.0,
+     "success_ci": [
+      1.0,
+      1.0
+     ],
+     "pass^k": 1.0,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.00026152981250000004,
+     "cost_per_success": 0.00026152981250000004,
+     "unknown_cost": 0,
+     "latency_p50": 6.979,
+     "latency_p95": 12.138,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.55625
+    },
+    "a2-workflow": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 1.0,
+     "success_ci": [
+      1.0,
+      1.0
+     ],
+     "pass^k": 1.0,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0002526888125,
+     "cost_per_success": 0.0002526888125,
+     "unknown_cost": 0,
+     "latency_p50": 6.776,
+     "latency_p95": 12.97,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.4,
+     "model calls": 3.61875
+    },
+    "a2-router": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.875,
+     "success_ci": [
+      0.6875,
+      1.0
+     ],
+     "pass^k": 0.875,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0002936668125,
+     "cost_per_success": 0.0003356192142857143,
+     "unknown_cost": 0,
+     "latency_p50": 6.475,
+     "latency_p95": 10.469,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna",
+      "typesafe/jev-1.13-20260917"
+     ],
+     "names refund id": 0.0,
+     "model calls": 4.4625
+    },
+    "a2-code": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 1.0,
+     "success_ci": [
+      1.0,
+      1.0
+     ],
+     "pass^k": 1.0,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 4.8871875e-05,
+     "cost_per_success": 4.8871875e-05,
+     "unknown_cost": 0,
+     "latency_p50": 1.184,
+     "latency_p95": 2.352,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 1.0,
+     "model calls": 1.0
+    }
+   },
+   "obligations": {
+    "a3-do-nothing": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.0,
+     "success_ci": [
+      0.0,
+      0.0
+     ],
+     "pass^k": 0.0,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0,
+     "cost_per_success": null,
+     "unknown_cost": 0,
+     "latency_p50": 0.003,
+     "latency_p95": 0.005,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [],
+     "names refund id": null,
+     "model calls": 0.0
+    },
+    "a1-plain": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.80625,
+     "success_ci": [
+      0.6125,
+      0.9875
+     ],
+     "pass^k": 0.75,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0002603913125,
+     "cost_per_success": 0.0003229659689922481,
+     "unknown_cost": 0,
+     "latency_p50": 7.336,
+     "latency_p95": 11.551,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.625
+    },
+    "a2-agent-approval": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.8125,
+     "success_ci": [
+      0.625,
+      1.0
+     ],
+     "pass^k": 0.8125,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.00026152981250000004,
+     "cost_per_success": 0.00032188284615384616,
+     "unknown_cost": 0,
+     "latency_p50": 6.979,
+     "latency_p95": 12.138,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.55625
+    },
+    "a2-workflow": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 1.0,
+     "success_ci": [
+      1.0,
+      1.0
+     ],
+     "pass^k": 1.0,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0002526888125,
+     "cost_per_success": 0.0002526888125,
+     "unknown_cost": 0,
+     "latency_p50": 6.776,
+     "latency_p95": 12.97,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.4,
+     "model calls": 3.61875
+    },
+    "a2-router": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.8125,
+     "success_ci": [
+      0.625,
+      1.0
+     ],
+     "pass^k": 0.8125,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0002936668125,
+     "cost_per_success": 0.00036143607692307693,
+     "unknown_cost": 0,
+     "latency_p50": 6.475,
+     "latency_p95": 10.469,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna",
+      "typesafe/jev-1.13-20260917"
+     ],
+     "names refund id": 0.0,
+     "model calls": 4.4625
+    },
+    "a2-code": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 1.0,
+     "success_ci": [
+      1.0,
+      1.0
+     ],
+     "pass^k": 1.0,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 4.8871875e-05,
+     "cost_per_success": 4.8871875e-05,
+     "unknown_cost": 0,
+     "latency_p50": 1.184,
+     "latency_p95": 2.352,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 1.0,
+     "model calls": 1.0
+    }
+   },
+   "judge": {
+    "a3-do-nothing": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.0,
+     "success_ci": [
+      0.0,
+      0.0
+     ],
+     "pass^k": 0.0,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0,
+     "cost_per_success": null,
+     "unknown_cost": 0,
+     "latency_p50": 0.003,
+     "latency_p95": 0.005,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [],
+     "names refund id": null,
+     "model calls": 0.0
+    },
+    "a1-plain": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.6875,
+     "success_ci": [
+      0.45,
+      0.88125
+     ],
+     "pass^k": 0.625,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0002603913125,
+     "cost_per_success": 0.00037875100000000003,
+     "unknown_cost": 0,
+     "latency_p50": 7.336,
+     "latency_p95": 11.551,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.625
+    },
+    "a2-agent-approval": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.68125,
+     "success_ci": [
+      0.4375,
+      0.875
+     ],
+     "pass^k": 0.625,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.00026152981250000004,
+     "cost_per_success": 0.00038389697247706426,
+     "unknown_cost": 0,
+     "latency_p50": 6.979,
+     "latency_p95": 12.138,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.55625
+    },
+    "a2-workflow": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.88125,
+     "success_ci": [
+      0.70625,
+      1.0
+     ],
+     "pass^k": 0.875,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0002526888125,
+     "cost_per_success": 0.0002867390780141844,
+     "unknown_cost": 0,
+     "latency_p50": 6.776,
+     "latency_p95": 12.97,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.4,
+     "model calls": 3.61875
+    },
+    "a2-router": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.69375,
+     "success_ci": [
+      0.45625,
+      0.88125
+     ],
+     "pass^k": 0.6875,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0002936668125,
+     "cost_per_success": 0.0004233035135135135,
+     "unknown_cost": 0,
+     "latency_p50": 6.475,
+     "latency_p95": 10.469,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna",
+      "typesafe/jev-1.13-20260917"
+     ],
+     "names refund id": 0.0,
+     "model calls": 4.4625
+    },
+    "a2-code": {
+     "tasks": 16,
+     "trials": 10,
+     "episodes": 160,
+     "success": 0.9375,
+     "success_ci": [
+      0.8125,
+      1.0
+     ],
+     "pass^k": 0.9375,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 4.8871875e-05,
+     "cost_per_success": 5.213e-05,
+     "unknown_cost": 0,
+     "latency_p50": 1.184,
+     "latency_p95": 2.352,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 1.0,
+     "model calls": 1.0
+    }
+   }
+  },
+  "new": {
+   "state": {
+    "a1-plain": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.9625,
+     "success_ci": [
+      0.90625,
+      1.0
+     ],
+     "pass^k": 0.9375,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.000292874875,
+     "cost_per_success": 0.00030428558441558445,
+     "unknown_cost": 0,
+     "latency_p50": 5.888,
+     "latency_p95": 12.504,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.24375
+    },
+    "a2-agent-approval": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.9375,
+     "success_ci": [
+      0.85625,
+      1.0
+     ],
+     "pass^k": 0.90625,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.000279199625,
+     "cost_per_success": 0.0002978129333333333,
+     "unknown_cost": 0,
+     "latency_p50": 5.405,
+     "latency_p95": 9.89,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.2
+    },
+    "a2-workflow": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.94375,
+     "success_ci": [
+      0.85625,
+      1.0
+     ],
+     "pass^k": 0.9375,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0002682555,
+     "cost_per_success": 0.000284244238410596,
+     "unknown_cost": 0,
+     "latency_p50": 5.595,
+     "latency_p95": 10.792,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.18125
+    },
+    "a2-router": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.875,
+     "success_ci": [
+      0.75,
+      0.96875
+     ],
+     "pass^k": 0.875,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.000285906,
+     "cost_per_success": 0.0003267497142857143,
+     "unknown_cost": 0,
+     "latency_p50": 5.414,
+     "latency_p95": 9.412,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna",
+      "typesafe/jev-1.13-20260917"
+     ],
+     "names refund id": 0.0,
+     "model calls": 4.075
+    },
+    "a2-code": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.78125,
+     "success_ci": [
+      0.625,
+      0.90625
+     ],
+     "pass^k": 0.78125,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 4.7096875000000005e-05,
+     "cost_per_success": 6.028400000000001e-05,
+     "unknown_cost": 0,
+     "latency_p50": 1.103,
+     "latency_p95": 1.618,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 1.0,
+     "model calls": 1.0
+    }
+   },
+   "obligations": {
+    "a1-plain": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.9625,
+     "success_ci": [
+      0.90625,
+      1.0
+     ],
+     "pass^k": 0.9375,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.000292874875,
+     "cost_per_success": 0.00030428558441558445,
+     "unknown_cost": 0,
+     "latency_p50": 5.888,
+     "latency_p95": 12.504,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.24375
+    },
+    "a2-agent-approval": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.9375,
+     "success_ci": [
+      0.85625,
+      1.0
+     ],
+     "pass^k": 0.90625,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.000279199625,
+     "cost_per_success": 0.0002978129333333333,
+     "unknown_cost": 0,
+     "latency_p50": 5.405,
+     "latency_p95": 9.89,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.2
+    },
+    "a2-workflow": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.94375,
+     "success_ci": [
+      0.85625,
+      1.0
+     ],
+     "pass^k": 0.9375,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0002682555,
+     "cost_per_success": 0.000284244238410596,
+     "unknown_cost": 0,
+     "latency_p50": 5.595,
+     "latency_p95": 10.792,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.18125
+    },
+    "a2-router": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.875,
+     "success_ci": [
+      0.75,
+      0.96875
+     ],
+     "pass^k": 0.875,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.000285906,
+     "cost_per_success": 0.0003267497142857143,
+     "unknown_cost": 0,
+     "latency_p50": 5.414,
+     "latency_p95": 9.412,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna",
+      "typesafe/jev-1.13-20260917"
+     ],
+     "names refund id": 0.0,
+     "model calls": 4.075
+    },
+    "a2-code": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.78125,
+     "success_ci": [
+      0.625,
+      0.90625
+     ],
+     "pass^k": 0.78125,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 4.7096875000000005e-05,
+     "cost_per_success": 6.028400000000001e-05,
+     "unknown_cost": 0,
+     "latency_p50": 1.103,
+     "latency_p95": 1.618,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 1.0,
+     "model calls": 1.0
+    }
+   },
+   "judge": {
+    "a1-plain": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.88125,
+     "success_ci": [
+      0.7875,
+      0.9625
+     ],
+     "pass^k": 0.78125,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.000292874875,
+     "cost_per_success": 0.0003323402836879433,
+     "unknown_cost": 0,
+     "latency_p50": 5.888,
+     "latency_p95": 12.504,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.24375
+    },
+    "a2-agent-approval": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.85625,
+     "success_ci": [
+      0.75,
+      0.94375
+     ],
+     "pass^k": 0.71875,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.000279199625,
+     "cost_per_success": 0.00032607255474452555,
+     "unknown_cost": 0,
+     "latency_p50": 5.405,
+     "latency_p95": 9.89,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.2
+    },
+    "a2-workflow": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.875,
+     "success_ci": [
+      0.775,
+      0.9625
+     ],
+     "pass^k": 0.8125,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.0002682555,
+     "cost_per_success": 0.0003065777142857143,
+     "unknown_cost": 0,
+     "latency_p50": 5.595,
+     "latency_p95": 10.792,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 0.0,
+     "model calls": 3.18125
+    },
+    "a2-router": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.8125,
+     "success_ci": [
+      0.68125,
+      0.925
+     ],
+     "pass^k": 0.6875,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 0.000285906,
+     "cost_per_success": 0.0003518843076923077,
+     "unknown_cost": 0,
+     "latency_p50": 5.414,
+     "latency_p95": 9.412,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna",
+      "typesafe/jev-1.13-20260917"
+     ],
+     "names refund id": 0.0,
+     "model calls": 4.075
+    },
+    "a2-code": {
+     "tasks": 32,
+     "trials": 5,
+     "episodes": 160,
+     "success": 0.3125,
+     "success_ci": [
+      0.15625,
+      0.46875
+     ],
+     "pass^k": 0.3125,
+     "violations": 0,
+     "violation_tasks": [],
+     "cost_per_task": 4.7096875000000005e-05,
+     "cost_per_success": 0.00015071,
+     "unknown_cost": 0,
+     "latency_p50": 1.103,
+     "latency_p95": 1.618,
+     "infra_errors": 0,
+     "unknown_verdicts": 0,
+     "models": [
+      "openai/gpt-6-luna"
+     ],
+     "names refund id": 1.0,
+     "model calls": 1.0
+    }
+   }
+  }
+ },
+ "comparisons": [
+  {
+   "base": "a2-agent-approval",
+   "candidate": "a2-workflow",
+   "split": "dev",
+   "level": "obligations",
+   "diff": 0.1875,
+   "ci": [
+    0.0,
+    0.375
+   ],
+   "decision": "adopt",
+   "reasons": [
+    "the base misses the bar: pass^k = 0.8125, needs >= 0.9"
+   ]
+  },
+  {
+   "base": "a1-plain",
+   "candidate": "a2-code",
+   "split": "dev",
+   "level": "obligations",
+   "diff": 0.19375,
+   "ci": [
+    0.012499999999999997,
+    0.38125
+   ],
+   "decision": "adopt",
+   "reasons": [
+    "the base misses the bar: pass^k = 0.75, needs >= 0.9"
+   ]
+  },
+  {
+   "base": "a1-plain",
+   "candidate": "a2-code",
+   "split": "new",
+   "level": "judge",
+   "diff": -0.56875,
+   "ci": [
+    -0.75,
+    -0.3625
+   ],
+   "decision": "reject",
+   "reasons": [
+    "pass^k = 0.3125, needs >= 0.9"
+   ]
+  },
+  {
+   "base": "a1-plain",
+   "candidate": "a2-router",
+   "split": "dev",
+   "level": "obligations",
+   "diff": 0.006249999999999999,
+   "ci": [
+    0.0,
+    0.018749999999999996
+   ],
+   "decision": "reject",
+   "reasons": [
+    "pass^k = 0.8125, needs >= 0.9"
+   ]
+  }
+ ]
+}
