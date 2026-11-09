@@ -22,14 +22,14 @@ Success by grader (share of task runs that pass):
 
 Every required metric, graded on obligations:
 
-| Harness | Success | pass^k | Violations | $ per task | $ per success | p95 latency, s | Infra errors | Undecided | names refund id | model calls |
-|---|---|---|---|---|---|---|---|---|---|---|
-| 0 do nothing | 0.00 (0.00–0.00) | 0.00 (k=10) | 0 | $0.00000 | unknown | 0.01 | 0 | 0 | unknown | 0.00 |
-| 1 plain agent | 0.81 (0.61–0.99) | 0.75 (k=10) | 0 | $0.00026 | $0.00032 | 11.55 | 0 | 0 | 0.00 | 3.62 |
-| 2 agent with approval middleware | 0.81 (0.62–1.00) | 0.81 (k=10) | 0 | $0.00026 | $0.00032 | 12.14 | 0 | 0 | 0.00 | 3.56 |
-| 3 agent inside a workflow | 1.00 (1.00–1.00) | 1.00 (k=10) | 0 | $0.00025 | $0.00025 | 12.97 | 0 | 0 | 0.40 | 3.62 |
-| 4 router and three agents | 0.81 (0.62–1.00) | 0.81 (k=10) | 0 | $0.00029 | $0.00036 | 10.47 | 0 | 0 | 0.00 | 4.46 |
-| 5 workflow with no agent | 1.00 (1.00–1.00) | 1.00 (k=10) | 0 | $0.00005 | $0.00005 | 2.35 | 0 | 0 | 1.00 | 1.00 |
+| Harness | Success | pass^k | Violations | $ per task | $ per success | p50 latency, s | p95 latency, s | Calls per task | Tokens per task | Infra errors | Undecided | names refund id |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 0 do nothing | 0.00 (0.00–0.00) | 0.00 (k=10) | 0 | $0.00000 (0.00000–0.00000) | unknown | 0.00 (0.00–0.00) | 0.01 (0.00–0.01) | 0.00 (0.00–0.00) | 0 (0–0) | 0 | 0 | unknown |
+| 1 plain agent | 0.81 (0.61–0.99) | 0.75 (k=10) | 0 | $0.00026 (0.00024–0.00028) | $0.00032 (0.00027–0.00043) | 7.34 (6.39–7.97) | 11.55 (9.64–13.76) | 3.62 (3.36–3.89) | 4101 (3578–4632) | 0 | 0 | 0.00 |
+| 2 agent with approval middleware | 0.81 (0.62–1.00) | 0.81 (k=10) | 0 | $0.00026 (0.00024–0.00029) | $0.00032 (0.00026–0.00043) | 6.98 (6.45–7.48) | 12.14 (11.34–14.29) | 3.56 (3.26–3.85) | 3995 (3465–4547) | 0 | 0 | 0.00 (0.00–0.00) |
+| 3 agent inside a workflow | 1.00 (1.00–1.00) | 1.00 (k=10) | 0 | $0.00025 (0.00024–0.00027) | $0.00025 (0.00024–0.00027) | 6.78 (6.30–7.31) | 12.97 (10.80–15.11) | 3.62 (3.31–3.92) | 4111 (3546–4669) | 0 | 0 | 0.40 (0.00–1.00) |
+| 4 router and three agents | 0.81 (0.62–1.00) | 0.81 (k=10) | 0 | $0.00029 (0.00027–0.00032) | $0.00036 (0.00029–0.00049) | 6.47 (5.67–7.46) | 10.47 (9.32–11.02) | 4.46 (4.15–4.77) | 3747 (3271–4227) | 0 | 0 | 0.00 |
+| 5 workflow with no agent | 1.00 (1.00–1.00) | 1.00 (k=10) | 0 | $0.00005 (0.00005–0.00005) | $0.00005 (0.00005–0.00005) | 1.18 (1.14–1.29) | 2.35 (1.80–2.60) | 1.00 (1.00–1.00) | 339 (335–344) | 0 | 0 | 1.00 (1.00–1.00) |
 
 Misses the bar (`gates` in evaluator/support.py):
 
@@ -39,6 +39,16 @@ Misses the bar (`gates` in evaluator/support.py):
 - 3 agent inside a workflow: nothing
 - 4 router and three agents: pass^k = 0.8125, needs >= 0.9
 - 5 workflow with no agent: nothing
+
+The frontier: designs that no other design beats on both success and the other
+metric. The plots show every design with the judge, with 95% intervals over tasks.
+
+| Graded on | Success against | Designs on the frontier | Plot |
+|---|---|---|---|
+| obligations | $ per task | 0 do nothing, 5 workflow with no agent |  |
+| obligations | p95 latency | 0 do nothing, 5 workflow with no agent |  |
+| judge | $ per task | 0 do nothing, 5 workflow with no agent | [frontier-known-cost.svg](frontier-known-cost.svg) |
+| judge | p95 latency | 0 do nothing, 5 workflow with no agent | [frontier-known-latency.svg](frontier-known-latency.svg) |
 
 What a single run would have shown (obligations; each of the 10 runs alone):
 
@@ -65,13 +75,13 @@ Success by grader (share of task runs that pass):
 
 Every required metric, graded on obligations:
 
-| Harness | Success | pass^k | Violations | $ per task | $ per success | p95 latency, s | Infra errors | Undecided | names refund id | model calls |
-|---|---|---|---|---|---|---|---|---|---|---|
-| 1 plain agent | 0.96 (0.91–1.00) | 0.94 (k=5) | 0 | $0.00029 | $0.00030 | 12.50 | 0 | 0 | 0.00 | 3.24 |
-| 2 agent with approval middleware | 0.94 (0.86–1.00) | 0.91 (k=5) | 0 | $0.00028 | $0.00030 | 9.89 | 0 | 0 | 0.00 | 3.20 |
-| 3 agent inside a workflow | 0.94 (0.86–1.00) | 0.94 (k=5) | 0 | $0.00027 | $0.00028 | 10.79 | 0 | 0 | 0.00 | 3.18 |
-| 4 router and three agents | 0.88 (0.75–0.97) | 0.88 (k=5) | 0 | $0.00029 | $0.00033 | 9.41 | 0 | 0 | 0.00 | 4.08 |
-| 5 workflow with no agent | 0.78 (0.62–0.91) | 0.78 (k=5) | 0 | $0.00005 | $0.00006 | 1.62 | 0 | 0 | 1.00 | 1.00 |
+| Harness | Success | pass^k | Violations | $ per task | $ per success | p50 latency, s | p95 latency, s | Calls per task | Tokens per task | Infra errors | Undecided | names refund id |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 plain agent | 0.96 (0.91–1.00) | 0.94 (k=5) | 0 | $0.00029 (0.00027–0.00032) | $0.00030 (0.00027–0.00034) | 5.89 (5.07–6.97) | 12.50 (10.89–13.63) | 3.24 (2.99–3.51) | 3380 (2943–3855) | 0 | 0 | 0.00 (0.00–0.00) |
+| 2 agent with approval middleware | 0.94 (0.86–1.00) | 0.91 (k=5) | 0 | $0.00028 (0.00025–0.00031) | $0.00030 (0.00026–0.00034) | 5.41 (4.65–6.37) | 9.89 (8.48–11.19) | 3.20 (2.93–3.47) | 3318 (2876–3785) | 0 | 0 | 0.00 (0.00–0.00) |
+| 3 agent inside a workflow | 0.94 (0.86–1.00) | 0.94 (k=5) | 0 | $0.00027 (0.00024–0.00029) | $0.00028 (0.00025–0.00032) | 5.59 (4.53–6.24) | 10.79 (8.86–12.44) | 3.18 (2.91–3.46) | 3300 (2851–3786) | 0 | 0 | 0.00 (0.00–0.00) |
+| 4 router and three agents | 0.88 (0.75–0.97) | 0.88 (k=5) | 0 | $0.00029 (0.00026–0.00032) | $0.00033 (0.00027–0.00040) | 5.41 (4.63–6.19) | 9.41 (8.28–10.50) | 4.08 (3.84–4.33) | 2955 (2585–3357) | 0 | 0 | 0.00 (0.00–0.00) |
+| 5 workflow with no agent | 0.78 (0.62–0.91) | 0.78 (k=5) | 0 | $0.00005 (0.00005–0.00005) | $0.00006 (0.00005–0.00008) | 1.10 (1.08–1.13) | 1.62 (1.49–2.03) | 1.00 (1.00–1.00) | 331 (325–338) | 0 | 0 | 1.00 |
 
 Misses the bar (`gates` in evaluator/support.py):
 
@@ -81,13 +91,31 @@ Misses the bar (`gates` in evaluator/support.py):
 - 4 router and three agents: pass^k = 0.875, needs >= 0.9
 - 5 workflow with no agent: pass^k = 0.7812, needs >= 0.9
 
+The frontier: designs that no other design beats on both success and the other
+metric. The plots show every design with the judge, with 95% intervals over tasks.
+
+| Graded on | Success against | Designs on the frontier | Plot |
+|---|---|---|---|
+| obligations | $ per task | 1 plain agent, 3 agent inside a workflow, 5 workflow with no agent |  |
+| obligations | p95 latency | 1 plain agent, 2 agent with approval middleware, 3 agent inside a workflow, 4 router and three agents, 5 workflow with no agent |  |
+| judge | $ per task | 1 plain agent, 3 agent inside a workflow, 5 workflow with no agent | [frontier-new-cost.svg](frontier-new-cost.svg) |
+| judge | p95 latency | 1 plain agent, 2 agent with approval middleware, 3 agent inside a workflow, 4 router and three agents, 5 workflow with no agent | [frontier-new-latency.svg](frontier-new-latency.svg) |
+
 ## Comparisons
 
-dev, obligations: **a2-workflow** against **a2-agent-approval** on 16 tasks: success +0.188 (+0.000 to +0.375). Better on 3 tasks, worse on 0. Decision: **adopt**. the base misses the bar: pass^k = 0.8125, needs >= 0.9
+dev, obligations: **a2-workflow** against **a2-agent-approval** on 16 tasks: success +0.188 (+0.000 to +0.375). Better on 3 tasks, worse on 0 tasks. Candidate minus base: cost_per_task -0.00001 (-0.00002 to +0.00001); latency_p50 -0.20 (-0.53 to +0.27); latency_p95 +0.83 (-1.59 to +2.80); calls_per_task +0.06 (-0.06 to +0.20); tokens_per_task +116 (-51 to +328); names refund id +0.40 (+0.00 to +1.00). Decision: **adopt**. the base misses the bar: pass^k = 0.8125, needs >= 0.9
 
-dev, obligations: **a2-code** against **a1-plain** on 16 tasks: success +0.194 (+0.012 to +0.381). Better on 4 tasks, worse on 0. Decision: **adopt**. the base misses the bar: pass^k = 0.75, needs >= 0.9
+dev, obligations: **a2-code** against **a1-plain** on 16 tasks: success +0.194 (+0.012 to +0.381). Better on 4 tasks, worse on 0 tasks. Candidate minus base: cost_per_task -0.00021 (-0.00023 to -0.00020); latency_p50 -6.15 (-6.80 to -5.23); latency_p95 -9.20 (-11.33 to -7.46); calls_per_task -2.62 (-2.89 to -2.36); tokens_per_task -3761 (-4283 to -3235); names refund id unknown. Decision: **adopt**. the base misses the bar: pass^k = 0.75, needs >= 0.9
 
-new, judge: **a2-code** against **a1-plain** on 32 tasks: success -0.569 (-0.750 to -0.362). Better on 4 tasks, worse on 21. Decision: **reject**. pass^k = 0.3125, needs >= 0.9
+new, judge: **a2-code** against **a1-plain** on 32 tasks: success -0.569 (-0.750 to -0.362). Better on 4 tasks, worse on 21 tasks. Candidate minus base: cost_per_task -0.00025 (-0.00027 to -0.00022); latency_p50 -4.79 (-5.86 to -3.96); latency_p95 -10.89 (-12.12 to -9.28); calls_per_task -2.24 (-2.49 to -1.99); tokens_per_task -3049 (-3504 to -2608); names refund id unknown. Decision: **reject**. pass^k = 0.3125, needs >= 0.9
 
-dev, obligations: **a2-router** against **a1-plain** on 16 tasks: success +0.006 (+0.000 to +0.019). Better on 1 tasks, worse on 0. Decision: **reject**. pass^k = 0.8125, needs >= 0.9
+dev, obligations: **a2-router** against **a1-plain** on 16 tasks: success +0.006 (+0.000 to +0.019). Better on 1 task, worse on 0 tasks. Candidate minus base: cost_per_task +0.00003 (+0.00001 to +0.00005); latency_p50 -0.86 (-1.17 to -0.33); latency_p95 -1.08 (-3.56 to +1.02); calls_per_task +0.84 (+0.76 to +0.91); tokens_per_task -354 (-439 to -263); names refund id unknown. Decision: **reject**. pass^k = 0.8125, needs >= 0.9
+
+dev, state: **a2-agent-approval** against **a1-plain** on 16 tasks: success +0.131 (+0.000 to +0.312). Better on 3 tasks, worse on 0 tasks. Candidate minus base: cost_per_task +0.00000 (-0.00001 to +0.00002); latency_p50 -0.36 (-0.89 to +0.21); latency_p95 +0.59 (-1.92 to +4.25); calls_per_task -0.07 (-0.20 to +0.05); tokens_per_task -105 (-311 to +52); names refund id unknown. Decision: **adopt**. the base misses the bar: pass^k = 0.8125, needs >= 0.9
+
+dev, obligations: **a2-agent-approval** against **a1-plain** on 16 tasks: success +0.006 (-0.181 to +0.188). Better on 2 tasks, worse on 1 task. Candidate minus base: cost_per_task +0.00000 (-0.00001 to +0.00002); latency_p50 -0.36 (-0.89 to +0.21); latency_p95 +0.59 (-1.92 to +4.25); calls_per_task -0.07 (-0.20 to +0.05); tokens_per_task -105 (-311 to +52); names refund id unknown. Decision: **reject**. pass^k = 0.8125, needs >= 0.9
+
+dev, obligations: **a2-code** against **a2-workflow** on 16 tasks: success +0.000 (+0.000 to +0.000). Better on 0 tasks, worse on 0 tasks. Candidate minus base: cost_per_task -0.00020 (-0.00022 to -0.00019); latency_p50 -5.59 (-6.11 to -5.14); latency_p95 -10.62 (-12.66 to -8.45); calls_per_task -2.62 (-2.92 to -2.32); tokens_per_task -3772 (-4340 to -3215); names refund id +0.60 (+0.00 to +1.00). Decision: **adopt**. no worse than -0.02 (+0.000 to +0.000) and cheaper per task (-0.00022 to -0.00019)
+
+new, obligations: **a2-code** against **a2-workflow** on 32 tasks: success -0.163 (-0.287 to -0.037). Better on 0 tasks, worse on 6 tasks. Candidate minus base: cost_per_task -0.00022 (-0.00025 to -0.00020); latency_p50 -4.49 (-5.13 to -3.42); latency_p95 -9.17 (-10.93 to -7.14); calls_per_task -2.18 (-2.44 to -1.91); tokens_per_task -2968 (-3406 to -2526); names refund id unknown. Decision: **reject**. pass^k = 0.7812, needs >= 0.9
 

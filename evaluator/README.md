@@ -12,7 +12,7 @@ definitions in `envs/custom/tasks.py` and the databases each run leaves behind.
 ## Commands
 
 ```bash
-make part4-regrade      # offline: grade the saved runs, write reports/part-4/RESULTS.md
+make part4-regrade      # offline: grade the saved runs; write RESULTS.md and frontier plots
 make part4-agreement    # offline: the judge and the held-reply check against labels
 make part4-compare BASE=a1-plain CANDIDATE=a2-code SPLIT=new LEVEL=judge
 make part4-live TRIALS=5 PART4_SPECS="harness/spec/plain.yaml harness/spec/workflows/support-code.yaml"
@@ -26,9 +26,23 @@ prices). It runs the 16 known tasks unless `SPLIT=new`. With
 
 | File | What it does |
 | --- | --- |
-| `support.py` | The use case: 16 known tasks (`dev`) and 32 new messages (`new`), checks at three levels, the bar a design must clear (`gates`) and two metrics this desk adds |
+| `support.py` | The use case: 16 known tasks (`dev`) and 32 new messages (`new`), checks at three levels, the bar a design must clear (`gates`), the limits a comparison applies (`margin`, `guardrails`) and one metric this desk adds |
 | `episodes.py` | Turns runs into episodes: the saved runs under `reports/part-4/`, or live runs of a spec in a separate process |
 | `__main__.py` | The commands above |
+
+## Several metrics at once
+
+`RESULTS.md` reports every design's success, pass^k, cost, latency, model calls and
+tokens, each with a 95% interval that resamples whole tasks. It then lists the frontier:
+the designs no other design beats on both success and cost per task, or on both success
+and p95 latency. `make part4-regrade` also draws those plots, graded with the judge, to
+`reports/part-4/frontier-{known,new}-{cost,latency}.svg`.
+
+A design that misses the bar is replaced by any candidate that clears it. Between two
+designs that clear the bar, a comparison adopts the candidate for higher success, or for
+a lower cost with success no more than 0.02 lower, and its guardrail lets p95 latency
+rise by at most 2 seconds, whatever the candidate gains. Every comparison prints the
+paired difference and interval of each metric.
 
 ## Three levels of checks
 

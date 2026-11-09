@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 440" role="img" font-family="system-ui, sans-serif" font-size="13" fill="#222">
+<title>16 known tasks, 10 runs, with the judge: success against $ per task</title>
+<rect width="640" height="440" fill="#fff"/>
+<text x="76" y="24" font-size="15" font-weight="600">16 known tasks, 10 runs, with the judge: success against $ per task</text>
+<text x="76" y="44" fill="#666">Bars: 95% intervals over tasks. <tspan fill="#c2185b">Line: no other harness beats these on both.</tspan></text>
+<path d="M76.0 64V384M76 384.0H612" stroke="#e6e6e6"/>
+<text x="76.0" y="402" text-anchor="middle" fill="#666">0.0000</text>
+<text x="68" y="388.0" text-anchor="end" fill="#666">0.0</text>
+<path d="M183.2 64V384M76 320.0H612" stroke="#e6e6e6"/>
+<text x="183.2" y="402" text-anchor="middle" fill="#666">0.0001</text>
+<text x="68" y="324.0" text-anchor="end" fill="#666">0.2</text>
+<path d="M290.4 64V384M76 256.0H612" stroke="#e6e6e6"/>
+<text x="290.4" y="402" text-anchor="middle" fill="#666">0.0002</text>
+<text x="68" y="260.0" text-anchor="end" fill="#666">0.4</text>
+<path d="M397.6 64V384M76 192.0H612" stroke="#e6e6e6"/>
+<text x="397.6" y="402" text-anchor="middle" fill="#666">0.0003</text>
+<text x="68" y="196.0" text-anchor="end" fill="#666">0.6</text>
+<path d="M504.8 64V384M76 128.0H612" stroke="#e6e6e6"/>
+<text x="504.8" y="402" text-anchor="middle" fill="#666">0.0004</text>
+<text x="68" y="132.0" text-anchor="end" fill="#666">0.8</text>
+<path d="M612.0 64V384M76 64.0H612" stroke="#e6e6e6"/>
+<text x="612.0" y="402" text-anchor="middle" fill="#666">0.0005</text>
+<text x="68" y="68.0" text-anchor="end" fill="#666">1.0</text>
+<text x="344.0" y="426" text-anchor="middle">cost_per_task</text>
+<text transform="translate(20 224.0) rotate(-90)" text-anchor="middle">success</text>
+<polyline fill="none" stroke="#c2185b" stroke-width="2" points="76.0,384.0 128.4,84.0"/>
+<path d="M76.0 384.0H76.0" stroke="#c2185b"/>
+<path d="M76.0 384.0V384.0" stroke="#c2185b"/>
+<circle cx="76.0" cy="384.0" r="4.5" fill="#c2185b"/>
+<text x="84.0" y="376.0" fill="#c2185b">0 do nothing</text>
+<path d="M335.6 164.0H377.6" stroke="#444"/>
+<path d="M355.1 240.0V102.0" stroke="#444"/>
+<circle cx="355.1" cy="164.0" r="4.5" fill="#444"/>
+<text x="363.1" y="156.0" fill="#444">1 plain agent</text>
+<path d="M332.1 166.0H384.1" stroke="#444"/>
+<path d="M356.4 244.0V104.0" stroke="#444"/>
+<circle cx="356.4" cy="166.0" r="4.5" fill="#444"/>
+<path d="M356.4 166.0L362.4 169.0" stroke="#bbb"/>
+<text x="364.4" y="173.0" fill="#444">2 agent with approval middleware</text>
+<path d="M327.9 102.0H366.5" stroke="#444"/>
+<path d="M346.9 158.0V64.0" stroke="#444"/>
+<circle cx="346.9" cy="102.0" r="4.5" fill="#444"/>
+<text x="354.9" y="94.0" fill="#444">3 agent inside a workflow</text>
+<path d="M366.2 162.0H414.3" stroke="#444"/>
+<path d="M390.8 238.0V102.0" stroke="#444"/>
+<circle cx="390.8" cy="162.0" r="4.5" fill="#444"/>
+<path d="M390.8 162.0L396.8 195.0" stroke="#bbb"/>
+<text x="398.8" y="199.0" fill="#444">4 router and three agents</text>
+<path d="M125.8 84.0H131.2" stroke="#c2185b"/>
+<path d="M128.4 124.0V64.0" stroke="#c2185b"/>
+<circle cx="128.4" cy="84.0" r="4.5" fill="#c2185b"/>
+<text x="136.4" y="76.0" fill="#c2185b">5 workflow with no agent</text>
+</svg>

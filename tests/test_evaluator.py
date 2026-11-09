@@ -5,6 +5,7 @@ import os
 import sqlite3
 from pathlib import Path
 
+import pytest
 from harness_evals import Episode, summarize
 
 from envs.custom.db import create_seed, fresh_copy
@@ -104,3 +105,35 @@ def test_the_judge_repair_numbers_come_from_the_saved_verdicts():
         "v1 action": 65,
         "v2 action": 1,
     }
+
+
+def test_the_frontier_separates_the_workflow_from_agents_it_cannot_order():
+    from harness_evals import pareto
+
+    designs = ["a1-plain", "a2-agent-approval", "a2-workflow", "a2-router", "a2-code"]
+    sums = {s: summarize(grades("new", "judge", s)) for s in designs}
+    assert pareto(sums, "cost_per_task", "success") == ["a1-plain", "a2-workflow", "a2-code"]
+    assert pareto(sums, "latency_p95", "success") == designs  # every design: no clear order
+    workflow, agents = sums["a2-code"], [sums[s] for s in designs[:-1]]
+    for metric in ("success", "cost_per_task", "latency_p95"):  # intervals do not overlap
+        lo, hi = workflow[f"{metric}_ci"]
+        assert all(hi < a[f"{metric}_ci"][0] or lo > a[f"{metric}_ci"][1] for a in agents)
+
+
+@pytest.mark.parametrize(
+    ("base", "candidate", "split", "level", "decision"),
+    [
+        ("a1-plain", "a2-agent-approval", "dev", "state", "adopt"),
+        ("a1-plain", "a2-agent-approval", "dev", "obligations", "reject"),
+        ("a2-workflow", "a2-code", "dev", "obligations", "adopt"),
+        ("a2-workflow", "a2-code", "new", "obligations", "reject"),
+    ],
+)
+def test_the_decisions_change_with_the_checks_and_the_tasks(
+    base, candidate, split, level, decision
+):
+    from harness_evals import compare
+
+    c = compare(usecase(level), grades(split, level, base), grades(split, level, candidate))
+    assert c.decision == decision
+    assert c.deltas["latency_p95"] is not None  # the guardrail was evaluated

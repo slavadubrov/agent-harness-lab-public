@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 440" role="img" font-family="system-ui, sans-serif" font-size="13" fill="#222">
+<title>32 new messages, 5 runs, with the judge: success against p95 latency</title>
+<rect width="640" height="440" fill="#fff"/>
+<text x="76" y="24" font-size="15" font-weight="600">32 new messages, 5 runs, with the judge: success against p95 latency</text>
+<text x="76" y="44" fill="#666">Bars: 95% intervals over tasks. <tspan fill="#c2185b">Line: no other harness beats these on both.</tspan></text>
+<path d="M76.0 64V384M76 384.0H612" stroke="#e6e6e6"/>
+<text x="76.0" y="402" text-anchor="middle" fill="#666">0</text>
+<text x="68" y="388.0" text-anchor="end" fill="#666">0.0</text>
+<path d="M183.2 64V384M76 320.0H612" stroke="#e6e6e6"/>
+<text x="183.2" y="402" text-anchor="middle" fill="#666">4</text>
+<text x="68" y="324.0" text-anchor="end" fill="#666">0.2</text>
+<path d="M290.4 64V384M76 256.0H612" stroke="#e6e6e6"/>
+<text x="290.4" y="402" text-anchor="middle" fill="#666">8</text>
+<text x="68" y="260.0" text-anchor="end" fill="#666">0.4</text>
+<path d="M397.6 64V384M76 192.0H612" stroke="#e6e6e6"/>
+<text x="397.6" y="402" text-anchor="middle" fill="#666">12</text>
+<text x="68" y="196.0" text-anchor="end" fill="#666">0.6</text>
+<path d="M504.8 64V384M76 128.0H612" stroke="#e6e6e6"/>
+<text x="504.8" y="402" text-anchor="middle" fill="#666">16</text>
+<text x="68" y="132.0" text-anchor="end" fill="#666">0.8</text>
+<path d="M612.0 64V384M76 64.0H612" stroke="#e6e6e6"/>
+<text x="612.0" y="402" text-anchor="middle" fill="#666">20</text>
+<text x="68" y="68.0" text-anchor="end" fill="#666">1.0</text>
+<text x="344.0" y="426" text-anchor="middle">latency_p95</text>
+<text transform="translate(20 224.0) rotate(-90)" text-anchor="middle">success</text>
+<polyline fill="none" stroke="#c2185b" stroke-width="2" points="119.4,284.0 328.2,124.0 341.1,110.0 365.2,104.0 411.1,102.0"/>
+<path d="M368.0 102.0H441.2" stroke="#c2185b"/>
+<path d="M411.1 132.0V76.0" stroke="#c2185b"/>
+<circle cx="411.1" cy="102.0" r="4.5" fill="#c2185b"/>
+<text x="419.1" y="94.0" fill="#c2185b">1 plain agent</text>
+<path d="M303.2 110.0H375.9" stroke="#c2185b"/>
+<path d="M341.1 144.0V82.0" stroke="#c2185b"/>
+<circle cx="341.1" cy="110.0" r="4.5" fill="#c2185b"/>
+<path d="M341.1 110.0L347.1 113.0" stroke="#bbb"/>
+<text x="349.1" y="117.0" fill="#c2185b">2 agent with approval middleware</text>
+<path d="M313.4 104.0H409.3" stroke="#c2185b"/>
+<path d="M365.2 136.0V76.0" stroke="#c2185b"/>
+<circle cx="365.2" cy="104.0" r="4.5" fill="#c2185b"/>
+<path d="M365.2 104.0L371.2 137.0" stroke="#bbb"/>
+<text x="373.2" y="141.0" fill="#c2185b">3 agent inside a workflow</text>
+<path d="M297.9 124.0H357.4" stroke="#c2185b"/>
+<path d="M328.2 166.0V88.0" stroke="#c2185b"/>
+<circle cx="328.2" cy="124.0" r="4.5" fill="#c2185b"/>
+<path d="M328.2 124.0L334.2 157.0" stroke="#bbb"/>
+<text x="336.2" y="161.0" fill="#c2185b">4 router and three agents</text>
+<path d="M115.9 284.0H130.5" stroke="#c2185b"/>
+<path d="M119.4 334.0V234.0" stroke="#c2185b"/>
+<circle cx="119.4" cy="284.0" r="4.5" fill="#c2185b"/>
+<text x="127.4" y="276.0" fill="#c2185b">5 workflow with no agent</text>
+</svg>

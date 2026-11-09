@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import re
 import statistics
+from functools import cache
 
 from harness_evals import (
     Check,
@@ -131,20 +132,18 @@ def _checks(task_id: str, level: str) -> tuple:
     return tuple(checks)
 
 
+@cache  # the intervals recompute this metric on 2,000 resamples of the same replies
+def _names_ids(reply: str, ids: tuple[int, ...]) -> bool:
+    return all(re.search(REFUND_ID.format(i=i), reply, re.I) for i in ids)
+
+
 def names_refund_id(grades: list[Grade]) -> float | None:
     """Optional metric for this desk: the share of replies after an issued refund that
     name the refund's id, so the customer can quote it later."""
     hits = [
-        all(re.search(REFUND_ID.format(i=i), g.episode.reply or "", re.I) for i in ids)
-        for g in grades
-        if (ids := _issued(g.episode))
+        _names_ids(g.episode.reply or "", tuple(ids)) for g in grades if (ids := _issued(g.episode))
     ]
     return statistics.fmean(hits) if hits else None
-
-
-def model_calls(grades: list[Grade]) -> float | None:
-    calls = [g.episode.model_calls for g in grades if g.episode.model_calls is not None]
-    return statistics.fmean(calls) if calls else None
 
 
 def usecase(level: str = "obligations") -> UseCase:
@@ -168,8 +167,11 @@ def usecase(level: str = "obligations") -> UseCase:
             "cost_per_task": ("<=", 0.002),
             "latency_p95": ("<=", 15.0),
         },
-        metrics={"names refund id": names_refund_id, "model calls": model_calls},
+        metrics={"names refund id": names_refund_id},
+        # Between two designs that clear the bar, success may drop by at most 0.02 for a
+        # cheaper design, and p95 latency may rise by at most 2 seconds, whatever it gains.
         margin=0.02,
+        guardrails={"latency_p95": ("<=", 2.0)},
     )
 
 

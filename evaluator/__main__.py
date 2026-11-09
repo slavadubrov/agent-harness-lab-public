@@ -17,8 +17,17 @@ import statistics
 import time
 from pathlib import Path
 
-from harness_evals import Episode, agreement, compare, gate_failures, run, save, summarize
-from harness_evals.report import comparison, table
+from harness_evals import (
+    Episode,
+    agreement,
+    compare,
+    gate_failures,
+    pareto,
+    run,
+    save,
+    summarize,
+)
+from harness_evals.report import comparison, frontier_svg, table
 
 from envs.custom.tasks import TASKS_BY_ID
 from evaluator.episodes import REPO, SAVED, _jsonl, adapter, saved
@@ -33,6 +42,8 @@ DESIGNS = {
     "a2-code": "5 workflow with no agent",
 }
 BATCH = {"dev": "known", "new": "new"}
+# The frontier plots: success with the judge against each of these.
+AXES = {"cost_per_task": ("cost", "$ per task"), "latency_p95": ("latency", "p95 latency")}
 BATCH_DIR = {"k10": "known", "oot": "new"}  # folder names in the labels
 FROZEN = {"model": "openai/gpt-6-luna", "endpoint": "openrouter, provider openai, no fallbacks"}
 
@@ -70,11 +81,18 @@ def regrade(out: Path) -> dict:
         lines += ["", "Misses the bar (`gates` in evaluator/support.py):", ""]
         for s, v in sums["obligations"].items():
             lines.append(f"- {DESIGNS[s]}: {'; '.join(gate_failures(v, uc.gates)) or 'nothing'}")
+        lines += ["", *_frontier(split, name, sums, out)]
         if split == "dev":
             lines += ["", *_single_runs(by_level["obligations"])]
         lines.append("")
         report["splits"][split] = {
             lv: {s: _jsonable(v) for s, v in d.items()} for lv, d in sums.items()
+        }
+        report["frontier"] = report.get("frontier", {}) | {
+            split: {
+                lv: {x: pareto(sums[lv], x, "success") for x in AXES}
+                for lv in ("obligations", "judge")
+            }
         }
     lines += ["## Comparisons", ""]
     for base, cand, split, level in COMPARISONS:
@@ -88,6 +106,7 @@ def regrade(out: Path) -> dict:
                 "level": level,
                 "diff": c.diff,
                 "ci": c.ci,
+                "deltas": c.deltas,
                 "decision": c.decision,
                 "reasons": c.reasons,
             }
@@ -103,6 +122,11 @@ COMPARISONS = [  # (base, candidate, split, level)
     ("a1-plain", "a2-code", "dev", "obligations"),
     ("a1-plain", "a2-code", "new", "judge"),
     ("a1-plain", "a2-router", "dev", "obligations"),
+    # The four in the article: the decision changes with the checks and with the tasks.
+    ("a1-plain", "a2-agent-approval", "dev", "state"),
+    ("a1-plain", "a2-agent-approval", "dev", "obligations"),
+    ("a2-workflow", "a2-code", "dev", "obligations"),
+    ("a2-workflow", "a2-code", "new", "obligations"),
 ]
 
 _ABOUT = """\
@@ -117,6 +141,30 @@ Intervals are 95% bootstrap intervals over tasks."""
 def _success(s: dict) -> str:
     lo, hi = s["success_ci"]
     return f"{s['success']:.2f} ({lo:.2f}–{hi:.2f})"
+
+
+def _frontier(split: str, name: str, sums: dict, out: Path) -> list[str]:
+    """Designs no other design beats on both success and cost, or success and latency,
+    and a plot of each with intervals on both axes."""
+    lines = [
+        "The frontier: designs that no other design beats on both success and the other",
+        "metric. The plots show every design with the judge, with 95% intervals over tasks.",
+        "",
+        "| Graded on | Success against | Designs on the frontier | Plot |",
+        "|---|---|---|---|",
+    ]
+    for level in ("obligations", "judge"):
+        for x, (slug, label) in AXES.items():
+            front = ", ".join(DESIGNS[s] for s in pareto(sums[level], x, "success"))
+            plot = ""
+            if level == "judge":
+                plot = f"frontier-{BATCH[split]}-{slug}.svg"
+                labelled = {DESIGNS[s]: v for s, v in sums[level].items()}
+                title = f"{name}, with the judge: success against {label}"
+                (out / plot).write_text(frontier_svg(labelled, x, "success", title=title))
+                plot = f"[{plot}]({plot})"
+            lines.append(f"| {level} | {label} | {front} | {plot} |")
+    return lines
 
 
 def _single_runs(by_spec: dict) -> list[str]:
@@ -142,7 +190,7 @@ def _single_runs(by_spec: dict) -> list[str]:
 
 
 def _jsonable(s: dict) -> dict:
-    return {k: (list(v) if isinstance(v, tuple) else v) for k, v in s.items()}
+    return json.loads(json.dumps(s))  # tuples become lists
 
 
 def labels_agreement() -> dict:
