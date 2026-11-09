@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = "==3.12.*"
 resolution-markers = [
     "sys_platform == 'win32'",
@@ -41,7 +41,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "harness-evals", git = "https://github.com/slavadubrov/harness-evals?rev=v0.1.0" },
+    { name = "harness-evals", git = "https://github.com/slavadubrov/harness-evals?rev=v0.2.0" },
     { name = "langchain", specifier = "==1.4.2" },
     { name = "langchain-mcp-adapters", specifier = "==0.3.2" },
     { name = "langchain-openai", specifier = "==1.6.5" },
@@ -427,8 +427,8 @@ wheels = [
 
 [[package]]
 name = "harness-evals"
-version = "0.1.0"
-source = { git = "https://github.com/slavadubrov/harness-evals?rev=v0.1.0#8bf5a7bd39aaa9ab23cf085bba3eee422a9f5425" }
+version = "0.2.0"
+source = { git = "https://github.com/slavadubrov/harness-evals?rev=v0.2.0#04936f22759d434fcf68cd1b2125b83cafd1f06c" }
 
 [[package]]
 name = "hf-xet"
