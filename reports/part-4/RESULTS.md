@@ -50,6 +50,8 @@ metric. The plots show every design with the judge, with 95% intervals over task
 | judge | $ per task | 0 do nothing, 5 workflow with no agent | [frontier-known-cost.svg](frontier-known-cost.svg) |
 | judge | p95 latency | 0 do nothing, 5 workflow with no agent | [frontier-known-latency.svg](frontier-known-latency.svg) |
 
+Where each design fails, graded with the judge: [by check](failures-known-by-check.svg), [by run](failures-known-by-run.svg).
+
 What a single run would have shown (obligations; each of the 10 runs alone):
 
 | Design | Success, run 1 | Success, worst to best run | $ per task, cheapest to dearest run |
@@ -100,6 +102,8 @@ metric. The plots show every design with the judge, with 95% intervals over task
 | obligations | p95 latency | 1 plain agent, 2 agent with approval middleware, 3 agent inside a workflow, 4 router and three agents, 5 workflow with no agent |  |
 | judge | $ per task | 1 plain agent, 3 agent inside a workflow, 5 workflow with no agent | [frontier-new-cost.svg](frontier-new-cost.svg) |
 | judge | p95 latency | 1 plain agent, 2 agent with approval middleware, 3 agent inside a workflow, 4 router and three agents, 5 workflow with no agent | [frontier-new-latency.svg](frontier-new-latency.svg) |
+
+Where each design fails, graded with the judge: [by check](failures-new-by-check.svg), [by run](failures-new-by-run.svg).
 
 ## Comparisons
 

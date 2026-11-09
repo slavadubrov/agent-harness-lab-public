@@ -27,7 +27,7 @@ from harness_evals import (
     save,
     summarize,
 )
-from harness_evals.report import comparison, frontier_svg, table
+from harness_evals.report import comparison, failure_map_svg, frontier_svg, table
 
 from envs.custom.tasks import TASKS_BY_ID
 from evaluator.episodes import REPO, SAVED, _jsonl, adapter, saved
@@ -82,6 +82,7 @@ def regrade(out: Path) -> dict:
         for s, v in sums["obligations"].items():
             lines.append(f"- {DESIGNS[s]}: {'; '.join(gate_failures(v, uc.gates)) or 'nothing'}")
         lines += ["", *_frontier(split, name, sums, out)]
+        lines += ["", *_failure_maps(split, name, by_level["judge"], out)]
         if split == "dev":
             lines += ["", *_single_runs(by_level["obligations"])]
         lines.append("")
@@ -165,6 +166,19 @@ def _frontier(split: str, name: str, sums: dict, out: Path) -> list[str]:
                 plot = f"[{plot}]({plot})"
             lines.append(f"| {level} | {label} | {front} | {plot} |")
     return lines
+
+
+def _failure_maps(split: str, name: str, by_spec: dict, out: Path) -> list[str]:
+    """Where each design fails, graded with the judge: tasks in rows, and in one panel per
+    design, the kinds of check or the runs in columns."""
+    links = []
+    for by in ("checks", "runs"):
+        plot = f"failures-{BATCH[split]}-by-{by[:-1]}.svg"
+        title = f"{name}, with the judge: where each design fails, by {by[:-1]}"
+        grades = {DESIGNS[s]: gs for s, gs in by_spec.items()}
+        (out / plot).write_text(failure_map_svg(usecase("judge"), grades, by=by, title=title))
+        links.append(f"[by {by[:-1]}]({plot})")
+    return ["Where each design fails, graded with the judge: " + ", ".join(links) + "."]
 
 
 def _single_runs(by_spec: dict) -> list[str]:
