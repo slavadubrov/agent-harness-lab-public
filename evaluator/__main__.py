@@ -66,7 +66,11 @@ def design(name: str | int) -> str:
 
 
 def grades(split: str, level: str, spec: str | int):
-    return usecase(level).grade(saved(BATCH[split], design(spec)))
+    spec = design(spec)
+    episodes = saved(BATCH[split], spec)
+    if not episodes:
+        raise SystemExit(f"no saved runs for {spec!r} in split {split!r}")
+    return usecase(level).grade(episodes)
 
 
 def specs(split: str) -> list[str]:

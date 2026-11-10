@@ -70,10 +70,20 @@ and a `Desk` it can read orders and request refunds through, and returns the rep
 `make mine` runs it on the 16 known tasks and prints its row beside the saved designs,
 the checks it fails, and the decision against design 1.
 
-The starter leaves out one rule on purpose, the 30-day refund window, so its first run
-shows a critical violation in all 10 runs of one task. Add the rule and run `make mine`
-again: the violation is gone and success rises from 0.25 to 0.31. Then replace the function's body with a call to your own agent or
-workflow.
+The starter leaves out the 30-day refund window on purpose. It also refunds full
+order amounts on partial-refund requests. Its first run has 30 critical violations:
+10 outside the window and 20 for wrong amounts. Add the window rule and run `make mine`
+again: success rises from 0.25 to 0.31 and 20 wrong-amount violations remain.
+
+To use your own agent or workflow, replace the function's body. Replace its rule-only
+zeros in `desk.usage` with measured `cost_usd`, `model_calls`, `input_tokens` and
+`output_tokens`; omit measurements you cannot collect, or set them to `None`. Record
+actual model identifiers in `desk.models`. The adapter leaves missing usage unknown.
+For a controlled comparison, also set `frozen` in the `run(...)` call to the actual
+model and endpoint shared by both designs.
+
+The starter covers order lookup and refunds. To handle all 16 tasks, also connect
+address updates, preference changes and supervisor decisions.
 
 The evaluator does not take the reply's word for what happened. It reads each task's
 database before and after the run and grades the refunds it finds there
@@ -147,3 +157,11 @@ and review it before you run it.
 
 Parts 2 and 3 of the series built the agent and the five designs. Their articles, tags,
 commands and saved results are in [docs/earlier-parts.md](docs/earlier-parts.md).
+
+## License
+
+Code and documentation authored for this lab use the [MIT license](LICENSE). Saved
+traces, model outputs and model-written labels are provided as evaluation evidence;
+the MIT notice does not grant rights to third-party content within them. Upstream
+benchmark materials and dependencies retain their own licenses, including
+[τ²-bench](https://github.com/sierra-research/tau2-bench/blob/main/LICENSE).

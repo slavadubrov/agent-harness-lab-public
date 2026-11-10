@@ -2,7 +2,8 @@
 
     make mine        # the same as: uv run python -m examples.your_harness
 
-Replace the body of ``my_harness`` with a call to your agent or workflow. It gets the
+Replace the body of ``my_harness`` with a call to your agent or workflow. Record its
+measured usage in ``desk.usage`` and model identifiers in ``desk.models``. It gets the
 customer's message and a ``Desk`` to act through, and returns the reply the customer
 sees. The evaluator does not take the reply's word for what happened: it reads the
 task's database before and after the run (``evaluator.episodes.observe``) and grades the
@@ -32,6 +33,9 @@ class Desk:
 
     def __init__(self, db: Path, case: str, fault: str | None = None) -> None:
         self.db, self.case, self.fault = db, case, fault
+        # Missing measurements stay unknown when my_harness is replaced.
+        self.usage: dict[str, float | int | None] = {}
+        self.models: list[str] = []
 
     def order(self, order_id: str) -> dict | None:
         """The order with its owner's email, days since delivery and money already refunded."""
@@ -61,6 +65,9 @@ class Desk:
 def my_harness(message: str, desk: Desk) -> str:
     """A rule harness to start from. One rule is left out on purpose: the 30-day refund
     window. ``make mine`` shows what that costs; then add the rule and run it again."""
+    # These zeros apply only to this rule-only body. Replace them with measured values
+    # when adding model calls, or omit them to leave the measurements unknown.
+    desk.usage = {"cost_usd": 0.0, "model_calls": 0, "input_tokens": 0, "output_tokens": 0}
     email = re.search(r"[\w.]+@[\w.]+\w", message)
     order_id = re.search(r"O-\d{4}", message)
     if "refund" not in message.lower() or not (email and order_id):
@@ -90,8 +97,9 @@ def adapter(tasks: list[Task], trial: int) -> list[Episode]:
             start = fresh_copy(seed, Path(tmp) / t.id / "start.sqlite", task.setup_sql)
             final = fresh_copy(start, Path(tmp) / t.id / "final.sqlite")
             began = time.perf_counter()
+            desk = Desk(final, t.id, task.fault)
             try:  # one task's error must not lose the other tasks' evidence
-                reply, error = my_harness(t.input, Desk(final, t.id, task.fault)), None
+                reply, error = my_harness(t.input, desk), None
             except Exception as exc:  # noqa: BLE001
                 reply, error = None, repr(exc)
             passed, actions = observe(start, final, t.id)
@@ -104,11 +112,8 @@ def adapter(tasks: list[Task], trial: int) -> list[Episode]:
                     state_ok=passed,
                     error=error,
                     latency_s=time.perf_counter() - began,
-                    # A harness that calls a model reports its real cost and usage here.
-                    cost_usd=0.0,
-                    model_calls=0,
-                    input_tokens=0,
-                    output_tokens=0,
+                    models=desk.models,
+                    **desk.usage,
                 )
             )
     return episodes
@@ -117,7 +122,8 @@ def adapter(tasks: list[Task], trial: int) -> list[Episode]:
 def main() -> None:
     uc = usecase("obligations")
     # Ten trials, like the saved designs, so the two can be paired task by task.
-    episodes = run(uc, {"mine": adapter}, trials=10, frozen={"model": "none: rules only"})
+    # For a controlled model comparison, set frozen to the actual model and endpoint.
+    episodes = run(uc, {"mine": adapter}, trials=10, frozen={"model": "unknown"})
     mine = uc.grade(episodes)
     saved = {DESIGNS[s]: grades("dev", "obligations", s) for s in ("a1-plain", "a2-code")}
     sums = {"mine": summarize(mine, uc.metrics)}
@@ -130,7 +136,7 @@ def main() -> None:
     c.base = "1 plain agent"
     print("\n" + comparison(c))
     print(
-        "\nThe saved designs ran on 2026-10-15 with a model; `mine` ran now without one."
+        "\nThe saved designs ran on 2026-10-15; `mine` ran now."
         " Read this as how a comparison works, not as a controlled result."
     )
 

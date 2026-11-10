@@ -2375,9 +2375,9 @@
      ]
     ]
    },
-   "decision": "adopt",
+   "decision": "inconclusive",
    "reasons": [
-    "no worse than -0.02 (+0.000 to +0.000) and cheaper per task (-0.00022 to -0.00019)"
+    "a zero-width success interval does not establish the allowed loss; keep the base"
    ]
   },
   {

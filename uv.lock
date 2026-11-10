@@ -41,7 +41,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "harness-evals", git = "https://github.com/slavadubrov/harness-evals?rev=9d47100f5efa0883c8ca9a83e98638330e97bd46" },
+    { name = "harness-evals", git = "https://github.com/slavadubrov/harness-evals?rev=03cc80db2fd7039515887baf5c5321c3957139fa" },
     { name = "langchain", specifier = "==1.4.2" },
     { name = "langchain-mcp-adapters", specifier = "==0.3.2" },
     { name = "langchain-openai", specifier = "==1.6.5" },
@@ -427,8 +427,8 @@ wheels = [
 
 [[package]]
 name = "harness-evals"
-version = "0.5.0"
-source = { git = "https://github.com/slavadubrov/harness-evals?rev=9d47100f5efa0883c8ca9a83e98638330e97bd46#9d47100f5efa0883c8ca9a83e98638330e97bd46" }
+version = "0.5.1"
+source = { git = "https://github.com/slavadubrov/harness-evals?rev=03cc80db2fd7039515887baf5c5321c3957139fa#03cc80db2fd7039515887baf5c5321c3957139fa" }
 
 [[package]]
 name = "hf-xet"

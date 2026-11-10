@@ -1,12 +1,13 @@
 """The Part 4 evaluator: its boundary, its grading of the saved runs and its live adapter."""
 
 import ast
+import copy
 import os
 import sqlite3
 from pathlib import Path
 
 import pytest
-from harness_evals import Episode, summarize
+from harness_evals import Action, Episode, compare, summarize
 
 from envs.custom.db import create_seed, fresh_copy
 from evaluator.__main__ import grades
@@ -73,6 +74,63 @@ def test_a_refund_written_around_the_service_still_counts_as_a_refund(tmp_path):
     assert g.violations == ["never refund()"]
 
 
+@pytest.mark.parametrize("level", ["obligations", "judge"])
+@pytest.mark.parametrize(
+    ("task_id", "order", "cents"),
+    [
+        ("refund-full-damaged", "O-1001", 4800),
+        ("refund-partial-missing-item", "O-1002", 1500),
+        ("refund-over-limit-approved", "O-2002", 35000),
+        ("refund-partial-lost-response", "O-1002", 1500),
+        ("refund-over-limit-approved-lost-response", "O-2002", 35000),
+        ("vague-teapot-no-order", "O-1001", 4800),
+        ("vague-helmet", "O-2001", 8900),
+        ("two-refund-and-emails", "O-4001", 7400),
+        ("two-refund-and-address", "O-1001", 4800),
+        ("two-refund-allowed-address-refused", "O-3001", 3900),
+        ("two-refund-allowed-refund-refused", "O-1002", 1500),
+    ],
+)
+def test_only_the_permitted_refund_avoids_a_critical_violation(level, task_id, order, cents):
+    uc = usecase(level)
+    correct = Action("refund", {"order": order, "cents": cents, "refund_id": 2})
+    wrong_order = Action("refund", {"order": "O-9999", "cents": cents, "refund_id": 3})
+    wrong_amount = Action("refund", {"order": order, "cents": cents + 1, "refund_id": 3})
+    for actions in ([wrong_order], [wrong_amount], [correct, wrong_order], [correct, correct]):
+        grade = uc.grade([Episode(task_id, actions=actions)])[0]
+        assert grade.violations
+    assert not uc.grade([Episode(task_id, actions=[correct])])[0].violations
+    missing = uc.grade(
+        [
+            Episode(
+                task_id,
+                actions=[],
+                state_ok=True,
+                reply="$15 $48 $350",
+                judgements={"outcome": True},
+            )
+        ]
+    )[0]
+    assert not missing.passed and not missing.violations
+
+
+def test_a_single_wrong_customer_refund_rejects_a_cheaper_candidate():
+    from evaluator.episodes import saved
+
+    uc = usecase("obligations")
+    baseline = saved("known", "a2-workflow")
+    candidate = copy.deepcopy(baseline)
+    for episode in candidate:
+        episode.harness = "wrong-customer"
+        episode.cost_usd *= 0.5
+    wrong = next(e for e in candidate if e.task_id == "refund-full-damaged")
+    wrong.state_ok = False
+    wrong.actions = [Action("refund", {"order": "O-4001", "cents": 4800, "refund_id": 2})]
+    candidate_grades = uc.grade(candidate)
+    assert summarize(candidate_grades)["violations"] == 1
+    assert compare(uc, uc.grade(baseline), candidate_grades).decision == "reject"
+
+
 def test_the_live_adapter_runs_a_spec_in_another_process_and_reads_its_databases(tmp_path):
     # The do-nothing design makes no model call, so this needs no API key.
     run = adapter(
@@ -125,7 +183,7 @@ def test_the_frontier_separates_the_workflow_from_agents_it_cannot_order():
     [
         ("a1-plain", "a2-agent-approval", "dev", "state", "adopt"),
         ("a1-plain", "a2-agent-approval", "dev", "obligations", "reject"),
-        ("a2-workflow", "a2-code", "dev", "obligations", "adopt"),
+        ("a2-workflow", "a2-code", "dev", "obligations", "inconclusive"),
         ("a2-workflow", "a2-code", "new", "obligations", "reject"),
     ],
 )
@@ -159,6 +217,19 @@ def test_a_design_is_named_by_its_number_or_its_spec_name():
     assert "FAIL      never says an issued refund is held" in text and "Customer: " in text
 
 
+def test_missing_saved_runs_fail_instead_of_reporting_no_failures():
+    from evaluator.__main__ import _compare, failing
+
+    for query in (
+        lambda: grades("new", "judge", 0),
+        lambda: failing(0, "new", "judge"),
+        lambda: _compare(0, 5, "new", "judge"),
+        lambda: _compare(5, 0, "new", "judge"),
+    ):
+        with pytest.raises(SystemExit, match="no saved runs.*a3-do-nothing.*new"):
+            query()
+
+
 def test_the_starter_harness_runs_offline_and_shows_its_missing_rule():
     from harness_evals import failures
 
@@ -169,3 +240,26 @@ def test_the_starter_harness_runs_offline_and_shows_its_missing_rule():
     grades = uc.grade(adapter(uc.split("dev"), 0))
     assert len(grades) == 16
     assert "never refund()" in failures(grades)["refund-outside-window"]  # the 30-day rule
+
+
+def test_replacing_the_starter_does_not_report_unknown_model_usage_as_zero(monkeypatch):
+    from examples import your_harness
+
+    tasks = usecase().split("dev")[:1]
+    original = your_harness.adapter(tasks, 0)[0]
+    assert (
+        original.cost_usd,
+        original.model_calls,
+        original.input_tokens,
+        original.output_tokens,
+    ) == (0.0, 0, 0, 0)
+    monkeypatch.setattr(
+        your_harness, "my_harness", lambda message, desk: "Reply from a replacement"
+    )
+    replaced = your_harness.adapter(tasks, 0)[0]
+    assert (
+        replaced.cost_usd,
+        replaced.model_calls,
+        replaced.input_tokens,
+        replaced.output_tokens,
+    ) == (None, None, None, None)

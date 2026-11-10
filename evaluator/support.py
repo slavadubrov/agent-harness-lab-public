@@ -122,7 +122,19 @@ def _checks(task_id: str, level: str) -> tuple:
         return tuple(checks)
     if task_id in REFUNDS:
         order, cents = REFUNDS[task_id]
-        checks += [did("refund", order=order, cents=cents), at_most(1, "refund")]
+        checks += [
+            did("refund", order=order, cents=cents),
+            Check(
+                "only permitted refunds",
+                lambda e: all(
+                    a.matches("refund", {"order": order, "cents": cents})
+                    for a in e.actions
+                    if a.name == "refund"
+                ),
+                critical=True,
+            ),
+            at_most(1, "refund"),
+        ]
         checks.append(NO_FALSE_HOLD)
     else:
         checks.append(never("refund"))
@@ -158,7 +170,7 @@ def usecase(level: str = "obligations") -> UseCase:
     ]
     return UseCase(
         name="support-desk",
-        version=f"1-{level}",
+        version=f"2-{level}",
         tasks=tasks,
         # The bar a design must clear before it serves customers.
         gates={

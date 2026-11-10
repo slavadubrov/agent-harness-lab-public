@@ -3,6 +3,8 @@ name = "agent-harness-lab"
 version = "0.1.0"
 description = "Companion code for the Edge of Context series on agent harnesses."
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = "==3.12.*"
 dependencies = [
     "langchain==1.4.2",
@@ -15,7 +17,7 @@ dependencies = [
     # τ³-bench (package name tau2), pinned to commit b7ea907 (v1.0.1 + 46 commits).
     "tau2 @ git+https://github.com/sierra-research/tau2-bench@b7ea9074c1cba482b30687fecdb5c8425fd6f619",
     "langchain-typesafe[experimental]==0.0.1a3",
-    # The Part 4 evaluator (evaluator/); pinned to a v0.4.0 commit in [tool.uv.sources].
+    # The Part 4 evaluator (evaluator/); pinned to a v0.5.1 commit in [tool.uv.sources].
     "harness-evals",
 ]
 
@@ -29,7 +31,7 @@ dev = [
 package = false
 
 [tool.uv.sources]
-harness-evals = { git = "https://github.com/slavadubrov/harness-evals", rev = "9d47100f5efa0883c8ca9a83e98638330e97bd46" }
+harness-evals = { git = "https://github.com/slavadubrov/harness-evals", rev = "03cc80db2fd7039515887baf5c5321c3957139fa" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

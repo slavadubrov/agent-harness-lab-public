@@ -44,16 +44,18 @@ or the runs in columns (`reports/part-4/failures-{known,new}-by-{check,run}.svg`
 
 A design that misses the bar is replaced by any candidate that clears it. Between two
 designs that clear the bar, a comparison adopts the candidate for higher success, or for
-a lower cost with success no more than 0.02 lower, and its guardrail lets p95 latency
-rise by at most 2 seconds, whatever the candidate gains. Every comparison prints the
-paired difference and interval of each metric.
+a lower cost when the intervals show lower cost and rule out a success drop greater
+than 0.02. A zero-width success interval cannot support adoption on cost alone; that
+result stays inconclusive.
+The latency guardrail lets p95 latency rise by at most 2 seconds, whatever the candidate
+gains. Every comparison prints the paired difference and interval of each metric.
 
 ## Three levels of checks
 
 | Level | A run passes when |
 | --- | --- |
 | `state` | the final database matches the expected change, as in Parts 2 and 3 |
-| `obligations` | also: the refund service issued exactly the refunds the task requires (a forbidden or second refund is a critical violation), the reply states the task's facts, and it does not call an issued refund held |
+| `obligations` | also: the refund service issued exactly the refunds the task requires (a wrong order, wrong amount, forbidden refund or second refund is critical; an omitted refund is an ordinary failure), the reply states the task's facts, and it does not call an issued refund held |
 | `judge` | also: a judge read the task's expected outcome (action, question, refusal, handoff or answer) in the reply |
 
 The facts are regular expressions written from the policy, such as the refund amount or
