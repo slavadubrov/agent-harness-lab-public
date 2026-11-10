@@ -1,13 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1571 400" role="img" font-family="system-ui, sans-serif" font-size="13" fill="#222">
 <title>16 known tasks, 10 runs, with the judge: where each design fails, by run</title>
-<rect width="1571" height="400" fill="#fff"/>
+<style>@media (prefers-color-scheme:dark){svg{fill:#e6edf3}.bg{fill:#0d1117}.mut{fill:#9da7b3}.grid{stroke:#30363d}.off{fill:#c9d1d9}.offl{stroke:#c9d1d9}.hot{fill:#ff6fb6}.hotl{stroke:#ff6fb6}.halo{stroke:#0d1117}}</style>
+<rect class="bg" width="1571" height="400" fill="#fff"/>
 <text x="16" y="26" font-size="15" font-weight="600">16 known tasks, 10 runs, with the judge: where each design fails, by run</text>
 <g transform="translate(16 42)"><rect x="0.0" y="0.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"></rect></g>
-<text x="35" y="53" fill="#555">passed</text>
+<text x="35" y="53" class="mut" fill="#555">passed</text>
 <g transform="translate(91 42)"><rect x="0.0" y="0.0" width="13" height="13" rx="2" fill="#c2185b" stroke="none"></rect></g>
-<text x="110" y="53" fill="#555">failed</text>
+<text x="110" y="53" class="mut" fill="#555">failed</text>
 <g transform="translate(165 42)"><rect x="0.0" y="0.0" width="13" height="13" rx="2" fill="#9e9e9e" stroke="none"></rect></g>
-<text x="184" y="53" fill="#555">undecided</text>
+<text x="184" y="53" class="mut" fill="#555">undecided</text>
 <text x="294" y="131" text-anchor="end">refund-full-damaged</text>
 <text x="294" y="147" text-anchor="end">refund-partial-missing-item</text>
 <text x="294" y="163" text-anchor="end">refund-outside-window</text>
@@ -25,16 +26,16 @@
 <text x="294" y="355" text-anchor="end">refund-partial-lost-response</text>
 <text x="294" y="371" text-anchor="end">refund-over-limit-approved-lost-response</text>
 <text x="304" y="90" font-weight="600">0 do nothing</text>
-<text x="310.5" y="114" text-anchor="middle" fill="#555">1</text>
-<text x="326.5" y="114" text-anchor="middle" fill="#555">2</text>
-<text x="342.5" y="114" text-anchor="middle" fill="#555">3</text>
-<text x="358.5" y="114" text-anchor="middle" fill="#555">4</text>
-<text x="374.5" y="114" text-anchor="middle" fill="#555">5</text>
-<text x="390.5" y="114" text-anchor="middle" fill="#555">6</text>
-<text x="406.5" y="114" text-anchor="middle" fill="#555">7</text>
-<text x="422.5" y="114" text-anchor="middle" fill="#555">8</text>
-<text x="438.5" y="114" text-anchor="middle" fill="#555">9</text>
-<text x="454.5" y="114" text-anchor="middle" fill="#555">10</text>
+<text x="310.5" y="114" text-anchor="middle" class="mut" fill="#555">1</text>
+<text x="326.5" y="114" text-anchor="middle" class="mut" fill="#555">2</text>
+<text x="342.5" y="114" text-anchor="middle" class="mut" fill="#555">3</text>
+<text x="358.5" y="114" text-anchor="middle" class="mut" fill="#555">4</text>
+<text x="374.5" y="114" text-anchor="middle" class="mut" fill="#555">5</text>
+<text x="390.5" y="114" text-anchor="middle" class="mut" fill="#555">6</text>
+<text x="406.5" y="114" text-anchor="middle" class="mut" fill="#555">7</text>
+<text x="422.5" y="114" text-anchor="middle" class="mut" fill="#555">8</text>
+<text x="438.5" y="114" text-anchor="middle" class="mut" fill="#555">9</text>
+<text x="454.5" y="114" text-anchor="middle" class="mut" fill="#555">10</text>
 <rect x="304.0" y="120.0" width="13" height="13" rx="2" fill="#c2185b" stroke="none"><title>0 do nothing · refund-full-damaged · 1: 1 of 1 runs failed</title></rect>
 <rect x="320.0" y="120.0" width="13" height="13" rx="2" fill="#c2185b" stroke="none"><title>0 do nothing · refund-full-damaged · 2: 1 of 1 runs failed</title></rect>
 <rect x="336.0" y="120.0" width="13" height="13" rx="2" fill="#c2185b" stroke="none"><title>0 do nothing · refund-full-damaged · 3: 1 of 1 runs failed</title></rect>
@@ -196,16 +197,16 @@
 <rect x="432.0" y="360.0" width="13" height="13" rx="2" fill="#c2185b" stroke="none"><title>0 do nothing · refund-over-limit-approved-lost-response · 9: 1 of 1 runs failed</title></rect>
 <rect x="448.0" y="360.0" width="13" height="13" rx="2" fill="#c2185b" stroke="none"><title>0 do nothing · refund-over-limit-approved-lost-response · 10: 1 of 1 runs failed</title></rect>
 <text x="492" y="90" font-weight="600">1 plain agent</text>
-<text x="498.5" y="114" text-anchor="middle" fill="#555">1</text>
-<text x="514.5" y="114" text-anchor="middle" fill="#555">2</text>
-<text x="530.5" y="114" text-anchor="middle" fill="#555">3</text>
-<text x="546.5" y="114" text-anchor="middle" fill="#555">4</text>
-<text x="562.5" y="114" text-anchor="middle" fill="#555">5</text>
-<text x="578.5" y="114" text-anchor="middle" fill="#555">6</text>
-<text x="594.5" y="114" text-anchor="middle" fill="#555">7</text>
-<text x="610.5" y="114" text-anchor="middle" fill="#555">8</text>
-<text x="626.5" y="114" text-anchor="middle" fill="#555">9</text>
-<text x="642.5" y="114" text-anchor="middle" fill="#555">10</text>
+<text x="498.5" y="114" text-anchor="middle" class="mut" fill="#555">1</text>
+<text x="514.5" y="114" text-anchor="middle" class="mut" fill="#555">2</text>
+<text x="530.5" y="114" text-anchor="middle" class="mut" fill="#555">3</text>
+<text x="546.5" y="114" text-anchor="middle" class="mut" fill="#555">4</text>
+<text x="562.5" y="114" text-anchor="middle" class="mut" fill="#555">5</text>
+<text x="578.5" y="114" text-anchor="middle" class="mut" fill="#555">6</text>
+<text x="594.5" y="114" text-anchor="middle" class="mut" fill="#555">7</text>
+<text x="610.5" y="114" text-anchor="middle" class="mut" fill="#555">8</text>
+<text x="626.5" y="114" text-anchor="middle" class="mut" fill="#555">9</text>
+<text x="642.5" y="114" text-anchor="middle" class="mut" fill="#555">10</text>
 <rect x="492.0" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>1 plain agent · refund-full-damaged · 1: 0 of 1 runs failed</title></rect>
 <rect x="508.0" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>1 plain agent · refund-full-damaged · 2: 0 of 1 runs failed</title></rect>
 <rect x="524.0" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>1 plain agent · refund-full-damaged · 3: 0 of 1 runs failed</title></rect>
@@ -367,16 +368,16 @@
 <rect x="620.0" y="360.0" width="13" height="13" rx="2" fill="#c2185b" stroke="none"><title>1 plain agent · refund-over-limit-approved-lost-response · 9: 1 of 1 runs failed</title></rect>
 <rect x="636.0" y="360.0" width="13" height="13" rx="2" fill="#c2185b" stroke="none"><title>1 plain agent · refund-over-limit-approved-lost-response · 10: 1 of 1 runs failed</title></rect>
 <text x="680" y="90" font-weight="600">2 agent with approval middleware</text>
-<text x="686.5" y="114" text-anchor="middle" fill="#555">1</text>
-<text x="702.5" y="114" text-anchor="middle" fill="#555">2</text>
-<text x="718.5" y="114" text-anchor="middle" fill="#555">3</text>
-<text x="734.5" y="114" text-anchor="middle" fill="#555">4</text>
-<text x="750.5" y="114" text-anchor="middle" fill="#555">5</text>
-<text x="766.5" y="114" text-anchor="middle" fill="#555">6</text>
-<text x="782.5" y="114" text-anchor="middle" fill="#555">7</text>
-<text x="798.5" y="114" text-anchor="middle" fill="#555">8</text>
-<text x="814.5" y="114" text-anchor="middle" fill="#555">9</text>
-<text x="830.5" y="114" text-anchor="middle" fill="#555">10</text>
+<text x="686.5" y="114" text-anchor="middle" class="mut" fill="#555">1</text>
+<text x="702.5" y="114" text-anchor="middle" class="mut" fill="#555">2</text>
+<text x="718.5" y="114" text-anchor="middle" class="mut" fill="#555">3</text>
+<text x="734.5" y="114" text-anchor="middle" class="mut" fill="#555">4</text>
+<text x="750.5" y="114" text-anchor="middle" class="mut" fill="#555">5</text>
+<text x="766.5" y="114" text-anchor="middle" class="mut" fill="#555">6</text>
+<text x="782.5" y="114" text-anchor="middle" class="mut" fill="#555">7</text>
+<text x="798.5" y="114" text-anchor="middle" class="mut" fill="#555">8</text>
+<text x="814.5" y="114" text-anchor="middle" class="mut" fill="#555">9</text>
+<text x="830.5" y="114" text-anchor="middle" class="mut" fill="#555">10</text>
 <rect x="680.0" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>2 agent with approval middleware · refund-full-damaged · 1: 0 of 1 runs failed</title></rect>
 <rect x="696.0" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>2 agent with approval middleware · refund-full-damaged · 2: 0 of 1 runs failed</title></rect>
 <rect x="712.0" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>2 agent with approval middleware · refund-full-damaged · 3: 0 of 1 runs failed</title></rect>
@@ -538,16 +539,16 @@
 <rect x="808.0" y="360.0" width="13" height="13" rx="2" fill="#c2185b" stroke="none"><title>2 agent with approval middleware · refund-over-limit-approved-lost-response · 9: 1 of 1 runs failed</title></rect>
 <rect x="824.0" y="360.0" width="13" height="13" rx="2" fill="#c2185b" stroke="none"><title>2 agent with approval middleware · refund-over-limit-approved-lost-response · 10: 1 of 1 runs failed</title></rect>
 <text x="938" y="90" font-weight="600">3 agent inside a workflow</text>
-<text x="944.9" y="114" text-anchor="middle" fill="#555">1</text>
-<text x="960.9" y="114" text-anchor="middle" fill="#555">2</text>
-<text x="976.9" y="114" text-anchor="middle" fill="#555">3</text>
-<text x="992.9" y="114" text-anchor="middle" fill="#555">4</text>
-<text x="1008.9" y="114" text-anchor="middle" fill="#555">5</text>
-<text x="1024.9" y="114" text-anchor="middle" fill="#555">6</text>
-<text x="1040.9" y="114" text-anchor="middle" fill="#555">7</text>
-<text x="1056.9" y="114" text-anchor="middle" fill="#555">8</text>
-<text x="1072.9" y="114" text-anchor="middle" fill="#555">9</text>
-<text x="1088.9" y="114" text-anchor="middle" fill="#555">10</text>
+<text x="944.9" y="114" text-anchor="middle" class="mut" fill="#555">1</text>
+<text x="960.9" y="114" text-anchor="middle" class="mut" fill="#555">2</text>
+<text x="976.9" y="114" text-anchor="middle" class="mut" fill="#555">3</text>
+<text x="992.9" y="114" text-anchor="middle" class="mut" fill="#555">4</text>
+<text x="1008.9" y="114" text-anchor="middle" class="mut" fill="#555">5</text>
+<text x="1024.9" y="114" text-anchor="middle" class="mut" fill="#555">6</text>
+<text x="1040.9" y="114" text-anchor="middle" class="mut" fill="#555">7</text>
+<text x="1056.9" y="114" text-anchor="middle" class="mut" fill="#555">8</text>
+<text x="1072.9" y="114" text-anchor="middle" class="mut" fill="#555">9</text>
+<text x="1088.9" y="114" text-anchor="middle" class="mut" fill="#555">10</text>
 <rect x="938.4" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>3 agent inside a workflow · refund-full-damaged · 1: 0 of 1 runs failed</title></rect>
 <rect x="954.4" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>3 agent inside a workflow · refund-full-damaged · 2: 0 of 1 runs failed</title></rect>
 <rect x="970.4" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>3 agent inside a workflow · refund-full-damaged · 3: 0 of 1 runs failed</title></rect>
@@ -709,16 +710,16 @@
 <rect x="1066.4" y="360.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>3 agent inside a workflow · refund-over-limit-approved-lost-response · 9: 0 of 1 runs failed</title></rect>
 <rect x="1082.4" y="360.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>3 agent inside a workflow · refund-over-limit-approved-lost-response · 10: 0 of 1 runs failed</title></rect>
 <text x="1146" y="90" font-weight="600">4 router and three agents</text>
-<text x="1152.9" y="114" text-anchor="middle" fill="#555">1</text>
-<text x="1168.9" y="114" text-anchor="middle" fill="#555">2</text>
-<text x="1184.9" y="114" text-anchor="middle" fill="#555">3</text>
-<text x="1200.9" y="114" text-anchor="middle" fill="#555">4</text>
-<text x="1216.9" y="114" text-anchor="middle" fill="#555">5</text>
-<text x="1232.9" y="114" text-anchor="middle" fill="#555">6</text>
-<text x="1248.9" y="114" text-anchor="middle" fill="#555">7</text>
-<text x="1264.9" y="114" text-anchor="middle" fill="#555">8</text>
-<text x="1280.9" y="114" text-anchor="middle" fill="#555">9</text>
-<text x="1296.9" y="114" text-anchor="middle" fill="#555">10</text>
+<text x="1152.9" y="114" text-anchor="middle" class="mut" fill="#555">1</text>
+<text x="1168.9" y="114" text-anchor="middle" class="mut" fill="#555">2</text>
+<text x="1184.9" y="114" text-anchor="middle" class="mut" fill="#555">3</text>
+<text x="1200.9" y="114" text-anchor="middle" class="mut" fill="#555">4</text>
+<text x="1216.9" y="114" text-anchor="middle" class="mut" fill="#555">5</text>
+<text x="1232.9" y="114" text-anchor="middle" class="mut" fill="#555">6</text>
+<text x="1248.9" y="114" text-anchor="middle" class="mut" fill="#555">7</text>
+<text x="1264.9" y="114" text-anchor="middle" class="mut" fill="#555">8</text>
+<text x="1280.9" y="114" text-anchor="middle" class="mut" fill="#555">9</text>
+<text x="1296.9" y="114" text-anchor="middle" class="mut" fill="#555">10</text>
 <rect x="1146.4" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>4 router and three agents · refund-full-damaged · 1: 0 of 1 runs failed</title></rect>
 <rect x="1162.4" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>4 router and three agents · refund-full-damaged · 2: 0 of 1 runs failed</title></rect>
 <rect x="1178.4" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>4 router and three agents · refund-full-damaged · 3: 0 of 1 runs failed</title></rect>
@@ -880,16 +881,16 @@
 <rect x="1274.4" y="360.0" width="13" height="13" rx="2" fill="#c2185b" stroke="none"><title>4 router and three agents · refund-over-limit-approved-lost-response · 9: 1 of 1 runs failed</title></rect>
 <rect x="1290.4" y="360.0" width="13" height="13" rx="2" fill="#c2185b" stroke="none"><title>4 router and three agents · refund-over-limit-approved-lost-response · 10: 1 of 1 runs failed</title></rect>
 <text x="1354" y="90" font-weight="600">5 workflow with no agent</text>
-<text x="1360.9" y="114" text-anchor="middle" fill="#555">1</text>
-<text x="1376.9" y="114" text-anchor="middle" fill="#555">2</text>
-<text x="1392.9" y="114" text-anchor="middle" fill="#555">3</text>
-<text x="1408.9" y="114" text-anchor="middle" fill="#555">4</text>
-<text x="1424.9" y="114" text-anchor="middle" fill="#555">5</text>
-<text x="1440.9" y="114" text-anchor="middle" fill="#555">6</text>
-<text x="1456.9" y="114" text-anchor="middle" fill="#555">7</text>
-<text x="1472.9" y="114" text-anchor="middle" fill="#555">8</text>
-<text x="1488.9" y="114" text-anchor="middle" fill="#555">9</text>
-<text x="1504.9" y="114" text-anchor="middle" fill="#555">10</text>
+<text x="1360.9" y="114" text-anchor="middle" class="mut" fill="#555">1</text>
+<text x="1376.9" y="114" text-anchor="middle" class="mut" fill="#555">2</text>
+<text x="1392.9" y="114" text-anchor="middle" class="mut" fill="#555">3</text>
+<text x="1408.9" y="114" text-anchor="middle" class="mut" fill="#555">4</text>
+<text x="1424.9" y="114" text-anchor="middle" class="mut" fill="#555">5</text>
+<text x="1440.9" y="114" text-anchor="middle" class="mut" fill="#555">6</text>
+<text x="1456.9" y="114" text-anchor="middle" class="mut" fill="#555">7</text>
+<text x="1472.9" y="114" text-anchor="middle" class="mut" fill="#555">8</text>
+<text x="1488.9" y="114" text-anchor="middle" class="mut" fill="#555">9</text>
+<text x="1504.9" y="114" text-anchor="middle" class="mut" fill="#555">10</text>
 <rect x="1354.4" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>5 workflow with no agent · refund-full-damaged · 1: 0 of 1 runs failed</title></rect>
 <rect x="1370.4" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>5 workflow with no agent · refund-full-damaged · 2: 0 of 1 runs failed</title></rect>
 <rect x="1386.4" y="120.0" width="13" height="13" rx="2" fill="#2e7d32" stroke="none"><title>5 workflow with no agent · refund-full-damaged · 3: 0 of 1 runs failed</title></rect>

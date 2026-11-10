@@ -50,7 +50,7 @@ Defined in [`envs/custom/tasks.py`](../envs/custom/tasks.py).
 Seven tasks expect no write. An agent that does nothing passes those seven state checks
 and scores 7/12. This is a property of the checks, not a measured success rate.
 
-### The four Part 2 tasks
+### The four Part 3 tasks
 
 `APPROVAL_TASKS` in the same file. Run them with `make a2-custom`.
 

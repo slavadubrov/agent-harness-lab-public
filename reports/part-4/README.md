@@ -24,13 +24,13 @@ Part 3 runs recorded (2026-10-05); the live prices on 2026-10-15 were the same. 
 calls' computed cost equals the cost OpenRouter billed; the judge's and the router's
 TypeSafe Jev calls are computed only.
 
-The runs were first made for a study that was later dropped from this repository. They
-are restored here with their folders renamed (`k10` to `known`, `oot` to `new`) and one
-edit: the email address that one of the 32 messages asks to switch to now reads
-`ben@ortiz.example` everywhere, a reserved example domain. `a3-do-nothing` is
-design 0, which makes no model call, no write and no reply. `a3-hybrid`, a design that
-routes known kinds of request to code and the rest to an agent, is kept because 10 of the
-60 labelled replies are its replies; its spec and code are not in this release.
+The folders are named by spec: `a3-do-nothing` is design 0, `a1-plain` design 1,
+`a2-agent-approval` design 2, `a2-workflow` design 3, `a2-router` design 4 and `a2-code`
+design 5. `a3-hybrid` is a prototype that routes known kinds of request to code and the
+rest to an agent. Its runs are here because 10 of the 60 labelled replies are its
+replies; its spec and code are not in this repository, and `RESULTS.md` leaves it out.
+The email address that one of the 32 messages asks to switch to is `ben@ortiz.example`,
+a reserved example domain.
 
 ## Limits
 
