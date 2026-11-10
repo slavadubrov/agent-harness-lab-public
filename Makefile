@@ -1,4 +1,6 @@
-# agent-harness-lab — targets for Parts 2 (a1-*), 3 (a2-*) and 4 (part4-*). Needs uv and OPENROUTER_API_KEY (or OPEN_ROUTER_API_KEY) in .env or the environment.
+# agent-harness-lab. Needs uv. The offline targets (test, mine, show, failures, part4-regrade, part4-agreement,
+# part4-compare) need no key. The a1-*, a2-* and part4-live targets call a model and need OPENROUTER_API_KEY
+# (or OPEN_ROUTER_API_KEY) in .env or the environment. a1-* belongs to Part 2 of the series, a2-* to Part 3.
 SHELL := /bin/bash
 UV ?= uv
 SPEC ?= harness/spec/base.yaml
@@ -17,23 +19,28 @@ TAU3_CONCURRENCY ?= 4
 CUSTOM_SPECS := harness/spec/base.yaml harness/spec/plain.yaml harness/spec/glm-5.3-flash.yaml harness/spec/mimo-v2.6-flash.yaml
 A2_SPECS := harness/spec/plain.yaml harness/spec/approval-agent.yaml harness/spec/workflows/refund-approval.yaml harness/spec/workflows/support-router.yaml harness/spec/workflows/support-code.yaml
 
-.PHONY: help sync test fmt lint a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 part4-regrade part4-agreement part4-compare part4-live
+.PHONY: help sync test fmt lint mine show failures a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 part4-regrade part4-agreement part4-compare part4-live
 
 help:
-	@echo "make a1-custom          run the custom environment dev set with SPEC (default base.yaml)"
-	@echo "make a1-custom-matrix   run the custom dev set with every A1 spec"
-	@echo "make a1-tau3            run the τ³ retail subset with SPEC"
-	@echo "make a1-tau3-matrix     run the τ³ subset with base.yaml and plain.yaml"
-	@echo "make report             rebuild reports/article-a1/README.md and versions.json"
-	@echo "make a2-custom          run the Part 2 task set (16) with SPEC (agent or workflow)"
-	@echo "make a2-matrix          run the Part 2 task set with plain, approval agent, workflow, router"
-	@echo "make a2-routes          score both routers' classifiers on 25 labelled requests"
-	@echo "make report-a2          rebuild reports/article-a2/README.md"
-	@echo "make part4-regrade      offline: grade the saved Part 4 runs, write reports/part-4/RESULTS.md"
-	@echo "make part4-agreement    offline: the judge and the held-reply check against labels"
-	@echo "make part4-compare      offline: BASE=<spec> CANDIDATE=<spec> [SPLIT=dev|new] [LEVEL=...]"
-	@echo "make part4-live         paid: TRIALS=5 PART4_SPECS=\"<spec files>\" [SPLIT=dev|new]"
+	@echo "offline, no key:"
+	@echo "make part4-regrade      grade the saved Part 4 runs, write reports/part-4/RESULTS.md and the plots"
+	@echo "make failures DESIGN=5 [SPLIT=new] [LEVEL=judge]     which checks a design fails, task by task"
+	@echo "make show DESIGN=5 TASK=policy-refund-window [RUN=1] [SPLIT=new] [LEVEL=judge]   one saved run"
+	@echo "make part4-compare      BASE=3 CANDIDATE=5 (design numbers) [SPLIT=dev|new] [LEVEL=state|obligations|judge]"
+	@echo "make part4-agreement    the judge and the held-reply check against labels"
+	@echo "make mine               score the function in examples/your_harness.py on the 16 known tasks"
 	@echo "make test | fmt | lint"
+	@echo "paid, needs a key:"
+	@echo "make a1-custom          Part 2: run the 12 support tasks with SPEC (default base.yaml)"
+	@echo "make a1-custom-matrix   Part 2: run the 12 support tasks with every Part 2 spec"
+	@echo "make a1-tau3            Part 2: run the τ³-bench retail subset with SPEC"
+	@echo "make a1-tau3-matrix     Part 2: run the τ³-bench subset with base.yaml and plain.yaml"
+	@echo "make report             rebuild reports/article-a1/README.md and versions.json"
+	@echo "make a2-custom          Part 3: run the 16 support tasks with SPEC (agent or workflow)"
+	@echo "make a2-matrix          Part 3: run the 16 support tasks with all five designs"
+	@echo "make a2-routes          Part 3: score both routers' classifiers on 25 labelled requests"
+	@echo "make report-a2          rebuild reports/article-a2/README.md"
+	@echo "make part4-live         TRIALS=5 PART4_SPECS=\"<spec files>\" [SPLIT=dev|new]"
 
 sync:
 	$(UV) sync --frozen
@@ -123,6 +130,17 @@ part4-agreement: sync
 
 part4-compare: sync
 	$(UV) run python -m evaluator compare $(BASE) $(CANDIDATE) --split $(SPLIT) --level $(LEVEL)
+
+RUN ?= 1
+
+failures: sync
+	$(UV) run python -m evaluator failures $(DESIGN) --split $(SPLIT) --level $(LEVEL)
+
+show: sync
+	$(UV) run python -m evaluator show $(DESIGN) $(TASK) --run $(RUN) --split $(SPLIT) --level $(LEVEL)
+
+mine: sync
+	$(UV) run python -m examples.your_harness
 
 part4-live: sync
 	$(UV) run python -m evaluator live --trials $(TRIALS) --split $(SPLIT) $(PART4_SPECS)

@@ -137,3 +137,35 @@ def test_the_decisions_change_with_the_checks_and_the_tasks(
     c = compare(usecase(level), grades(split, level, base), grades(split, level, candidate))
     assert c.decision == decision
     assert c.deltas["latency_p95"] is not None  # the guardrail was evaluated
+
+
+def test_a_design_is_named_by_its_number_or_its_spec_name():
+    from evaluator.__main__ import _compare, design, failing, show
+
+    assert design(3) == design("3") == design("a2-workflow") == "a2-workflow"
+    with pytest.raises(SystemExit, match="unknown design"):
+        design("9")
+    by_number, by_name = (
+        _compare(3, 5, "new", "obligations"),
+        _compare("a2-workflow", "a2-code", "new", "obligations"),
+    )
+    assert by_number.decision == by_name.decision == "reject"
+    assert by_number.candidate == "5 workflow with no agent"
+    assert any(
+        line.startswith("refund-over-limit-approved: failed")
+        for line in failing(2, "dev", "obligations")
+    )
+    text = show(2, "refund-over-limit-approved", "dev", "obligations", 1)
+    assert "FAIL      never says an issued refund is held" in text and "Customer: " in text
+
+
+def test_the_starter_harness_runs_offline_and_shows_its_missing_rule():
+    from harness_evals import failures
+
+    from evaluator.support import usecase
+    from examples.your_harness import adapter
+
+    uc = usecase("obligations")
+    grades = uc.grade(adapter(uc.split("dev"), 0))
+    assert len(grades) == 16
+    assert "never refund()" in failures(grades)["refund-outside-window"]  # the 30-day rule

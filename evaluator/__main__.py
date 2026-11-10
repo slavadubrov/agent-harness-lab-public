@@ -1,12 +1,14 @@
 """Evaluate the support assistant's designs with harness-evals.
 
     python -m evaluator regrade                  # offline: grade the saved runs, write the report
-    python -m evaluator agreement                # offline: the graders against hand labels
+    python -m evaluator agreement                # offline: the graders against the labels
     python -m evaluator compare BASE CANDIDATE [--split new] [--level judge]
+    python -m evaluator failures DESIGN [--split new] [--level judge]
+    python -m evaluator show DESIGN TASK [--run 1] [--split new] [--level judge]
     python -m evaluator live --trials 5 SPEC ... # paid: new runs, graded as they finish
 
-Designs by spec name: a3-do-nothing (0), a1-plain (1), a2-agent-approval (2),
-a2-workflow (3), a2-router (4), a2-code (5).
+Name a design by its number in the articles or by its spec name: 0 a3-do-nothing,
+1 a1-plain, 2 a2-agent-approval, 3 a2-workflow, 4 a2-router, 5 a2-code.
 """
 
 from __future__ import annotations
@@ -21,17 +23,21 @@ from harness_evals import (
     Episode,
     agreement,
     compare,
+    comparison,
+    failure_map_svg,
+    failures,
+    frontier_svg,
     gate_failures,
     pareto,
     run,
     save,
     summarize,
+    table,
 )
-from harness_evals.report import comparison, failure_map_svg, frontier_svg, table
 
 from envs.custom.tasks import TASKS_BY_ID
 from evaluator.episodes import REPO, SAVED, _jsonl, adapter, saved
-from evaluator.support import LEVELS, NO_FALSE_HOLD, usecase
+from evaluator.support import LEVELS, NO_FALSE_HOLD, OUTCOME, usecase
 
 DESIGNS = {
     "a3-do-nothing": "0 do nothing",
@@ -48,8 +54,19 @@ BATCH_DIR = {"k10": "known", "oot": "new"}  # folder names in the labels
 FROZEN = {"model": "openai/gpt-6-luna", "endpoint": "openrouter, provider openai, no fallbacks"}
 
 
-def grades(split: str, level: str, spec: str):
-    return usecase(level).grade(saved(BATCH[split], spec))
+NUMBERS = {label.split()[0]: spec for spec, label in DESIGNS.items()}  # "3" -> "a2-workflow"
+
+
+def design(name: str | int) -> str:
+    """A design's spec name, from its number in the articles (0 to 5) or the spec name."""
+    spec = NUMBERS.get(str(name), str(name))
+    if spec not in DESIGNS and not any((SAVED / b / spec).exists() for b in BATCH.values()):
+        raise SystemExit(f"unknown design {name!r}; use 0 to 5 or one of: {', '.join(DESIGNS)}")
+    return spec
+
+
+def grades(split: str, level: str, spec: str | int):
+    return usecase(level).grade(saved(BATCH[split], design(spec)))
 
 
 def specs(split: str) -> list[str]:
@@ -97,7 +114,7 @@ def regrade(out: Path) -> dict:
         }
     lines += ["## Comparisons", ""]
     for base, cand, split, level in COMPARISONS:
-        c = compare(usecase(level), grades(split, level, base), grades(split, level, cand))
+        c = _compare(base, cand, split, level)
         lines += [f"{split}, {level}: " + comparison(c).replace("\n", " "), ""]
         report.setdefault("comparisons", []).append(
             {
@@ -116,6 +133,14 @@ def regrade(out: Path) -> dict:
     (out / "RESULTS.md").write_text("\n".join(lines) + "\n")
     (out / "summary.json").write_text(json.dumps(report, indent=1) + "\n")
     return report
+
+
+def _compare(base: str | int, cand: str | int, split: str, level: str):
+    """A paired comparison of two saved designs, named as in the articles."""
+    base, cand = design(base), design(cand)
+    c = compare(usecase(level), grades(split, level, base), grades(split, level, cand))
+    c.base, c.candidate = DESIGNS.get(base, base), DESIGNS.get(cand, cand)
+    return c
 
 
 COMPARISONS = [  # (base, candidate, split, level)
@@ -165,6 +190,11 @@ def _frontier(split: str, name: str, sums: dict, out: Path) -> list[str]:
                 (out / plot).write_text(frontier_svg(labelled, x, "success", title=title))
                 plot = f"[{plot}]({plot})"
             lines.append(f"| {level} | {label} | {front} | {plot} |")
+    for slug, label in AXES.values():
+        lines += [
+            "",
+            f"![{name}: success with the judge against {label}](frontier-{BATCH[split]}-{slug}.svg)",
+        ]
     return lines
 
 
@@ -178,7 +208,11 @@ def _failure_maps(split: str, name: str, by_spec: dict, out: Path) -> list[str]:
         grades = {DESIGNS[s]: gs for s, gs in by_spec.items()}
         (out / plot).write_text(failure_map_svg(usecase("judge"), grades, by=by, title=title))
         links.append(f"[by {by[:-1]}]({plot})")
-    return ["Where each design fails, graded with the judge: " + ", ".join(links) + "."]
+    return [
+        "Where each design fails, graded with the judge: " + ", ".join(links) + ".",
+        "",
+        f"![{name}: failed runs for each task and kind of check](failures-{BATCH[split]}-by-check.svg)",
+    ]
 
 
 def _single_runs(by_spec: dict) -> list[str]:
@@ -201,6 +235,66 @@ def _single_runs(by_spec: dict) -> list[str]:
             f" | ${min(cost.values()):.5f} to ${max(cost.values()):.5f} |"
         )
     return out
+
+
+def failing(spec: str | int, split: str, level: str) -> list[str]:
+    """One line per task a design fails: which checks, and in how many of its runs."""
+    gs = grades(split, level, spec)
+    runs = len({g.episode.trial for g in gs})
+    return [
+        f"{task}: failed "
+        + "; ".join(f"{check} in {n} of {runs} runs" for check, n in checks.items())
+        for task, checks in failures(gs).items()
+    ] or ["no failures"]
+
+
+def show(spec: str | int, task_id: str, split: str, level: str, run_no: int) -> str:
+    """One saved run as the evaluator saw it: the message, the recorded actions, the
+    reply, and the verdict of every check."""
+    spec = design(spec)
+    task = next((t for t in usecase(level).split(split) if t.id == task_id), None)
+    if task is None:
+        ids = ", ".join(t.id for t in usecase(level).split(split))
+        raise SystemExit(f"no task {task_id!r} in split {split!r}; tasks: {ids}")
+    found = [e for e in saved(BATCH[split], spec) if e.task_id == task_id and e.trial == run_no - 1]
+    if not found:
+        raise SystemExit(f"no run {run_no} of {task_id} for {DESIGNS.get(spec, spec)}")
+    e = found[0]
+    marks = {True: "PASS", False: "FAIL", None: "UNDECIDED"}
+    acts = [f"{a.name} {a.args}" for a in e.actions]
+    lines = [
+        f"{DESIGNS.get(spec, spec)} · {task_id} · run {run_no} · {BATCH[split]} tasks",
+        "",
+        f"Customer: {task.input}",
+        "",
+        "Recorded by the refund service: " + ("; ".join(acts) or "nothing"),
+        "",
+        f"Reply: {e.reply or '(no reply)'}",
+        "",
+        "Checks:",
+        *(
+            f"  {marks[v if v is None else bool(v)]:<9} {c.name}"
+            for c in task.checks
+            if (v := c(e)) or True
+        ),
+        "",
+        f"Expected outcome: {OUTCOME[task_id]}. The judge read: {e.extra.get('judge_outcome')}.",
+    ]
+    return "\n".join(lines)
+
+
+def _headline(report: dict) -> str:
+    """What regrade prints: where the report went, and success with the judge."""
+    lines = [
+        f"Wrote {SAVED.relative_to(REPO)}/RESULTS.md, summary.json, 4 frontier plots and 4 failure maps.",
+        "",
+    ]
+    for split, name in (("dev", "16 known tasks"), ("new", "32 new messages")):
+        lines.append(f"Success with the judge, {name}:")
+        for spec, s in report["splits"][split]["judge"].items():
+            lo, hi = s["success_ci"]
+            lines.append(f"  {DESIGNS[spec]:<34} {s['success']:.2f} ({lo:.2f}–{hi:.2f})")
+    return "\n".join(lines)
 
 
 def _jsonable(s: dict) -> dict:
@@ -271,8 +365,15 @@ def main() -> None:
     c = sub.add_parser("compare")
     c.add_argument("base")
     c.add_argument("candidate")
-    c.add_argument("--split", choices=["dev", "new"], default="dev")
-    c.add_argument("--level", choices=LEVELS, default="obligations")
+    f = sub.add_parser("failures")
+    f.add_argument("design")
+    w = sub.add_parser("show")
+    w.add_argument("design")
+    w.add_argument("task")
+    w.add_argument("--run", type=int, default=1)
+    for cmd in (c, f, w):
+        cmd.add_argument("--split", choices=["dev", "new"], default="dev")
+        cmd.add_argument("--level", choices=LEVELS, default="obligations")
     lv = sub.add_parser("live")
     lv.add_argument("specs", nargs="+", help="spec files, e.g. harness/spec/plain.yaml")
     lv.add_argument("--trials", type=int, default=5)
@@ -280,17 +381,15 @@ def main() -> None:
     a = p.parse_args()
 
     if a.cmd == "regrade":
-        regrade(SAVED)
-        print((SAVED / "RESULTS.md").read_text())
+        print(_headline(regrade(SAVED)))
+    elif a.cmd == "failures":
+        print("\n".join(failing(a.design, a.split, a.level)))
+    elif a.cmd == "show":
+        print(show(a.design, a.task, a.split, a.level, a.run))
     elif a.cmd == "agreement":
         print(json.dumps(labels_agreement(), indent=1))
     elif a.cmd == "compare":
-        uc = usecase(a.level)
-        print(
-            comparison(
-                compare(uc, grades(a.split, a.level, a.base), grades(a.split, a.level, a.candidate))
-            )
-        )
+        print(comparison(_compare(a.base, a.candidate, a.split, a.level)))
     else:
         out = SAVED / "live" / time.strftime("%Y%m%d-%H%M%S")
         uc = usecase("obligations")

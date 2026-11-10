@@ -12,9 +12,11 @@ definitions in `envs/custom/tasks.py` and the databases each run leaves behind.
 ## Commands
 
 ```bash
-make part4-regrade      # offline: grade the saved runs; write RESULTS.md and frontier plots
+make part4-regrade      # offline: grade the saved runs; write RESULTS.md, frontier plots and failure maps
 make part4-agreement    # offline: the judge and the held-reply check against labels
-make part4-compare BASE=a1-plain CANDIDATE=a2-code SPLIT=new LEVEL=judge
+make part4-compare BASE=1 CANDIDATE=5 SPLIT=new LEVEL=judge   # designs by number, or by spec name
+make failures DESIGN=5 SPLIT=new LEVEL=judge                  # which checks a design fails, task by task
+make show DESIGN=5 TASK=address-suspended-account LEVEL=judge # one saved run, check by check
 make part4-live TRIALS=5 PART4_SPECS="harness/spec/plain.yaml harness/spec/workflows/support-code.yaml"
 ```
 

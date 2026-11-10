@@ -1,50 +1,57 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 440" role="img" font-family="system-ui, sans-serif" font-size="13" fill="#222">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 452" role="img" font-family="system-ui, sans-serif" font-size="13" fill="#222">
 <title>32 new messages, 5 runs, with the judge: success against $ per task</title>
-<rect width="640" height="440" fill="#fff"/>
+<style>@media (prefers-color-scheme:dark){svg{fill:#e6edf3}.bg{fill:#0d1117}.mut{fill:#9da7b3}.grid{stroke:#30363d}.off{fill:#c9d1d9}.offl{stroke:#c9d1d9}.hot{fill:#ff6fb6}.hotl{stroke:#ff6fb6}.halo{stroke:#0d1117}}</style>
+<rect class="bg" width="640" height="452" fill="#fff"/>
 <text x="76" y="24" font-size="15" font-weight="600">32 new messages, 5 runs, with the judge: success against $ per task</text>
-<text x="76" y="44" fill="#666">Bars: 95% intervals over tasks. <tspan fill="#c2185b">Line: no other harness beats these on both.</tspan></text>
-<path d="M76.0 64V384M76 384.0H612" stroke="#e6e6e6"/>
-<text x="76.0" y="402" text-anchor="middle" fill="#666">0.0000</text>
-<text x="68" y="388.0" text-anchor="end" fill="#666">0.0</text>
-<path d="M183.2 64V384M76 320.0H612" stroke="#e6e6e6"/>
-<text x="183.2" y="402" text-anchor="middle" fill="#666">0.0001</text>
-<text x="68" y="324.0" text-anchor="end" fill="#666">0.2</text>
-<path d="M290.4 64V384M76 256.0H612" stroke="#e6e6e6"/>
-<text x="290.4" y="402" text-anchor="middle" fill="#666">0.0002</text>
-<text x="68" y="260.0" text-anchor="end" fill="#666">0.4</text>
-<path d="M397.6 64V384M76 192.0H612" stroke="#e6e6e6"/>
-<text x="397.6" y="402" text-anchor="middle" fill="#666">0.0003</text>
-<text x="68" y="196.0" text-anchor="end" fill="#666">0.6</text>
-<path d="M504.8 64V384M76 128.0H612" stroke="#e6e6e6"/>
-<text x="504.8" y="402" text-anchor="middle" fill="#666">0.0004</text>
-<text x="68" y="132.0" text-anchor="end" fill="#666">0.8</text>
-<path d="M612.0 64V384M76 64.0H612" stroke="#e6e6e6"/>
-<text x="612.0" y="402" text-anchor="middle" fill="#666">0.0005</text>
-<text x="68" y="68.0" text-anchor="end" fill="#666">1.0</text>
-<text x="344.0" y="426" text-anchor="middle">cost_per_task</text>
-<text transform="translate(20 224.0) rotate(-90)" text-anchor="middle">success</text>
-<polyline fill="none" stroke="#c2185b" stroke-width="2" points="126.5,284.0 363.6,104.0 390.0,102.0"/>
-<path d="M362.7 102.0H418.4" stroke="#c2185b"/>
-<path d="M390.0 132.0V76.0" stroke="#c2185b"/>
-<circle cx="390.0" cy="102.0" r="4.5" fill="#c2185b"/>
-<text x="398.0" y="94.0" fill="#c2185b">1 plain agent</text>
-<path d="M347.5 110.0H404.1" stroke="#444"/>
-<path d="M375.3 144.0V82.0" stroke="#444"/>
-<circle cx="375.3" cy="110.0" r="4.5" fill="#444"/>
-<path d="M375.3 110.0L381.3 113.0" stroke="#bbb"/>
-<text x="383.3" y="117.0" fill="#444">2 agent with approval middleware</text>
-<path d="M338.0 104.0H391.9" stroke="#c2185b"/>
-<path d="M363.6 136.0V76.0" stroke="#c2185b"/>
-<circle cx="363.6" cy="104.0" r="4.5" fill="#c2185b"/>
-<path d="M363.6 104.0L369.6 137.0" stroke="#bbb"/>
-<text x="371.6" y="141.0" fill="#c2185b">3 agent inside a workflow</text>
-<path d="M350.2 124.0H418.6" stroke="#444"/>
-<path d="M382.5 166.0V88.0" stroke="#444"/>
-<circle cx="382.5" cy="124.0" r="4.5" fill="#444"/>
-<path d="M382.5 124.0L388.5 157.0" stroke="#bbb"/>
-<text x="390.5" y="161.0" fill="#444">4 router and three agents</text>
-<path d="M124.6 284.0H128.7" stroke="#c2185b"/>
-<path d="M126.5 334.0V234.0" stroke="#c2185b"/>
-<circle cx="126.5" cy="284.0" r="4.5" fill="#c2185b"/>
-<text x="134.5" y="276.0" fill="#c2185b">5 workflow with no agent</text>
+<text x="76" y="44" class="mut" fill="#666">Bars: 95% intervals over tasks. <tspan class="hot" fill="#c2185b">Pink: no other harness beats it on both.</tspan></text>
+<path class="grid" d="M76.0 76V396" stroke="#e6e6e6"/>
+<text x="76.0" y="414" text-anchor="middle" class="mut" fill="#666">0.0000</text>
+<path class="grid" d="M207.0 76V396" stroke="#e6e6e6"/>
+<text x="207.0" y="414" text-anchor="middle" class="mut" fill="#666">0.0001</text>
+<path class="grid" d="M338.0 76V396" stroke="#e6e6e6"/>
+<text x="338.0" y="414" text-anchor="middle" class="mut" fill="#666">0.0002</text>
+<path class="grid" d="M469.0 76V396" stroke="#e6e6e6"/>
+<text x="469.0" y="414" text-anchor="middle" class="mut" fill="#666">0.0003</text>
+<path class="grid" d="M600.0 76V396" stroke="#e6e6e6"/>
+<text x="600.0" y="414" text-anchor="middle" class="mut" fill="#666">0.0004</text>
+<path class="grid" d="M76 396.0H600" stroke="#e6e6e6"/>
+<text x="68" y="400.0" text-anchor="end" class="mut" fill="#666">0.0</text>
+<path class="grid" d="M76 332.0H600" stroke="#e6e6e6"/>
+<text x="68" y="336.0" text-anchor="end" class="mut" fill="#666">0.2</text>
+<path class="grid" d="M76 268.0H600" stroke="#e6e6e6"/>
+<text x="68" y="272.0" text-anchor="end" class="mut" fill="#666">0.4</text>
+<path class="grid" d="M76 204.0H600" stroke="#e6e6e6"/>
+<text x="68" y="208.0" text-anchor="end" class="mut" fill="#666">0.6</text>
+<path class="grid" d="M76 140.0H600" stroke="#e6e6e6"/>
+<text x="68" y="144.0" text-anchor="end" class="mut" fill="#666">0.8</text>
+<path class="grid" d="M76 76.0H600" stroke="#e6e6e6"/>
+<text x="68" y="80.0" text-anchor="end" class="mut" fill="#666">1.0</text>
+<text x="338.0" y="438" text-anchor="middle">$ per task</text>
+<text transform="translate(20 236.0) rotate(-90)" text-anchor="middle">Success</text>
+<polyline class="hotl" fill="none" stroke="#c2185b" stroke-width="2" points="137.7,296.0 427.4,116.0 459.7,114.0"/>
+<path class="hotl" d="M426.3 114.0H494.4M426.3 111.0v6M494.4 111.0v6" stroke="#c2185b"/>
+<path class="hotl" d="M459.7 144.0V88.0M456.7 144.0h6M456.7 88.0h6" stroke="#c2185b"/>
+<circle class="hot" cx="459.7" cy="114.0" r="4.5" fill="#c2185b"/>
+<path class="offl" d="M407.8 122.0H476.9M407.8 119.0v6M476.9 119.0v6" stroke="#444"/>
+<path class="offl" d="M441.8 156.0V94.0M438.8 156.0h6M438.8 94.0h6" stroke="#444"/>
+<circle class="off" cx="441.8" cy="122.0" r="4.5" fill="#444"/>
+<path class="hotl" d="M396.1 116.0H462.1M396.1 113.0v6M462.1 113.0v6" stroke="#c2185b"/>
+<path class="hotl" d="M427.4 148.0V88.0M424.4 148.0h6M424.4 88.0h6" stroke="#c2185b"/>
+<circle class="hot" cx="427.4" cy="116.0" r="4.5" fill="#c2185b"/>
+<path class="offl" d="M411.0 136.0H494.7M411.0 133.0v6M494.7 133.0v6" stroke="#444"/>
+<path class="offl" d="M450.5 178.0V100.0M447.5 178.0h6M447.5 100.0h6" stroke="#444"/>
+<circle class="off" cx="450.5" cy="136.0" r="4.5" fill="#444"/>
+<path class="hotl" d="M135.4 296.0H140.4M135.4 293.0v6M140.4 293.0v6" stroke="#c2185b"/>
+<path class="hotl" d="M137.7 346.0V246.0M134.7 346.0h6M134.7 246.0h6" stroke="#c2185b"/>
+<circle class="hot" cx="137.7" cy="296.0" r="4.5" fill="#c2185b"/>
+<path d="M459.7 114.0L474.1 101.6" stroke="#bbb"/>
+<text class="halo hot" x="475.1" y="98.6" fill="#c2185b" stroke="#fff" stroke-width="3" stroke-linejoin="round" paint-order="stroke">1 plain agent</text>
+<path d="M441.8 122.0L417.6 99.8" stroke="#bbb"/>
+<text class="halo off" x="186.2" y="96.8" fill="#444" stroke="#fff" stroke-width="3" stroke-linejoin="round" paint-order="stroke">2 agent with approval middleware</text>
+<path d="M427.4 116.0L392.4 116.0" stroke="#bbb"/>
+<text class="halo hot" x="211.4" y="120.0" fill="#c2185b" stroke="#fff" stroke-width="3" stroke-linejoin="round" paint-order="stroke">3 agent inside a workflow</text>
+<path d="M450.5 136.0L450.5 85.0" stroke="#bbb"/>
+<text class="halo off" x="360.5" y="82.0" fill="#444" stroke="#fff" stroke-width="3" stroke-linejoin="round" paint-order="stroke">4 router and three agents</text>
+<path d="M137.7 296.0L152.1 309.4" stroke="#bbb"/>
+<text class="halo hot" x="153.1" y="320.4" fill="#c2185b" stroke="#fff" stroke-width="3" stroke-linejoin="round" paint-order="stroke">5 workflow with no agent</text>
 </svg>

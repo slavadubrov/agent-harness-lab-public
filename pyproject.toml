@@ -29,7 +29,7 @@ dev = [
 package = false
 
 [tool.uv.sources]
-harness-evals = { git = "https://github.com/slavadubrov/harness-evals", rev = "203d53e854f049df0306862afcff65f911ce27fd" }
+harness-evals = { git = "https://github.com/slavadubrov/harness-evals", rev = "9d47100f5efa0883c8ca9a83e98638330e97bd46" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
