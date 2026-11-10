@@ -83,7 +83,7 @@ tools:
 
 `ToolCallLimitMiddleware` has no typed entry. Use `import` with
 `ref: langchain.agents.middleware:ToolCallLimitMiddleware` and kwargs such as `tool_name`,
-`thread_limit`, `run_limit` and `exit_behavior`. No A1 spec uses it.
+`thread_limit`, `run_limit` and `exit_behavior`. No Part 2 spec uses it.
 
 For `import`, a kwargs value of `"$harness_model"` is replaced with the harness chat
 model, for middleware that needs one.

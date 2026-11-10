@@ -1,7 +1,7 @@
 """Run an agent or workflow spec on the custom customer-account environment.
 
-    python -m envs.custom.run --spec harness/spec/plain.yaml               # Part 2 set (16)
-    python -m envs.custom.run --spec harness/spec/base.yaml --suite a1     # Part 1 set (12)
+    python -m envs.custom.run --spec harness/spec/plain.yaml               # Part 3 set (16)
+    python -m envs.custom.run --spec harness/spec/base.yaml --suite a1     # Part 2 set (12)
     python -m envs.custom.run --spec harness/spec/workflows/refund-approval.yaml
 
 Per task: fresh database copy -> one run -> state check on the final database.
