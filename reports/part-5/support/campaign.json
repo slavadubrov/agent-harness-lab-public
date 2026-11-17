@@ -1,0 +1,47 @@
+{
+  "usecase": "support-desk",
+  "usecase_version": "3-loop",
+  "fingerprints": {
+    "dev": "a836d6dcb6347a34",
+    "val": "d2981033a99deda6",
+    "test": "b5d2d106cbdab39f"
+  },
+  "frozen": {
+    "model": "gemma3n:latest",
+    "weights": "15cb39fd9394",
+    "endpoint": "http://localhost:11434/v1",
+    "sampling": "the model's defaults at the endpoint; seed = trial number"
+  },
+  "trials": {
+    "dev": 2,
+    "val": 3,
+    "test": 3
+  },
+  "level": 0.95,
+  "screen": true,
+  "feedback": true,
+  "improver": {
+    "kind": "claude-code",
+    "argv": [
+      "claude",
+      "-p",
+      "Read TASK.md in this directory and do what it says.",
+      "--restricted",
+      "--strict-mcp-config",
+      "--permission-mode",
+      "acceptEdits",
+      "--tools",
+      "Read,Edit,Write,Glob,Grep",
+      "--output-format",
+      "json",
+      "--no-session-persistence",
+      "--model",
+      "sonnet",
+      "--max-budget-usd",
+      "2.0"
+    ],
+    "version": "2.1.319 (Claude Code)"
+  },
+  "harness_loop": "0.1.0",
+  "started": "2026-11-16T22:59:04+00:00"
+}

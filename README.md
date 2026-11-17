@@ -4,6 +4,8 @@ Six designs of one customer-support assistant, from a plain agent to a workflow 
 agent, and an evaluator that scores any design on success, cost and latency with the model
 held fixed. It is the lab of the series **Recursive Harness Engineering**; Part 4,
 *Evaluating an agent harness with the model held fixed*, walks through the evaluation.
+In Part 5 a program improves the cheapest design in a loop, and this evaluator decides
+which of its changes are kept.
 
 The assistant issues refunds, changes addresses and updates account settings. Refunds
 above $200 need a supervisor's decision. The evaluator is built on the
@@ -89,6 +91,48 @@ The evaluator does not take the reply's word for what happened. It reads each ta
 database before and after the run and grades the refunds it finds there
 ([`evaluator/episodes.py`](evaluator/episodes.py), `observe`).
 
+## Let a program improve a design
+
+Part 5, *Closing the loop*, runs an improvement loop on design 5, the workflow with no
+agent. A coding agent edits a copy of the harness in [`loop/seed/`](loop/seed/), the
+evaluator scores each candidate on tasks the agent cannot see, and a rule keeps the
+change or drops it. The loop is the [harness-loop](https://github.com/slavadubrov/harness-loop)
+library; [`loop/target.py`](loop/target.py) describes this assistant to it.
+
+The campaign in [`reports/part-5/support/`](reports/part-5/support/) used one local model,
+`gemma3n:latest` served by Ollama, and replays without a model or a key:
+
+```bash
+make part5-report                  # grade the saved runs again; rewrite REPORT.md and trajectory.svg
+make part5-show                    # the ledger, one line per candidate
+make part5-show CANDIDATE=002      # one candidate: the decision, the improver's note and the diff
+```
+
+| | Development, 48 tasks | Validation, 32 tasks | Test, 32 tasks |
+| --- | --- | --- | --- |
+| Starting harness | 0.48 | 0.34 (0.19–0.51) | 0.35 (0.20–0.52) |
+| Candidate 1, not kept | 0.88 | 0.48 (0.31–0.66) | not run |
+| Candidate 2, kept | 1.00 | 0.66 (0.50–0.81) | 0.62 (0.47–0.78) |
+
+Success is the share of runs that pass every check, with a 95% interval over tasks. The
+kept candidate is better on the test tasks by 0.27 (0.05 to 0.48) and still below the
+bar a release needs. It is also worse on the standard requests there, 0.38 against 0.67:
+[`reports/part-5/support/REPORT.md`](reports/part-5/support/REPORT.md) has the split by
+kind of request and both candidates' notes.
+
+- **The tasks.** The 48 tasks of Parts 2 to 4 are the development set, whose failures the
+  improver reads. [`loop/tasks.py`](loop/tasks.py) adds 32 validation tasks, which decide
+  whether a change is kept, and 32 test tasks, scored once at the end.
+- **The model.** [`harness/local.py`](harness/local.py) calls any OpenAI-compatible
+  endpoint; set `LAB_LOCAL_MODEL` and `LAB_LOCAL_URL` to use another model. A candidate
+  cannot change it: every model call must be a workflow node that names it, and
+  `loop/target.py` rejects a candidate that does anything else.
+- **A new campaign.** `make part5-loop` needs Ollama with the model pulled and the
+  `claude` CLI. It writes to `build/part-5/support`, leaving the saved campaign as it is.
+  `noise.json` in the saved campaign is the adoption rule's answer on the starting
+  harness against itself, which has to be "inconclusive"; `noise-first-rule.json` is the
+  answer of an earlier rule, which kept the pair for lower cost alone.
+
 ## Change the evaluation
 
 [`evaluator/support.py`](evaluator/support.py) holds the use case in about 180 lines:
@@ -123,6 +167,8 @@ does not call the judge, whose saved verdicts cover the saved runs only.
 | [`evaluator/`](evaluator/) | The support use case for harness-evals, adapters for saved and live runs, and the commands above |
 | [`examples/`](examples/) | The template for scoring your own harness |
 | [`reports/part-4/`](reports/part-4/) | The saved runs with their traces and judge verdicts, 60 labelled replies, the report and the plots |
+| [`loop/`](loop/) | Part 5: the harness an improver edits, the validation and test tasks, and the target for harness-loop |
+| [`reports/part-5/`](reports/part-5/) | The saved improvement campaign: every candidate with its diff, note, runs and decision |
 | [`harness/`](harness/) | `build_harness(spec)`, `build_workflow(spec)`, the spec schema, middleware, token and cost accounting |
 | [`harness/spec/`](harness/spec/) | The agent and workflow specs |
 | [`envs/custom/`](envs/custom/) | The support tasks, a SQLite database, the account tools, the refund service and the supervisor's approval steps |
@@ -137,6 +183,12 @@ does not call the judge, whose saved verdicts cover the saved runs only.
   reviewed the labels yet.
 - The judge's verdicts are saved with the runs. The code that called the judge is not in
   this repository.
+- The Part 5 campaign is one run of the loop with one small local model. Its 64
+  validation and test tasks were written by a model and checked against the database by
+  [`tests/test_loop_tasks.py`](tests/test_loop_tasks.py); no person has reviewed them.
+- The improver cannot read outside its working directory while it proposes, but a
+  candidate's code runs with the evaluator's permissions. Do not run candidates from an
+  improver you do not trust outside a sandbox.
 - The tools do not enforce ownership or most of the business policy. The refund
   service enforces only the $200 approval rule and one refund per operation key. A real
   service would reject every write that breaks policy.

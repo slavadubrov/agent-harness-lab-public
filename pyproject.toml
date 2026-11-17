@@ -17,8 +17,9 @@ dependencies = [
     # τ³-bench (package name tau2), pinned to commit b7ea907 (v1.0.1 + 46 commits).
     "tau2 @ git+https://github.com/sierra-research/tau2-bench@b7ea9074c1cba482b30687fecdb5c8425fd6f619",
     "langchain-typesafe[experimental]==0.0.1a3",
-    # The Part 4 evaluator (evaluator/); pinned to a v0.5.1 commit in [tool.uv.sources].
+    # The evaluator (evaluator/) and the improvement loop (loop/); pinned in [tool.uv.sources].
     "harness-evals",
+    "harness-loop",
 ]
 
 [dependency-groups]
@@ -31,7 +32,8 @@ dev = [
 package = false
 
 [tool.uv.sources]
-harness-evals = { git = "https://github.com/slavadubrov/harness-evals", rev = "03cc80db2fd7039515887baf5c5321c3957139fa" }
+harness-evals = { git = "https://github.com/slavadubrov/harness-evals", rev = "4a63be083ba2a7e11f14605a4b966a07f22d5bcf" }
+harness-loop = { git = "https://github.com/slavadubrov/harness-loop", rev = "2cdebfb8b6dc2cd321f56a70422bbada7b84cd4c" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -40,7 +42,8 @@ pythonpath = ["."]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-extend-exclude = [".cache", "build"]
+# reports/part-5 holds candidates exactly as an improver wrote them.
+extend-exclude = [".cache", "build", "reports/part-5"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
