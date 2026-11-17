@@ -25,11 +25,16 @@ MODEL = os.environ.get("LAB_LOCAL_MODEL", "gemma3n:latest")
 URL = os.environ.get("LAB_LOCAL_URL", "http://localhost:11434/v1")
 # A local model has no bill. Its tokens get a nominal price, the list price of the closest
 # hosted model, so cost per task still measures how much model work a harness asks for.
+_INPUT = float(os.environ.get("LAB_LOCAL_USD_PER_INPUT_TOKEN", "5e-8"))
 PRICE = Price(
     model_id=MODEL,
     provider_tag="local",
-    prompt=float(os.environ.get("LAB_LOCAL_USD_PER_INPUT_TOKEN", "5e-8")),
+    prompt=_INPUT,
     completion=float(os.environ.get("LAB_LOCAL_USD_PER_OUTPUT_TOKEN", "1e-7")),
+    # A local endpoint reports cached prompt tokens but gives no discount for them. Priced
+    # at zero, two runs of one harness would differ in cost with the state of the cache.
+    input_cache_read=_INPUT,
+    input_cache_write=_INPUT,
     source="nominal: OpenRouter list price of google/gemma-3-4b-it on 2026-11-16",
 )
 
