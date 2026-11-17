@@ -1,0 +1,19 @@
+{
+  "usecase": "support-desk",
+  "usecase_version": "3-loop",
+  "fingerprint": "d2981033a99deda6",
+  "split": "val",
+  "frozen": {
+    "model": "gemma3n:latest",
+    "weights": "15cb39fd9394",
+    "endpoint": "http://localhost:11434/v1",
+    "sampling": "the model's defaults at the endpoint; seed = trial number"
+  },
+  "harnesses": [
+    "001"
+  ],
+  "trials": 3,
+  "evaluator": "harness-evals 0.6.0",
+  "started": "2026-11-16T23:21:53+00:00",
+  "finished": "2026-11-16T23:26:47+00:00"
+}

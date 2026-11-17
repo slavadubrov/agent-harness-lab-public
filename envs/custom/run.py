@@ -211,8 +211,9 @@ async def run_task(target, task: Task, seed: Path, workdir: Path, prices) -> tup
 
 
 async def main_async(args) -> int:
-    load_api_key()
     spec = load_any(args.spec)
+    if '"openrouter' in spec.model_dump_json() or "typesafe" in spec.model_dump_json():
+        load_api_key()  # a spec that only calls the local model needs no key
     prices = workflow_prices(spec) if isinstance(spec, WorkflowSpec) else spec_prices(spec)
     suite = SUITES[args.suite]
     wanted = args.tasks.split(",") if args.tasks else [t.id for t in suite]
