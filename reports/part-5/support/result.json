@@ -5,10 +5,10 @@
     "improver_usd": 0.8938819,
     "improver_unknown": 0,
     "improver_seconds": 327.8307366659865,
-    "eval_usd": 0.0047951,
+    "eval_usd": 0.00696565,
     "eval_unknown": 0,
-    "eval_seconds": 1824.6,
-    "eval_episodes": 576
+    "eval_seconds": 2738.6,
+    "eval_episodes": 864
   },
   "test": {
     "000": {

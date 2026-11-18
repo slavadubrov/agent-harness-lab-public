@@ -97,36 +97,53 @@ Part 5, *Closing the loop*, runs an improvement loop on design 5, the workflow w
 agent. A coding agent edits a copy of the harness in [`loop/seed/`](loop/seed/), the
 evaluator scores each candidate on tasks the agent cannot see, and a rule keeps the
 change or drops it. The loop is the [harness-loop](https://github.com/slavadubrov/harness-loop)
-library; [`loop/target.py`](loop/target.py) describes this assistant to it.
+library. [`loop/target.py`](loop/target.py) connects this assistant to the runner.
 
-The campaign in [`reports/part-5/support/`](reports/part-5/support/) used one local model,
-`gemma3n:latest` served by Ollama, and replays without a model or a key:
+The saved campaign used Gemma 3n on Ollama. Regrade all 864 recorded runs with uv and
+Python 3.12 from this checkout:
 
 ```bash
-make part5-report                  # grade the saved runs again; rewrite REPORT.md and trajectory.svg
-make part5-show                    # the ledger, one line per candidate
-make part5-show CANDIDATE=002      # one candidate: the decision, the improver's note and the diff
+make part5-regrade
 ```
 
-| | Development, 48 tasks | Validation, 32 tasks | Test, 32 tasks |
-| --- | --- | --- | --- |
-| Starting harness | 0.48 | 0.34 (0.19–0.51) | 0.35 (0.20–0.52) |
-| Candidate 1, not kept | 0.88 | 0.48 (0.31–0.66) | not run |
-| Candidate 2, kept | 1.00 | 0.66 (0.50–0.81) | 0.62 (0.47–0.78) |
+This command installs only the pinned harness-evals library. After the first install,
+`UV_OFFLINE=1 make part5-regrade` runs without network access. It prints the scores for
+development, validation and test, the noise check, the candidate decisions and the
+development tasks that still fail. With access to harness-loop, `make part5-report`
+also rebuilds the Markdown report and figure, and `make part5-show CANDIDATE=002`
+prints the saved decision, note and diff.
 
-Success is the share of runs that pass every check, with a 95% interval over tasks. The
-kept candidate is better on the test tasks by 0.27 (0.05 to 0.48) and still below the
-bar a release needs. It is also worse on the standard requests there, 0.38 against 0.67:
-[`reports/part-5/support/REPORT.md`](reports/part-5/support/REPORT.md) has the split by
-kind of request and both candidates' notes.
+The original campaign used support rubric `3-loop`. Rubric `4-loop` requires a handoff
+reply to state a transfer or direct the customer to a person or team. For refunds that
+require supervisor review it checks that the run actually paused. For an account
+language lookup, the reply must identify the stored language. A list of options used
+to pass. The checks accept specific English forms and can miss other valid wording.
+A referral is evidence of what the customer was told. The lab has no record of a human
+taking over the case.
+
+| Harness | Development, 48 tasks | Validation, 32 tasks | Test, 32 tasks |
+| --- | --- | --- | --- |
+| Start | 0.40 | 0.22 (0.09–0.38) | 0.25 (0.11–0.41) |
+| Candidate 1, inconclusive | 0.81 | 0.38 (0.22–0.54) | not run |
+| Candidate 2, adopted | 0.93 | 0.55 (0.39–0.72) | 0.52 (0.36–0.69) |
+
+Both validation decisions held after regrading. Test success increased by 0.27 (paired
+95% interval 0.06 to 0.48). Standard requests fell from 16/24 to 9/24. Half the test
+tasks passed all three runs, below the release threshold of 90%. Five development
+tasks still fail under rubric 4. The recorded campaign stopped when rubric 3 found
+none. Regrading cannot tell us what the improver would have proposed next.
+[REPORT.md](reports/part-5/support/REPORT.md) reports rubric 4.
+The [ledger](reports/part-5/support/ledger.jsonl) records the original decisions.
+The [saved result](reports/part-5/support/result.json) retains its rubric 3 test scores
+and stopping reason. Its spending total includes the 576 candidate runs, 96 noise
+runs and 192 test runs.
 
 - **The tasks.** The 48 tasks of Parts 2 to 4 are the development set, whose failures the
   improver reads. [`loop/tasks.py`](loop/tasks.py) adds 32 validation tasks, which decide
   whether a change is kept, and 32 test tasks, scored once at the end.
 - **The model.** [`harness/local.py`](harness/local.py) calls any OpenAI-compatible
-  endpoint; set `LAB_LOCAL_MODEL` and `LAB_LOCAL_URL` to use another model. A candidate
-  cannot change it: every model call must be a workflow node that names it, and
-  `loop/target.py` rejects a candidate that does anything else.
+  endpoint; set `LAB_LOCAL_MODEL` and `LAB_LOCAL_URL` to use another model. The validator checks visible model declarations and imports. Candidate code runs with
+  the evaluator’s permissions.
 - **A new campaign.** `make part5-loop` needs Ollama with the model pulled and the
   `claude` CLI. It writes to `build/part-5/support`, leaving the saved campaign as it is.
   `noise.json` in the saved campaign is the adoption rule's answer on the starting
