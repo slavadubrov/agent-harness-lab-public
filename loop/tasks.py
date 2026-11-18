@@ -842,8 +842,13 @@ TEST_CASES: list[Case] = [
         "t-unusual-language-on-file",
         "unusual",
         "Customer A-306 here. Which language is my account set to at the moment?",
-        "answer",  # identity rule 1: an account id names the customer as well as an email
-        facts=(GERMAN,),
+        "answer",  # asks for one stored preference, not the list of available languages
+        facts=(
+            r"^\s*(?:German|Deutsch|de)(?: \(de\))?[.! ]*$"
+            r"|\b(?:your (?:account|(?:account |current )?language(?: preference)?)|"
+            r"the current language) is (?:currently )?(?:set to )?(?:German|Deutsch|de)\b"
+            r"|\b(?:German|Deutsch|de) is your (?:current |account )?language\b",
+        ),
     ),
     Case(
         "t-unusual-payment-card",

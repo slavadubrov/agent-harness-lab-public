@@ -1,21 +1,27 @@
 # Campaign on support-desk
 
+- Saved use case: `support-desk` v3-loop. Regraded with `support-desk` v4-loop.
 - Model held fixed: `gemma3n:latest`
 - Runs per task: 2 on development, 3 on validation, 3 on test
 - Adoption rule: one step of a loop, intervals at 95.00%
-- Candidates: 2 proposed, 1 adopted
-- Improver: $0.89 at list price in 5.5 minutes
+- The campaign proposed 2 candidates and adopted 1. Regrading supports 1 on the recorded path.
+- Improver: $0.89 known cost in 5.5 minutes.
 - Evaluation: 576 runs of candidates in 30.4 minutes, 96 more for the noise check and 192 on the test tasks
+- All evaluation phases: 864 runs, $0.0070 in reported costs.
+- Recorded stop: no development task fails
+- Under the current checks, the recorded final harness still fails development runs. This stopping condition no longer holds.
 - Noise check, the starting harness against itself on new samples: success +0.03 (+0.00 to +0.08), inconclusive: as it should be
-- With intervals at 97.50%, one error rate shared by all 2 candidates: the same decisions
+- With intervals at 97.50%, sensitivity check across 2 candidates: the same decisions
 
 ## Every candidate
 
+Development screens and validation decisions are recomputed from saved runs. A decision without grading evidence is marked as recorded only. Test scores describe the harnesses the campaign actually tested.
+
 | Candidate | Change to | Development success | Validation success | Difference on validation | Decision | Why |
 |---|---|---|---|---|---|---|
-| 000 |  | 0.48 | 0.34 (0.19–0.51) |  | start | the starting harness |
-| 001 | 000 | 0.88 | 0.48 (0.31–0.66) | +0.14 (-0.07 to +0.35) | inconclusive | success difference -0.073 to +0.354 does not establish a benefit; keep the base |
-| 002 | 000 | 1.00 | 0.66 (0.50–0.81) | +0.31 (+0.15 to +0.50) | adopted | success is higher: +0.146 to +0.500; still below the bar: pass^k = 0.6562, needs >= 0.9 |
+| 000 |  | 0.40 | 0.22 (0.09–0.38) |  | start | the starting harness |
+| 001 | 000 | 0.81 | 0.38 (0.22–0.54) | +0.16 (-0.05 to +0.38) | inconclusive | success difference -0.052 to +0.375 does not establish a benefit; keep the base |
+| 002 | 000 | 0.93 | 0.55 (0.39–0.72) | +0.33 (+0.17 to +0.52) | adopted | success is higher: +0.167 to +0.521; still below the bar: pass^k = 0.5312, needs >= 0.9 |
 
 ## What each candidate changed
 
@@ -29,18 +35,18 @@ Files: `support_steps.py` (+273 −13). Diff: `candidates/002/patch.diff`.
 
 | Harness | Success | pass^k | Violations | $ per task | $ per success | p50 latency, s | p95 latency, s | Calls per task | Tokens per task | Infra errors | Undecided | names refund id |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 000 | 0.35 (0.20–0.52) | 0.34 (k=3) | 0 | $0.00001 (0.00001–0.00001) | $0.00002 (0.00002–0.00004) | 3.00 (2.55–3.48) | 5.83 (4.65–6.63) | 1.00 (1.00–1.00) | 137 (127–148) | 0 | 0 | 1.00 (1.00–1.00) |
-| 002 | 0.62 (0.47–0.78) | 0.62 (k=3) | 0 | $0.00001 (0.00001–0.00001) | $0.00001 (0.00001–0.00002) | 3.10 (2.58–3.57) | 5.94 (5.32–8.11) | 1.00 (1.00–1.00) | 137 (127–148) | 0 | 0 | 1.00 |
+| 000 | 0.25 (0.11–0.41) | 0.22 (k=3) | 0 | $0.00001 (0.00001–0.00001) | $0.00003 (0.00002–0.00007) | 3.00 (2.55–3.48) | 5.83 (4.65–6.63) | 1.00 (1.00–1.00) | 137 (127–148) | 0 | 0 | 1.00 (1.00–1.00) |
+| 002 | 0.52 (0.36–0.69) | 0.50 (k=3) | 0 | $0.00001 (0.00001–0.00001) | $0.00001 (0.00001–0.00002) | 3.10 (2.58–3.57) | 5.94 (5.32–8.11) | 1.00 (1.00–1.00) | 137 (127–148) | 0 | 0 | 1.00 |
 
 | Tasks tagged | 000 | 002 |
 |---|---|---|
 | policy | 0.00 (6 tasks) | 0.33 (6 tasks) |
 | standard | 0.67 (8 tasks) | 0.38 (8 tasks) |
 | two_requests | 0.00 (6 tasks) | 0.67 (6 tasks) |
-| unusual | 0.67 (6 tasks) | 0.83 (6 tasks) |
+| unusual | 0.11 (6 tasks) | 0.28 (6 tasks) |
 | vague | 0.33 (6 tasks) | 1.00 (6 tasks) |
 
-**002** against **000** on 32 tasks: success +0.271 (+0.052 to +0.479).
-Better on 12 tasks, worse on 3 tasks.
+**002** against **000** on 32 tasks: success +0.271 (+0.062 to +0.479).
+Better on 13 tasks, worse on 3 tasks.
 Candidate minus base: cost_per_task -0.00000 (-0.00000 to -0.00000); latency_p50 +0.11 (-0.02 to +0.38); latency_p95 +0.10 (-0.27 to +1.48); calls_per_task +0.00 (+0.00 to +0.00); tokens_per_task +0 (+0 to +0); names refund id unknown.
-Decision: **adopt**. success is higher: +0.052 to +0.479; still below the bar: pass^k = 0.625, needs >= 0.9
+Decision: **adopt**. success is higher: +0.062 to +0.479; still below the bar: pass^k = 0.5, needs >= 0.9

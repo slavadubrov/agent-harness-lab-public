@@ -32,8 +32,8 @@ dev = [
 package = false
 
 [tool.uv.sources]
-harness-evals = { git = "https://github.com/slavadubrov/harness-evals", rev = "4a63be083ba2a7e11f14605a4b966a07f22d5bcf" }
-harness-loop = { git = "https://github.com/slavadubrov/harness-loop", rev = "2cdebfb8b6dc2cd321f56a70422bbada7b84cd4c" }
+harness-evals = { git = "https://github.com/slavadubrov/harness-evals", rev = "919124f966cd7f6073ef23b70125123d836a2176" }
+harness-loop = { git = "https://github.com/slavadubrov/harness-loop", rev = "14dbd8b8d0cbfe5dd084c3dbb477f6cf7a906cf0" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -266,3 +266,31 @@ def test_retry_tools_field_defaults_to_all():
     assert ToolRetrySpec(type="ToolRetryMiddleware").tools is None
     with pytest.raises(ValidationError):
         ToolRetrySpec(type="ToolRetryMiddleware", tool="x")
+
+
+@pytest.mark.parametrize(
+    "spec,needs_key",
+    [
+        ("harness/spec/workflows/refund-approval.yaml", True),
+        ("loop/seed/workflow.yaml", False),
+    ],
+)
+def test_runner_loads_dotenv_only_for_hosted_models(spec, needs_key, tmp_path, monkeypatch):
+    import os
+    from types import SimpleNamespace
+
+    from envs.custom import run
+    from harness import env
+    from harness.accounting import Price
+
+    (tmp_path / ".env").write_text("OPEN_ROUTER_API_KEY=test-nested-key\n")
+    monkeypatch.setattr(env, "REPO_ROOT", tmp_path)
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("OPEN_ROUTER_API_KEY", raising=False)
+    monkeypatch.setattr(
+        "harness.agent.fetch_price", lambda model, provider: Price(model, provider, 0, 0)
+    )
+
+    with pytest.raises(SystemExit, match="unknown task"):
+        asyncio.run(run.main_async(SimpleNamespace(spec=spec, suite="a1", tasks="no-such-task")))
+    assert os.environ.get("OPENROUTER_API_KEY") == ("test-nested-key" if needs_key else None)
