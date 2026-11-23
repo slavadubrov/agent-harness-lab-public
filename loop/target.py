@@ -25,25 +25,19 @@ import urllib.request
 from pathlib import Path
 
 import yaml
-from harness_evals import Episode, Task, UseCase, at_most, did, never, says, state
-from harness_evals.core import Check
+from harness_evals import Episode, Task
 from harness_loop import Target, scrub
 
 import loop  # noqa: F401 - registers the validation and test tasks with the environment
 from envs.custom.policy_mcp import POLICIES
-from envs.custom.tasks import APPROVAL_TASKS, OOT_TASKS, TASKS
-from evaluator import support
 from evaluator.episodes import _episode, _jsonl, observe
 from harness.local import MODEL, URL
-from loop.tasks import FACTS, REFUNDS, TEST_TASKS, VAL_TASKS
+from loop.grading import SPLITS, usecase
 
 REPO = Path(__file__).resolve().parents[1]
 SEED = REPO / "loop" / "seed"
 # Every model call of a candidate must be a node of its workflow with exactly this block.
 MODEL_BLOCK = {"provider": "import", "id": "local", "ref": "harness.local:chat"}
-SPLITS = {"dev": TASKS + APPROVAL_TASKS + OOT_TASKS, "val": VAL_TASKS, "test": TEST_TASKS}
-ALL_REFUNDS = support.REFUNDS | REFUNDS
-ALL_FACTS = support.FACTS | FACTS
 # A candidate's own code may not reach a model, the network or another process: model
 # calls are workflow nodes, where the runner counts their tokens.
 FORBIDDEN = {
@@ -110,50 +104,6 @@ reply states, never on what the harness says it did.
 """
 
 
-def _checks(task_id: str) -> tuple[Check, ...]:
-    """The obligations of Part 4: the final database, the refunds the refund service
-    recorded, and the facts the reply must state."""
-    checks = [state()]
-    if task_id in ALL_REFUNDS:
-        order, cents = ALL_REFUNDS[task_id]
-        checks += [
-            did("refund", order=order, cents=cents),
-            Check(
-                "only permitted refunds",
-                lambda e: all(
-                    a.matches("refund", {"order": order, "cents": cents})
-                    for a in e.actions
-                    if a.name == "refund"
-                ),
-                critical=True,
-            ),
-            at_most(1, "refund"),
-            support.NO_FALSE_HOLD,
-        ]
-    else:
-        checks.append(never("refund"))
-    return (*checks, *(says(p) for p in ALL_FACTS.get(task_id, ())))
-
-
-def usecase() -> UseCase:
-    return UseCase(
-        name="support-desk",
-        version="3-loop",
-        tasks=[
-            Task(t.id, t.user_message, _checks(t.id), split=split, tags=(t.category,))
-            for split, tasks in SPLITS.items()
-            for t in tasks
-        ],
-        # The bar the final harness must clear to serve customers. Set before the first run.
-        gates={"violations": ("<=", 0), "pass^k": (">=", 0.9), "latency_p95": ("<=", 20.0)},
-        metrics={"names refund id": support.names_refund_id},
-        margin=0.02,
-        # On a laptop, latency moves with whatever else the machine does. Tokens per task
-        # measure the same model work without that noise.
-        guardrails={"tokens_per_task": ("<=", 150.0)},
-    )
-
-
 def adapter(harness: Path):
     """Run the harness in ``harness`` on the given tasks in a new process, then read each
     task's databases here, outside it."""
@@ -201,7 +151,12 @@ def validate(harness: Path) -> list[str]:
     development task, or a workflow that does not build."""
     problems = []
     for path in sorted(harness.rglob("*.yaml")):
-        problems += _models(yaml.safe_load(path.read_text()), path.name)
+        try:
+            spec = yaml.safe_load(path.read_text())
+        except yaml.YAMLError as exc:
+            problems.append(f"{path.name}: invalid YAML: {exc}")
+            continue
+        problems += _models(spec, path.name)
     dev = SPLITS["dev"]
     for path in sorted(p for p in harness.rglob("*") if p.is_file()):
         text = path.read_text(errors="replace")

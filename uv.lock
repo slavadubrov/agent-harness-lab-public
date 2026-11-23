@@ -42,8 +42,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "harness-evals", git = "https://github.com/slavadubrov/harness-evals?rev=4a63be083ba2a7e11f14605a4b966a07f22d5bcf" },
-    { name = "harness-loop", git = "https://github.com/slavadubrov/harness-loop?rev=2cdebfb8b6dc2cd321f56a70422bbada7b84cd4c" },
+    { name = "harness-evals", git = "https://github.com/slavadubrov/harness-evals?rev=919124f966cd7f6073ef23b70125123d836a2176" },
+    { name = "harness-loop", git = "https://github.com/slavadubrov/harness-loop?rev=14dbd8b8d0cbfe5dd084c3dbb477f6cf7a906cf0" },
     { name = "langchain", specifier = "==1.4.2" },
     { name = "langchain-mcp-adapters", specifier = "==0.3.2" },
     { name = "langchain-openai", specifier = "==1.6.5" },
@@ -430,12 +430,12 @@ wheels = [
 [[package]]
 name = "harness-evals"
 version = "0.6.0"
-source = { git = "https://github.com/slavadubrov/harness-evals?rev=4a63be083ba2a7e11f14605a4b966a07f22d5bcf#4a63be083ba2a7e11f14605a4b966a07f22d5bcf" }
+source = { git = "https://github.com/slavadubrov/harness-evals?rev=919124f966cd7f6073ef23b70125123d836a2176#919124f966cd7f6073ef23b70125123d836a2176" }
 
 [[package]]
 name = "harness-loop"
 version = "0.1.0"
-source = { git = "https://github.com/slavadubrov/harness-loop?rev=2cdebfb8b6dc2cd321f56a70422bbada7b84cd4c#2cdebfb8b6dc2cd321f56a70422bbada7b84cd4c" }
+source = { git = "https://github.com/slavadubrov/harness-loop?rev=14dbd8b8d0cbfe5dd084c3dbb477f6cf7a906cf0#14dbd8b8d0cbfe5dd084c3dbb477f6cf7a906cf0" }
 dependencies = [
     { name = "harness-evals" },
 ]
