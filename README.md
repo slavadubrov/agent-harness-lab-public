@@ -4,6 +4,8 @@ Six designs of one customer-support assistant, from a plain agent to a workflow 
 agent, and an evaluator that scores any design on success, cost and latency with the model
 held fixed. It is the lab of the series **Recursive Harness Engineering**; Part 4,
 *Evaluating an agent harness with the model held fixed*, walks through the evaluation.
+In Part 5 a program improves the cheapest design in a loop, and this evaluator decides
+which of its changes are kept.
 
 The assistant issues refunds, changes addresses and updates account settings. Refunds
 above $200 need a supervisor's decision. The evaluator is built on the
@@ -89,6 +91,65 @@ The evaluator does not take the reply's word for what happened. It reads each ta
 database before and after the run and grades the refunds it finds there
 ([`evaluator/episodes.py`](evaluator/episodes.py), `observe`).
 
+## Let a program improve a design
+
+Part 5, *Closing the loop*, runs an improvement loop on design 5, the workflow with no
+agent. A coding agent edits a copy of the harness in [`loop/seed/`](loop/seed/), the
+evaluator scores each candidate on tasks the agent cannot see, and a rule keeps the
+change or drops it. The loop is the [harness-loop](https://github.com/slavadubrov/harness-loop)
+library. [`loop/target.py`](loop/target.py) connects this assistant to the runner.
+
+The saved campaign used Gemma 3n on Ollama. Regrade all 864 recorded runs with uv and
+Python 3.12 from this checkout:
+
+```bash
+make part5-regrade
+```
+
+This command installs only the pinned harness-evals library. After the first install,
+`UV_OFFLINE=1 make part5-regrade` runs without network access. It prints the scores for
+development, validation and test, the noise check, the candidate decisions and the
+development tasks that still fail. With access to harness-loop, `make part5-report`
+also rebuilds the Markdown report and figure, and `make part5-show CANDIDATE=002`
+prints the saved decision, note and diff.
+
+The original campaign used support rubric `3-loop`. Rubric `4-loop` requires a handoff
+reply to state a transfer or direct the customer to a person or team. For refunds that
+require supervisor review it checks that the run actually paused. For an account
+language lookup, the reply must identify the stored language. A list of options used
+to pass. The checks accept specific English forms and can miss other valid wording.
+A referral is evidence of what the customer was told. The lab has no record of a human
+taking over the case.
+
+| Harness | Development, 48 tasks | Validation, 32 tasks | Test, 32 tasks |
+| --- | --- | --- | --- |
+| Start | 0.40 | 0.22 (0.09–0.38) | 0.25 (0.11–0.41) |
+| Candidate 1, inconclusive | 0.81 | 0.38 (0.22–0.54) | not run |
+| Candidate 2, adopted | 0.93 | 0.55 (0.39–0.72) | 0.52 (0.36–0.69) |
+
+Both validation decisions held after regrading. Test success increased by 0.27 (paired
+95% interval 0.06 to 0.48). Standard requests fell from 16/24 to 9/24. Half the test
+tasks passed all three runs, below the release threshold of 90%. Five development
+tasks still fail under rubric 4. The recorded campaign stopped when rubric 3 found
+none. Regrading cannot tell us what the improver would have proposed next.
+[REPORT.md](reports/part-5/support/REPORT.md) reports rubric 4.
+The [ledger](reports/part-5/support/ledger.jsonl) records the original decisions.
+The [saved result](reports/part-5/support/result.json) retains its rubric 3 test scores
+and stopping reason. Its spending total includes the 576 candidate runs, 96 noise
+runs and 192 test runs.
+
+- **The tasks.** The 48 tasks of Parts 2 to 4 are the development set, whose failures the
+  improver reads. [`loop/tasks.py`](loop/tasks.py) adds 32 validation tasks, which decide
+  whether a change is kept, and 32 test tasks, scored once at the end.
+- **The model.** [`harness/local.py`](harness/local.py) calls any OpenAI-compatible
+  endpoint; set `LAB_LOCAL_MODEL` and `LAB_LOCAL_URL` to use another model. The validator checks visible model declarations and imports. Candidate code runs with
+  the evaluator’s permissions.
+- **A new campaign.** `make part5-loop` needs Ollama with the model pulled and the
+  `claude` CLI. It writes to `build/part-5/support`, leaving the saved campaign as it is.
+  `noise.json` in the saved campaign is the adoption rule's answer on the starting
+  harness against itself, which has to be "inconclusive"; `noise-first-rule.json` is the
+  answer of an earlier rule, which kept the pair for lower cost alone.
+
 ## Change the evaluation
 
 [`evaluator/support.py`](evaluator/support.py) holds the use case in about 180 lines:
@@ -123,6 +184,8 @@ does not call the judge, whose saved verdicts cover the saved runs only.
 | [`evaluator/`](evaluator/) | The support use case for harness-evals, adapters for saved and live runs, and the commands above |
 | [`examples/`](examples/) | The template for scoring your own harness |
 | [`reports/part-4/`](reports/part-4/) | The saved runs with their traces and judge verdicts, 60 labelled replies, the report and the plots |
+| [`loop/`](loop/) | Part 5: the harness an improver edits, the validation and test tasks, and the target for harness-loop |
+| [`reports/part-5/`](reports/part-5/) | The saved improvement campaign: every candidate with its diff, note, runs and decision |
 | [`harness/`](harness/) | `build_harness(spec)`, `build_workflow(spec)`, the spec schema, middleware, token and cost accounting |
 | [`harness/spec/`](harness/spec/) | The agent and workflow specs |
 | [`envs/custom/`](envs/custom/) | The support tasks, a SQLite database, the account tools, the refund service and the supervisor's approval steps |
@@ -137,6 +200,12 @@ does not call the judge, whose saved verdicts cover the saved runs only.
   reviewed the labels yet.
 - The judge's verdicts are saved with the runs. The code that called the judge is not in
   this repository.
+- The Part 5 campaign is one run of the loop with one small local model. Its 64
+  validation and test tasks were written by a model and checked against the database by
+  [`tests/test_loop_tasks.py`](tests/test_loop_tasks.py); no person has reviewed them.
+- The improver cannot read outside its working directory while it proposes, but a
+  candidate's code runs with the evaluator's permissions. Do not run candidates from an
+  improver you do not trust outside a sandbox.
 - The tools do not enforce ownership or most of the business policy. The refund
   service enforces only the $200 approval rule and one refund per operation key. A real
   service would reject every write that breaks policy.

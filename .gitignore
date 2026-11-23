@@ -6,4 +6,6 @@ __pycache__/
 .ruff_cache/
 .cache/
 build/
-\n# Output of make part4-live\nreports/part-4/live/\n
+
+# Output of make part4-live
+reports/part-4/live/

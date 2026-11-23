@@ -19,7 +19,7 @@ TAU3_CONCURRENCY ?= 4
 CUSTOM_SPECS := harness/spec/base.yaml harness/spec/plain.yaml harness/spec/glm-5.3-flash.yaml harness/spec/mimo-v2.6-flash.yaml
 A2_SPECS := harness/spec/plain.yaml harness/spec/approval-agent.yaml harness/spec/workflows/refund-approval.yaml harness/spec/workflows/support-router.yaml harness/spec/workflows/support-code.yaml
 
-.PHONY: help sync test fmt lint mine show failures a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 part4-regrade part4-agreement part4-compare part4-live
+.PHONY: help sync test fmt lint mine show failures a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 part4-regrade part4-agreement part4-compare part4-live part5-report part5-regrade part5-show part5-loop
 
 help:
 	@echo "offline, no key:"
@@ -29,6 +29,9 @@ help:
 	@echo "make part4-compare      BASE=3 CANDIDATE=5 (design numbers) [SPLIT=dev|new] [LEVEL=state|obligations|judge]"
 	@echo "make part4-agreement    the judge and the held-reply check against labels"
 	@echo "make mine               score the function in examples/your_harness.py on the 16 known tasks"
+	@echo "make part5-regrade      regrade the saved support campaign using only public dependencies"
+	@echo "make part5-report       grade the saved Part 5 campaign again, write its REPORT.md and trajectory.svg"
+	@echo "make part5-show [CANDIDATE=003]   the campaign's ledger, or one candidate with its note and diff"
 	@echo "make test | fmt | lint"
 	@echo "paid, needs a key:"
 	@echo "make a1-custom          Part 2: run the 12 support tasks with SPEC (default base.yaml)"
@@ -41,6 +44,8 @@ help:
 	@echo "make a2-routes          Part 3: score both routers' classifiers on 25 labelled requests"
 	@echo "make report-a2          rebuild reports/article-a2/README.md"
 	@echo "make part4-live         TRIALS=5 PART4_SPECS=\"<spec files>\" [SPLIT=dev|new]"
+	@echo "local model and Claude Code, no key:"
+	@echo "make part5-loop         run or resume a campaign in CAMPAIGN (default build/part-5/support)"
 
 sync:
 	$(UV) sync --frozen
@@ -144,3 +149,28 @@ mine: sync
 
 part4-live: sync
 	$(UV) run python -m evaluator live --trials $(TRIALS) --split $(SPLIT) $(PART4_SPECS)
+
+
+# Part 5: the improvement loop on the workflow with no agent. The saved campaign is in
+# reports/part-5/support; a new one goes to build/ unless CAMPAIGN says otherwise.
+SAVED_CAMPAIGN := reports/part-5/support
+CAMPAIGN ?= build/part-5/support
+CANDIDATES ?= 8
+IMPROVER ?= sonnet
+LOOP_TRIALS ?= dev=2,val=3,test=3
+
+# The episode regrade uses the same evaluator as the full project and installs no runner.
+REPLAY_EVALS ?= git+https://github.com/slavadubrov/harness-evals@919124f966cd7f6073ef23b70125123d836a2176
+part5-regrade:
+	$(UV) run --no-project --with "$(REPLAY_EVALS)" python -m loop.regrade
+
+part5-report: sync
+	$(UV) run harness-loop report loop.target:TARGET $(SAVED_CAMPAIGN)
+
+part5-show: sync
+	$(UV) run harness-loop show - $(SAVED_CAMPAIGN) $(CANDIDATE)
+
+# Needs Ollama serving LAB_LOCAL_MODEL (default gemma3n:latest) and the claude CLI.
+part5-loop: sync
+	$(UV) run harness-loop run loop.target:TARGET $(CAMPAIGN) --max-candidates $(CANDIDATES) \
+		--model $(IMPROVER) --trials $(LOOP_TRIALS)

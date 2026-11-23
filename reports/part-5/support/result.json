@@ -1,0 +1,108 @@
+{
+  "stopped": "no development task fails",
+  "final": "002",
+  "spent": {
+    "improver_usd": 0.8938819,
+    "improver_unknown": 0,
+    "improver_seconds": 327.8307366659865,
+    "eval_usd": 0.00696565,
+    "eval_unknown": 0,
+    "eval_seconds": 2738.6,
+    "eval_episodes": 864
+  },
+  "test": {
+    "000": {
+      "success": 0.3541666666666667,
+      "pass^k": 0.34375,
+      "violations": 0,
+      "cost_per_task": 8.575520833333334e-06,
+      "latency_p95": 5.834,
+      "tokens_per_task": 136.90625,
+      "success_ci": [
+        0.19791666666666666,
+        0.5208333333333334
+      ],
+      "k": 3,
+      "failing": [
+        "t-policy-address-kind",
+        "t-policy-currency",
+        "t-policy-large-refund",
+        "t-policy-notification-settings",
+        "t-policy-over-total",
+        "t-policy-three-weeks",
+        "t-std-address-missing-city",
+        "t-std-address-shipping",
+        "t-std-prefs-one-unsupported",
+        "t-two-both-refused",
+        "t-two-language-and-refund",
+        "t-two-marketing-allowed-cancelled-refused",
+        "t-two-refund-allowed-refunded-refused",
+        "t-two-refund-and-incomplete-address",
+        "t-two-shipping-and-paperless",
+        "t-unusual-language-on-file",
+        "t-unusual-order-price",
+        "t-vague-address-no-kind",
+        "t-vague-rain-jacket",
+        "t-vague-sewing-machine-over-limit",
+        "t-vague-tent-late"
+      ]
+    },
+    "002": {
+      "success": 0.625,
+      "pass^k": 0.625,
+      "violations": 0,
+      "cost_per_task": 7.428125e-06,
+      "latency_p95": 5.937,
+      "tokens_per_task": 136.90625,
+      "success_ci": [
+        0.46875,
+        0.78125
+      ],
+      "k": 3,
+      "failing": [
+        "t-policy-currency",
+        "t-policy-large-refund",
+        "t-policy-notification-settings",
+        "t-policy-over-total",
+        "t-std-address-shipping",
+        "t-std-prefs-one-unsupported",
+        "t-std-refund-over-limit-approved",
+        "t-std-refund-over-limit-rejected",
+        "t-std-refund-partial-lost-response",
+        "t-two-language-and-refund",
+        "t-two-refund-allowed-refunded-refused",
+        "t-unusual-order-price"
+      ]
+    },
+    "delta": {
+      "success": [
+        0.2708333333333333,
+        0.052083333333333336,
+        0.4791666666666667
+      ],
+      "cost_per_task": [
+        -1.1473958333333336e-06,
+        -1.3322916666666657e-06,
+        -9.937499999999996e-07
+      ],
+      "latency_p95": [
+        0.10300000000000065,
+        -0.2679999999999998,
+        1.4799999999999995
+      ],
+      "tokens_per_task": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "decision": "adopt",
+    "reasons": [
+      "success is higher: +0.052 to +0.479",
+      "still below the bar: pass^k = 0.625, needs >= 0.9"
+    ],
+    "misses": [
+      "pass^k = 0.625, needs >= 0.9"
+    ]
+  }
+}
