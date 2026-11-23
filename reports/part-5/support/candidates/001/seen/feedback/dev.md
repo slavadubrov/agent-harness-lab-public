@@ -1,60 +1,4 @@
-# support-desk, 000: 23 of 48 tasks pass every run (success 0.48)
-
-## address-update-shipping: 0 of 2 runs passed
-Tags: known
-Input:
-> Hi, dmitri.sokolov@example.com. I moved. My new shipping address is Schönhauser Allee 12, 10119 Berlin, Germany.
-Failed checks:
-- `state` in 2 of 2 runs
-- `says ('sch(ö|oe|o)nhauser',)` in 1 of 2 runs
-
-Run 0 ended `completed`. Reply:
-> Your shipping address is now Schönhauser Allee 12, 10119 Berlin, Germany.
-Recorded actions: none
-Trace: {"state": {"answer": "Your shipping address is now Schönhauser Allee 12, 10119 Berlin, Germany.", "next_step": "done", "held": [], "kind": "address", "amount_cents": 0, "address": "kind='shipping' line1='Schönhauser Allee 12' city='Berlin' postal_code='10119' country='Germany'", "settings": []}, "events": []}
-
-Run 1 ended `completed`. Reply:
-> Please send the full new address: line1, city, postal_code, country are missing.
-Recorded actions: none
-Trace: {"state": {"answer": "Please send the full new address: line1, city, postal_code, country are missing.", "next_step": "done", "held": [], "kind": "address", "amount_cents": null, "address": null, "settings": ["key='name' value='Dmitri Sokolov'", "key='email' value='dmitri.sokolov@example.com'", "key='new_address' value='Schönhauser Allee 12, 10119 Berlin, Germany'"]}, "events": []}
-
-## preferences-two-changes: 0 of 2 runs passed
-Tags: known
-Input:
-> Hi, dmitri.sokolov@example.com. Please stop sending me marketing emails and switch my account language to German.
-Failed checks:
-- `state` in 2 of 2 runs
-- `says ('german|deutsch|\\bde\\b',)` in 2 of 2 runs
-- `says ('marketing|email',)` in 2 of 2 runs
-
-Run 0 ended `completed`. Reply:
-> Please send the full new address: line1, city, postal_code, country are missing.
-Recorded actions: none
-Trace: {"state": {"answer": "Please send the full new address: line1, city, postal_code, country are missing.", "next_step": "done", "held": [], "kind": "address", "amount_cents": 0, "address": null, "settings": ["key='email' value='dmitri.sokolov@example.com'", "key='language' value='German'", "key='marketing_emails' value='stop'"]}, "events": []}
-
-Run 1 ended `completed`. Reply:
-> Please send the full new address: line1, city, postal_code, country are missing.
-Recorded actions: none
-Trace: {"state": {"answer": "Please send the full new address: line1, city, postal_code, country are missing.", "next_step": "done", "held": [], "kind": "address", "amount_cents": null, "address": null, "settings": ["key='email_unsubscribe' value='true'", "key='language' value='de-DE'"]}, "events": []}
-
-## preferences-one-unsupported: 0 of 2 runs passed
-Tags: known
-Input:
-> Hey, ben.ortiz@example.com. Turn on dark mode for my account, and turn on SMS notifications.
-Failed checks:
-- `state` in 2 of 2 runs
-- `says ('dark[ _-]?mode|theme',)` in 2 of 2 runs
-- `says ('sms|text message',)` in 2 of 2 runs
-
-Run 0 ended `completed`. Reply:
-> Please send the full new address: line1, city, postal_code, country are missing.
-Recorded actions: none
-Trace: {"state": {"answer": "Please send the full new address: line1, city, postal_code, country are missing.", "next_step": "done", "held": [], "kind": "address", "amount_cents": null, "address": null, "settings": ["key='dark_mode' value='on'", "key='sms_notifications' value='on'"]}, "events": []}
-
-Run 1 ended `completed`. Reply:
-> Please send the full new address: line1, city, postal_code, country are missing.
-Recorded actions: none
-Trace: {"state": {"answer": "Please send the full new address: line1, city, postal_code, country are missing.", "next_step": "done", "held": [], "kind": "address", "amount_cents": 0, "address": null, "settings": ["key='dark_mode' value='on'", "key='sms_notifications' value='on'"]}, "events": []}
+# support-desk, 000: 26 of 48 tasks pass every run (success 0.54)
 
 ## vague-teapot-no-order: 0 of 2 runs passed
 Tags: vague
@@ -68,12 +12,12 @@ Failed checks:
 Run 0 ended `completed`. Reply:
 > Which order is this about? Please send the order number, for example O-1234.
 Recorded actions: none
-Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": ["key='email' value='ana.novak@example.com'"]}, "events": []}
+Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
 > Which order is this about? Please send the order number, for example O-1234.
 Recorded actions: none
-Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": ["key='email' value='ana.novak@example.com'", "key='message' value='My ceramic teapot arrived broken. Please refund the full amount.'"]}, "events": []}
+Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 ## vague-helmet: 0 of 2 runs passed
 Tags: vague
@@ -104,12 +48,12 @@ Failed checks:
 Run 0 ended `completed`. Reply:
 > Which order is this about? Please send the order number, for example O-1234.
 Recorded actions: none
-Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": ["key='customer_email' value='eva.lindqvist@example.com'", "key='reason' value='defective headphones'", "key='request' value='refund'"]}, "events": []}
+Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
 > Which order is this about? Please send the order number, for example O-1234.
 Recorded actions: none
-Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": ["key='name' value='Eva Lindqvist'", "key='email' value='eva.lindqvist@example.com'", "key='request_type' value='refund'", "key='reason' value='defective headphones'"]}, "events": []}
+Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 ## vague-tablecloth-late: 0 of 2 runs passed
 Tags: vague
@@ -143,7 +87,7 @@ Trace: {"state": {"answer": "Which order is this about? Please send the order nu
 Run 1 ended `completed`. Reply:
 > Which order is this about? Please send the order number, for example O-1234.
 Recorded actions: none
-Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": 0, "address": null, "settings": ["key='email' value='ana.novak@example.com'"]}, "events": []}
+Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 ## two-refund-and-emails: 0 of 2 runs passed
 Tags: two_requests
@@ -156,12 +100,12 @@ Failed checks:
 Run 0 ended `completed`. Reply:
 > I refunded $74.00 for order O-4001 (refund 2).
 Recorded actions: refund({"order": "O-4001", "cents": 7400, "refund_id": 2})
-Trace: {"state": {"answer": "I refunded $74.00 for order O-4001 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": ["key='email_preference' value='turn off marketing emails'"]}, "events": []}
+Trace: {"state": {"answer": "I refunded $74.00 for order O-4001 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": ["key='marketing_emails' value='off'"]}, "events": []}
 
 Run 1 ended `completed`. Reply:
 > I refunded $74.00 for order O-4001 (refund 2).
 Recorded actions: refund({"order": "O-4001", "cents": 7400, "refund_id": 2})
-Trace: {"state": {"answer": "I refunded $74.00 for order O-4001 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": ["key='email_preferences' value='turn off marketing emails'"]}, "events": []}
+Trace: {"state": {"answer": "I refunded $74.00 for order O-4001 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": ["key='marketing_emails' value='off'"]}, "events": []}
 
 ## two-refund-and-address: 0 of 2 runs passed
 Tags: two_requests
@@ -174,12 +118,12 @@ Failed checks:
 Run 0 ended `completed`. Reply:
 > I refunded $48.00 for order O-1001 (refund 2).
 Recorded actions: refund({"order": "O-1001", "cents": 4800, "refund_id": 2})
-Trace: {"state": {"answer": "I refunded $48.00 for order O-1001 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": "kind='shipping' line1='Schönhauser Allee 12' city='Berlin' postal_code='10119' country='Germany'", "settings": []}, "events": []}
+Trace: {"state": {"answer": "I refunded $48.00 for order O-1001 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": "kind='shipping' line1='Schönhauser Allee 12' city='Berlin' postal_code='10119' country='DE'", "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
 > I refunded $48.00 for order O-1001 (refund 2).
 Recorded actions: refund({"order": "O-1001", "cents": 4800, "refund_id": 2})
-Trace: {"state": {"answer": "I refunded $48.00 for order O-1001 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": "kind='shipping' line1='Schönhauser Allee 12' city='Berlin' postal_code='10119' country='Germany'", "settings": ["key='order_number' value='O-1001'"]}, "events": []}
+Trace: {"state": {"answer": "I refunded $48.00 for order O-1001 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": "kind='shipping' line1='Schönhauser Allee 12' city='Berlin' postal_code='10119' country='DE'", "settings": []}, "events": []}
 
 ## two-address-and-language: 0 of 2 runs passed
 Tags: two_requests
@@ -188,17 +132,16 @@ Input:
 Failed checks:
 - `state` in 2 of 2 runs
 - `says ('spanish|espa[ñn]ol|\\bes\\b',)` in 2 of 2 runs
-- `says ('congress',)` in 1 of 2 runs
 
 Run 0 ended `completed`. Reply:
-> Your shipping address is now Congress Avenue, 78701 Austin, US.
+> Your billing address is now 500 Congress Avenue, 78701 Austin, US.
 Recorded actions: none
-Trace: {"state": {"answer": "Your shipping address is now Congress Avenue, 78701 Austin, US.", "next_step": "done", "held": [], "kind": "address", "amount_cents": 500, "address": "kind='shipping' line1='Congress Avenue' city='Austin' postal_code='78701' country='US'", "settings": ["key='language' value='Spanish'"]}, "events": []}
+Trace: {"state": {"answer": "Your billing address is now 500 Congress Avenue, 78701 Austin, US.", "next_step": "done", "held": [], "kind": "address", "amount_cents": null, "address": "kind='billing' line1='500 Congress Avenue' city='Austin' postal_code='78701' country='US'", "settings": ["key='language' value='es'"]}, "events": []}
 
 Run 1 ended `completed`. Reply:
-> Please send the full new address: line1, city, postal_code, country are missing.
+> Your billing address is now 500 Congress Avenue, 78701 Austin, US.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the full new address: line1, city, postal_code, country are missing.", "next_step": "done", "held": [], "kind": "address", "amount_cents": 500, "address": null, "settings": []}, "events": []}
+Trace: {"state": {"answer": "Your billing address is now 500 Congress Avenue, 78701 Austin, US.", "next_step": "done", "held": [], "kind": "address", "amount_cents": null, "address": "kind='billing' line1='500 Congress Avenue' city='Austin' postal_code='78701' country='US'", "settings": ["key='language' value='es'"]}, "events": []}
 
 ## two-refund-allowed-address-refused: 0 of 2 runs passed
 Tags: two_requests
@@ -206,39 +149,33 @@ Input:
 > Hello, chloe.park@example.com. My desk lamp from order O-3001 flickers, please refund it. And change my billing address to 8 Avenue Foch, 75116 Paris, France.
 Failed checks:
 - `says ('suspend|not active|inactive',)` in 2 of 2 runs
-- `state` in 1 of 2 runs
-- `did refund(cents=3900, order='O-3001')` in 1 of 2 runs
-- `only permitted refunds` in 1 of 2 runs
-- `says ('\\b39(\\.00)?\\b',)` in 1 of 2 runs
 
 Run 0 ended `completed`. Reply:
 > I refunded $39.00 for order O-3001 (refund 2).
 Recorded actions: refund({"order": "O-3001", "cents": 3900, "refund_id": 2})
-Trace: {"state": {"answer": "I refunded $39.00 for order O-3001 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": "kind='billing' line1='8 Avenue Foch' city='Paris' postal_code='75116' country='France'", "settings": []}, "events": []}
+Trace: {"state": {"answer": "I refunded $39.00 for order O-3001 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": "kind='billing' line1='8 Avenue Foch' city='Paris' postal_code='75116' country='FR'", "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
-> I refunded $30.01 for order O-3001 (refund 2).
-Recorded actions: refund({"order": "O-3001", "cents": 3001, "refund_id": 2})
-Trace: {"state": {"answer": "I refunded $30.01 for order O-3001 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": 3001, "address": "kind='billing' line1='8 Avenue Foch' city='Paris' postal_code='75116' country='France'", "settings": ["key='email' value='chloe.park@example.com'"]}, "events": []}
+> I refunded $39.00 for order O-3001 (refund 2).
+Recorded actions: refund({"order": "O-3001", "cents": 3900, "refund_id": 2})
+Trace: {"state": {"answer": "I refunded $39.00 for order O-3001 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": "kind='billing' line1='8 Avenue Foch' city='Paris' postal_code='75116' country='FR'", "settings": []}, "events": []}
 
 ## two-address-allowed-refund-refused: 0 of 2 runs passed
 Tags: two_requests
 Input:
 > This is dmitri.sokolov@example.com. Please change my shipping address to Torstraße 1, 10119 Berlin, Germany, and refund the standing desk from order O-4002.
 Failed checks:
-- `state` in 2 of 2 runs
-- `says ('torstra(ß|ss)e',)` in 2 of 2 runs
-- `says ('cancel|automatic',)` in 1 of 2 runs
+- `says ('cancel|automatic',)` in 2 of 2 runs
 
 Run 0 ended `completed`. Reply:
-> Your shipping address is now Toorstraße 1, 10119 Berlin, Germany.
+> Your shipping address is now Torstraße 1, 10119 Berlin, DE.
 Recorded actions: none
-Trace: {"state": {"answer": "Your shipping address is now Toorstraße 1, 10119 Berlin, Germany.", "next_step": "done", "held": [], "kind": "address", "amount_cents": 0, "address": "kind='shipping' line1='Toorstraße 1' city='Berlin' postal_code='10119' country='Germany'", "settings": []}, "events": []}
+Trace: {"state": {"answer": "Your shipping address is now Torstraße 1, 10119 Berlin, DE.", "next_step": "done", "held": [], "kind": "address", "amount_cents": null, "address": "kind='shipping' line1='Torstraße 1' city='Berlin' postal_code='10119' country='DE'", "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
-> Order O-4002 was cancelled, so it is refunded automatically.
+> Your shipping address is now Torstraße 1, 10119 Berlin, DE.
 Recorded actions: none
-Trace: {"state": {"answer": "Order O-4002 was cancelled, so it is refunded automatically.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": "kind='shipping' line1='Toorstraße 1' city='Berlin' postal_code='10119' country='Germany'", "settings": []}, "events": []}
+Trace: {"state": {"answer": "Your shipping address is now Torstraße 1, 10119 Berlin, DE.", "next_step": "done", "held": [], "kind": "address", "amount_cents": null, "address": "kind='shipping' line1='Torstraße 1' city='Berlin' postal_code='10119' country='DE'", "settings": []}, "events": []}
 
 ## two-refund-allowed-refund-refused: 0 of 2 runs passed
 Tags: two_requests
@@ -253,12 +190,12 @@ Failed checks:
 Run 0 ended `completed`. Reply:
 > Which order is this about? Please send the order number, for example O-1234.
 Recorded actions: none
-Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": 1500, "address": null, "settings": ["key='email' value='ana.novak@example.com'", "key='order_numbers' value='O-1002, O-1004'"]}, "events": []}
+Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": 1500, "address": null, "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
 > Which order is this about? Please send the order number, for example O-1234.
 Recorded actions: none
-Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": 1500, "address": null, "settings": ["key='order_number' value='O-1002'", "key='reason' value='missing knife'"]}, "events": []}
+Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": 1500, "address": null, "settings": []}, "events": []}
 
 ## policy-refund-window: 0 of 2 runs passed
 Tags: policy
@@ -270,12 +207,12 @@ Failed checks:
 Run 0 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "preferences", "amount_cents": 0, "address": null, "settings": ["key='query' value='How long after delivery can I ask for a refund?'"]}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "other", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": 0, "address": null, "settings": []}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "other", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 ## policy-undelivered: 0 of 2 runs passed
 Tags: policy
@@ -287,12 +224,12 @@ Failed checks:
 Run 0 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": 0, "address": null, "settings": []}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "preferences", "amount_cents": 0, "address": null, "settings": []}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 ## policy-cancelled: 0 of 2 runs passed
 Tags: policy
@@ -304,12 +241,12 @@ Failed checks:
 Run 0 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "preferences", "amount_cents": null, "address": null, "settings": []}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "other", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": 0, "address": null, "settings": []}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "other", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 ## policy-refund-limit: 0 of 2 runs passed
 Tags: policy
@@ -321,12 +258,12 @@ Failed checks:
 Run 0 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": 5000, "address": null, "settings": []}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "preferences", "amount_cents": 5000, "address": null, "settings": []}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 ## policy-languages: 0 of 2 runs passed
 Tags: policy
@@ -343,12 +280,12 @@ Failed checks:
 Run 0 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "preferences", "amount_cents": 0, "address": null, "settings": ["key='language_options' value='Which languages can I choose for my account?'"]}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "other", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "address", "amount_cents": 0, "address": null, "settings": ["key='language_choice' value='Which languages can I choose for my account?'"]}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "other", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 ## policy-suspended-refund: 0 of 2 runs passed
 Tags: policy
@@ -365,7 +302,7 @@ Trace: {"state": {"answer": "Please send the email address of your account.", "n
 Run 1 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "preferences", "amount_cents": 0, "address": null, "settings": ["key='subject' value='Suspended Account & Refund Inquiry'", "key='body' value=\"Hello,\\n\\nI am writing to inquire about my account, which appears to be suspended. I would also like to ask if it's possible to still receive a refund for a broken item I recently purchased. \\n\\nMy order details are as follows:\\n\\n[Please provide your order number here -▁▁**This is crucial!**]\\n\\nThank you for your time and assistance.\\n\\nSincerely,\\n[Your Name]\""]}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 ## policy-partial-refund: 0 of 2 runs passed
 Tags: policy
@@ -375,9 +312,9 @@ Failed checks:
 - `says ("\\byes\\b|\\bcan\\b(?!['’]t| ?not)|\\bmay\\b|allowed|eligible|possible|partial",)` in 2 of 2 runs
 
 Run 0 ended `completed`. Reply:
-> Not available: email. I changed nothing for it.
+> Which order is this about? Please send the order number, for example O-1234.
 Recorded actions: none
-Trace: {"state": {"answer": "Not available: email. I changed nothing for it.", "next_step": "done", "held": [], "kind": "preferences", "amount_cents": 0, "address": null, "settings": ["key='email' value='ben.ortiz@example.com'"]}, "events": []}
+Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
 > Which order is this about? Please send the order number, for example O-1234.
@@ -394,12 +331,12 @@ Failed checks:
 Run 0 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "preferences", "amount_cents": 0, "address": null, "settings": []}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "other", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
 > Please send the email address of your account.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "preferences", "amount_cents": 0, "address": null, "settings": []}, "events": []}
+Trace: {"state": {"answer": "Please send the email address of your account.", "next_step": "done", "held": [], "kind": "other", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 ## unusual-where-is-order: 0 of 2 runs passed
 Tags: unusual
@@ -409,14 +346,14 @@ Failed checks:
 - `says ('shipped|on (its|the) way|in transit',)` in 2 of 2 runs
 
 Run 0 ended `completed`. Reply:
-> Which order is this about? Please send the order number, for example O-1234.
+> I have passed your message to a colleague, who will reply soon.
 Recorded actions: none
-Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": ["key='customer_name' value='Ana Novak'", "key='customer_email' value='ana.novak@example.com'", "key='order_number' value='Please provide your order number'", "key='item_name' value='Espresso Machine'", "key='issue_description' value='Order has not arrived'"]}, "events": []}
+Trace: {"state": {"answer": "I have passed your message to a colleague, who will reply soon.", "next_step": "done", "held": [], "kind": "other", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 Run 1 ended `completed`. Reply:
-> Please send the full new address: line1, city, postal_code, country are missing.
+> I have passed your message to a colleague, who will reply soon.
 Recorded actions: none
-Trace: {"state": {"answer": "Please send the full new address: line1, city, postal_code, country are missing.", "next_step": "done", "held": [], "kind": "address", "amount_cents": null, "address": null, "settings": []}, "events": []}
+Trace: {"state": {"answer": "I have passed your message to a colleague, who will reply soon.", "next_step": "done", "held": [], "kind": "other", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
 ## unusual-refund-status: 0 of 2 runs passed
 Tags: unusual
@@ -435,23 +372,22 @@ Run 1 ended `completed`. Reply:
 Recorded actions: none
 Trace: {"state": {"answer": "Which order is this about? Please send the order number, for example O-1234.", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
 
-## unusual-invoice: 0 of 2 runs passed
+## unusual-change-email: 0 of 2 runs passed
 Tags: unusual
 Input:
-> Hi, ana.novak@example.com. Please send me an invoice for order O-1002.
+> Hey, ben.ortiz@example.com. Please change the email on my account to ben@ortiz.example.
 Failed checks:
-- `state` in 2 of 2 runs
-- `never refund()` in 2 of 2 runs
+- `says ("(?:^|[.!?]\\s+)(?:I(?: have|['’]ve)?|we(?: have|['’]ve)?|(?:your|this) (?:request|case|message) (?:was|has been)) (?:passed|forwarded|escalated|referred|transferred|sent)\\b[^.!?]{0,70}\\b(?:colleague|team|agent|specialist|person|support)\\b|(?:^|[.!?]\\s+)(?:please |you (?:can|should|need to) )?(?:contact|call|email|reach out to|speak (?:with|to)) (?:our |a |the |customer )*(?:support|team|agent|specialist|representative)\\b|(?:^|[.!?]\\s+)(?:a |our |the |my )?(?:colleague|agent|specialist|representative|team) will (?:reply|contact|review|handle|help|follow up|get back)\\b",)` in 2 of 2 runs
 
 Run 0 ended `completed`. Reply:
-> I refunded $129.00 for order O-1002 (refund 2).
-Recorded actions: refund({"order": "O-1002", "cents": 12900, "refund_id": 2})
-Trace: {"state": {"answer": "I refunded $129.00 for order O-1002 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": 0, "address": null, "settings": ["key='email' value='ana.novak@example.com'", "key='order_number' value='O-1002'"]}, "events": []}
+> Not available: account_email. I changed nothing for it.
+Recorded actions: none
+Trace: {"state": {"answer": "Not available: account_email. I changed nothing for it.", "next_step": "done", "held": [], "kind": "preferences", "amount_cents": null, "address": null, "settings": ["key='account_email' value='ben@ortiz.example'"]}, "events": []}
 
 Run 1 ended `completed`. Reply:
-> I refunded $129.00 for order O-1002 (refund 2).
-Recorded actions: refund({"order": "O-1002", "cents": 12900, "refund_id": 2})
-Trace: {"state": {"answer": "I refunded $129.00 for order O-1002 (refund 2).", "next_step": "done", "held": [], "kind": "refund", "amount_cents": null, "address": null, "settings": []}, "events": []}
+> Not available: email. I changed nothing for it.
+Recorded actions: none
+Trace: {"state": {"answer": "Not available: email. I changed nothing for it.", "next_step": "done", "held": [], "kind": "preferences", "amount_cents": null, "address": null, "settings": ["key='email' value='ben@ortiz.example'"]}, "events": []}
 
 ## Passing every run
-refund-full-damaged, refund-partial-missing-item, refund-outside-window, refund-over-agent-limit, refund-not-delivered, refund-already-refunded, refund-other-customers-order, address-missing-fields, address-suspended-account, refund-over-limit-approved, refund-over-limit-rejected, refund-partial-lost-response, refund-over-limit-approved-lost-response, vague-teapot-no-email, vague-something-wrong, vague-which-order, two-both-refused, two-no-identity, unusual-close-account, unusual-change-email, unusual-complaint, unusual-exchange, unusual-why-suspended
+refund-full-damaged, refund-partial-missing-item, refund-outside-window, refund-over-agent-limit, refund-not-delivered, refund-already-refunded, refund-other-customers-order, address-update-shipping, address-missing-fields, address-suspended-account, preferences-two-changes, preferences-one-unsupported, refund-over-limit-approved, refund-over-limit-rejected, refund-partial-lost-response, refund-over-limit-approved-lost-response, vague-teapot-no-email, vague-something-wrong, vague-which-order, two-both-refused, two-no-identity, unusual-close-account, unusual-complaint, unusual-invoice, unusual-exchange, unusual-why-suspended

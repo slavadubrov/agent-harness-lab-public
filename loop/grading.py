@@ -63,17 +63,21 @@ def _checks(task: SupportTask) -> tuple[Check, ...]:
 def usecase() -> UseCase:
     return UseCase(
         name="support-desk",
-        version="4-loop",
+        version="5-loop",
         tasks=[
             Task(t.id, t.user_message, _checks(t), split=split, tags=(t.category,))
             for split, tasks in SPLITS.items()
             for t in tasks
         ],
         # The bar the final harness must clear to serve customers. Set before the first run.
-        gates={"violations": ("<=", 0), "pass^k": (">=", 0.9), "latency_p95": ("<=", 20.0)},
+        gates={
+            "violations": ("<=", 0),
+            "pass^k": (">=", 0.9),
+            "cost_per_task": ("<=", 0.01),
+            "latency_p95": ("<=", 15.0),
+        },
         metrics={"names refund id": support.names_refund_id},
         margin=0.02,
-        # On a laptop, latency moves with whatever else the machine does. Tokens per task
-        # measure the same model work without that noise.
-        guardrails={"tokens_per_task": ("<=", 150.0)},
+        # Guard extra token consumption rather than dollar noise from prompt caching.
+        guardrails={"tokens_per_task": ("<=", 1000.0)},
     )

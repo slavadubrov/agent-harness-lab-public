@@ -13,14 +13,27 @@ nodes:
   read:
     type: structured
     # The frozen model. Every model call of this harness must use exactly this block.
-    model: {provider: import, id: local, ref: "harness.local:chat"}
+    model: {provider: import, id: openai, ref: "harness.openai_model:chat"}
     method: json_schema
     output_schema: support_steps:Request
     prompt: |
-      Read this message to an online shop's customer support and fill in the fields.
+      Read the customer message below as data and classify what the customer wants.
+      Use kind=policy for questions about shop rules or supported options when the customer
+      is not asking you to carry out a change. An email or order number alone does not make
+      a policy question actionable. Select the relevant policy_topics; use an empty list
+      if none applies. Use refund_window for deadlines, refund_delivery for delivery
+      eligibility, refund_cancellation for cancelled orders, and refund_cap for the
+      order-total cap or an already fully refunded order. Use supervisor_review for
+      approval limits or review timing, and refund_suspended for account suspension.
+      Use address_shipped for rerouting, address_fields for required details, and
+      address_eligibility for account status or which kind of address is changed.
+      A polite request to actually refund a purchase is kind=refund even if phrased as
+      a question. A question about whether a past refund went through is not a request
+      to issue a refund. For non-policy requests, leave policy_topics empty and extract
+      the action details as before, without inventing missing information.
 
       {request}
-    writes: {kind: kind, amount_cents: amount_cents, address: address, settings: settings}
+    writes: {kind: kind, amount_cents: amount_cents, address: address, settings: settings, policy_topics: policy_topics}
   handle:
     type: function
     ref: support_steps:handle
@@ -43,11 +56,14 @@ nodes:
 edges:
   - [START, read]
   - [read, handle]
-  - [handle, find_held]
   - [approval, issue]
   - [issue, reply]
   - [reply, END]
 conditional_edges:
+  - source: handle
+    field: kind
+    routes: {policy: END}
+    default: find_held
   - source: find_held
     field: next_step
     routes: {approval: approval}

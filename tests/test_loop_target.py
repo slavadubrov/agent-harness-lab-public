@@ -25,15 +25,19 @@ def test_the_starting_harness_is_valid(candidate):
 
 def test_a_changed_model_is_invalid(candidate):
     spec = candidate / "workflow.yaml"
-    spec.write_text(spec.read_text().replace('ref: "harness.local:chat"', 'ref: "other:model"'))
+    spec.write_text(
+        spec.read_text().replace('ref: "harness.openai_model:chat"', 'ref: "other:model"')
+    )
     assert "differs from the frozen one" in validate(candidate)[0]
-    assert MODEL_BLOCK["ref"] == "harness.local:chat"
+    assert MODEL_BLOCK["ref"] == "harness.openai_model:chat"
 
 
 def test_code_that_reaches_a_model_or_the_network_is_invalid(candidate):
     steps = candidate / "support_steps.py"
-    steps.write_text("import urllib.request\nfrom harness.local import chat\n" + steps.read_text())
-    assert validate(candidate) == ["support_steps.py imports harness.local, urllib.request"]
+    steps.write_text(
+        "import urllib.request\nfrom harness.openai_model import chat\n" + steps.read_text()
+    )
+    assert validate(candidate) == ["support_steps.py imports harness.openai_model, urllib.request"]
 
 
 def test_a_copied_development_task_is_invalid(candidate):
@@ -100,10 +104,11 @@ def test_regrade_of_all_saved_runs_reports_the_observed_results(capsys):
 
     main()
     output = capsys.readouterr().out
-    assert "3-loop regraded with 4-loop" in output
-    assert "Better on 13 tasks, worse on 3 tasks" in output
-    assert "unusual: 2/18, 5/18" in output
-    assert "unusual-close-account" in output
+    assert "5-loop regraded with 5-loop" in output
+    assert "Better on 6 tasks, worse on 1 task" in output
+    assert "Better on 4 tasks, worse on 0 tasks" in output
+    assert "policy: 0/18" in output
+    assert "two-address-allowed-refund-refused" in output
 
 
 def test_regrade_skips_validation_decisions_on_a_development_tie(capsys, monkeypatch):
@@ -117,4 +122,4 @@ def test_regrade_skips_validation_decisions_on_a_development_tie(capsys, monkeyp
     )
     regrade.main()
     output = capsys.readouterr().out
-    assert output.count("Screened on development") == 2
+    assert output.count("Screened on development") == 3

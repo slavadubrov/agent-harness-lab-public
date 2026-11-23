@@ -6,9 +6,8 @@ One run handles one customer message on a fresh copy of the shop's database.
   `lab/harness/spec.py` defines every key a workflow file may use (`WorkflowSpec` and the
   node types), and `lab/harness/workflow.py` shows how each node type runs.
 - A `structured` node makes one model call: it fills `prompt` from the state, asks the
-  model for an object of `output_schema` (a Pydantic class) and writes its fields to the
-  state. The model is small. It sees the prompt text; do not assume it sees the field
-  descriptions of the schema.
+  model for an object of `output_schema` (a Pydantic class, `method: json_schema`) and
+  writes its fields to the state.
 - A `function` node calls `module:function(state, ctx)` and merges the returned dict into
   the state. `ctx.context` is an `AccountContext` (`lab/envs/custom/tools.py`) with the
   database path of this run.

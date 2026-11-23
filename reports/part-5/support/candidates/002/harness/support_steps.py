@@ -1,10 +1,10 @@
 """The support assistant as a workflow with no agent: the harness the loop improves.
 
 One model call reads the customer's message into typed fields (``Request``). Everything
-else is code: regular expressions find the email and the order number, the policy rules
-are ``if`` statements, the writes go through the environment's tools and refund service,
-and the reply comes from a template. A refund above $200 is held by the refund service,
-and the environment's approval steps take over (``workflow.yaml``).
+else is code: regular expressions check identifiers, policy checks gate each action,
+and the writes go through the environment's tools and refund service. The reply combines
+an outcome for each action. Refunds above $200 go through the environment's approval
+steps (``workflow.yaml``).
 """
 
 from __future__ import annotations
@@ -16,9 +16,9 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-from envs.custom.approval import CaseState
+from envs.custom.approval import CaseState, reply as supervisor_reply
 from envs.custom.db import TODAY, connect
-from envs.custom.refunds import call_refund_service
+from envs.custom.refunds import call_refund_service, needs_approval, operations
 from envs.custom.tools import set_preference, update_address
 from harness.workflow import NodeContext
 
@@ -54,22 +54,27 @@ class Setting(BaseModel):
     value: str = Field(description="on or off, or an ISO 639-1 code for language.")
 
 
-class Request(BaseModel):
-    """What the customer asks for. Leave a field empty when the message does not say it."""
-
-    kind: Literal["refund", "address", "preferences", "other"]
-    amount_cents: int | None = Field(
-        None, description="Refund amount the customer states, in cents. Empty for the full amount."
+class Refund(BaseModel):
+    order_id: str | None = Field(description="The literal order ID for this refund, if given.")
+    amount_cents: int | None = Field(description="Specific refund amount requested, in cents.")
+    full_refund: bool = Field(
+        description="True only when the customer wants the whole order refunded, not just a part."
     )
-    address: Address | None = None
-    settings: list[Setting] = []
+
+
+class Request(BaseModel):
+    """Independent actions the customer asks support to perform."""
+
+    refunds: list[Refund]
+    addresses: list[Address]
+    settings: list[Setting]
 
 
 class CodeCase(CaseState):
-    kind: str = ""
-    amount_cents: int | None = None
-    address: Address | None = None
-    settings: list[Setting] = []
+    refunds: list[Refund] = Field(default_factory=list)
+    addresses: list[Address] = Field(default_factory=list)
+    settings: list[Setting] = Field(default_factory=list)
+    companion_answer: str = ""
 
 
 # -- code: checks, writes and replies ---------------------------------------------------
@@ -79,20 +84,14 @@ def _tool_runtime(ctx: NodeContext) -> Any:
     return SimpleNamespace(context=ctx.context)  # the tools read only runtime.context
 
 
-def _refund(
-    state: CodeCase, ctx: NodeContext, account: dict, order_id: str | None, amount_cents: int | None
-) -> str:
-    if order_id is None:
-        return "Which order is this about? Please send the order number, for example O-1234."
-    con = connect(ctx.context.db_path)
-    try:
-        order = con.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
-        refunded = con.execute(
-            "SELECT COALESCE(SUM(amount_cents), 0) FROM refunds WHERE order_id = ?", (order_id,)
-        ).fetchone()[0]
-    finally:
-        con.close()
-    if order is None or order["account_id"] != account["id"]:
+def _prepare_refund(
+    con: Any, account_id: str, order_id: str, request: Refund, prior: dict | None
+) -> int | str:
+    """Check eligibility and return the amount to submit, or explain why not."""
+    order = con.execute(
+        "SELECT * FROM orders WHERE id = ? AND account_id = ?", (order_id, account_id)
+    ).fetchone()
+    if order is None:
         return f"I cannot find order {order_id} on your account, so I cannot refund it."
     if order["status"] == "cancelled":
         return f"Order {order_id} was cancelled, so it is refunded automatically."
@@ -100,15 +99,29 @@ def _refund(
         return f"Order {order_id} has not been delivered yet. Refunds start after delivery."
     if (TODAY - date.fromisoformat(order["delivered_at"])).days > REFUND_WINDOW_DAYS:
         return f"Order {order_id} was delivered more than 30 days ago, outside the refund window."
+    amount = request.amount_cents
+    if (amount is None and not request.full_refund) or (amount is not None and amount <= 0):
+        return f"Please confirm the refund amount you are requesting for order {order_id}."
+    # On retry, do not recompute a different amount after this case's refund committed.
+    if prior is not None:
+        if amount is not None and amount != prior["amount_cents"]:
+            return f"A different refund amount was already submitted for order {order_id}."
+        return prior["amount_cents"]
+    refunded = con.execute(
+        "SELECT COALESCE(SUM(amount_cents), 0) FROM refunds WHERE order_id = ?", (order_id,)
+    ).fetchone()[0]
     remaining = order["total_cents"] - refunded
     if remaining <= 0:
         return f"Order {order_id} has already been refunded in full."
-    amount = amount_cents or remaining
-    if amount > remaining:
+    if amount is not None and amount > remaining:
         return f"I can refund at most ${remaining / 100:.2f} on order {order_id}."
+    return remaining if amount is None else amount
+
+
+def _submit_refund(ctx: NodeContext, order_id: str, amount: int) -> str:
     c = ctx.context
     r = call_refund_service(
-        c.db_path, c.case_id, order_id, amount, f"Customer request: {state.kind}", fault=c.fault
+        c.db_path, c.case_id, order_id, amount, "Customer request: refund", fault=c.fault
     )
     if r.get("status") == "held_for_approval":
         return (
@@ -120,11 +133,10 @@ def _refund(
     return f"I refunded ${amount / 100:.2f} for order {order_id} (refund {r['refund_id']})."
 
 
-def _address(state: CodeCase, ctx: NodeContext, account: dict) -> str:
+def _address(a: Address, ctx: NodeContext, account: dict) -> str:
     if account["status"] != "active":
         return "Your account is not active, so I cannot change its address. Please call support."
-    a = state.address
-    missing = [f for f in ("line1", "city", "postal_code", "country") if not a or not getattr(a, f)]
+    missing = [f for f in ("line1", "city", "postal_code", "country") if not getattr(a, f)]
     if missing:
         return "Please send the full new address: " + ", ".join(missing) + " are missing."
     update_address.func(
@@ -156,285 +168,64 @@ def _preferences(state: CodeCase, ctx: NodeContext, account: dict) -> str:
     return " ".join(p for p in parts if p) or "Which setting would you like to change?"
 
 
-# -- code-first reading: clauses, regexes and the account's own orders -------------------
-
-SPLIT = re.compile(
-    r"(?<=[.!?])\s+"
-    r"|,?\s+and\s+(?:also\s+)?(?=(?:please\s+)?(?:refund|switch|turn|stop|change|update|set|enable|disable)\b)"
-    r"|,?\s+also,?\s+|\s*;\s*"
-    r"|\s+(?=(?:also|plus),)",
-    re.I,
-)
-COUNTRIES = {
-    "germany": "DE", "deutschland": "DE", "france": "FR", "poland": "PL", "sweden": "SE",
-    "spain": "ES", "italy": "IT", "netherlands": "NL", "austria": "AT", "switzerland": "CH",
-    "canada": "CA", "ireland": "IE", "us": "US", "usa": "US", "united states": "US",
-    "united states of america": "US", "uk": "GB", "united kingdom": "GB", "denmark": "DK",
-    "norway": "NO", "finland": "FI", "portugal": "PT", "belgium": "BE",
-}
-LANGS = {
-    "english": "en", "german": "de", "deutsch": "de", "french": "fr", "spanish": "es",
-    "polish": "pl", "swedish": "sv",
-}
-LANG_NAMES = {"en": "English", "de": "German", "fr": "French", "es": "Spanish", "pl": "Polish", "sv": "Swedish"}
-OFF = re.compile(r"\b(stop|turn(?:ed)? off|switch(?:ed)? off|unsubscribe|disable|opt(?:ing)? out|no more|don'?t|do not|off)\b", re.I)
-REFUND_WORD = re.compile(r"\brefund|money back|reimburse", re.I)
-ADDRESS_WORD = re.compile(r"\b(shipping|billing)\b|\bmoved\b|\bmove\b|(?<!email )\baddress\b", re.I)
-PREF_WORD = re.compile(
-    r"marketing|promotional|newsletter|\bsms\b|text message|paperless|dark[ _-]?mode|\btheme\b|\blanguage\b",
-    re.I,
-)
-STATUS_Q = re.compile(r"did my refund|refund (?:go|went)|has my refund|refund status|how much was", re.I)
-WHERE_Q = re.compile(r"\bwhere is\b|hasn['’]?t (?:arrived|come)|not (?:arrived|come)|tracking", re.I)
-
-POLICY = [
-    (r"language", "You can choose English (en), German (de), French (fr), Spanish (es), Polish (pl) or Swedish (sv) for your account."),
-    (r"suspend", "Yes, a suspended account can still get a refund, but a suspended account cannot change its address."),
-    (r"cancel", "Cancelled orders are refunded automatically, so there is no need to ask for a refund."),
-    (r"manager|supervisor|limit|largest|maximum|at most|biggest", "Agents can refund up to $200.00 (20000 cents) per order. A larger refund needs a supervisor's approval."),
-    (r"shipped.*address|address.*shipped|already shipped|reroute", "No, an address change does not reroute orders that have already shipped; only new orders use it."),
-    (r"not (?:been )?delivered|hasn['’]?t (?:been )?delivered|undelivered|not arrived|shipped|pending", "No, an order that has not been delivered cannot be refunded yet. Please wait until it is delivered."),
-    (r"how long|days|deadline|window|time limit|after delivery", "You can ask for a refund within 30 days of delivery."),
-    (r"part|partial|missing|damaged|just that", "Yes, a partial refund is possible for a missing or damaged part of an order."),
-    (r"refund", "Refunds are possible for delivered orders within 30 days of delivery. Agents can refund up to $200.00; a larger refund needs a supervisor."),
-    (r"address", "You can change your shipping or billing address if your account is active. I need the street, city, postal code and country."),
-]
-
-
-def _stem(w: str) -> str:
-    return w[:-1] if w.endswith("s") and len(w) > 4 else w
-
-
-def _find_order_by_item(clause: str, orders: list[dict]) -> str | None:
-    words = {_stem(w) for w in re.findall(r"[a-z]+", clause.lower())}
-    best, best_ids = 0, []
-    for o in orders:
-        toks = {_stem(t) for t in re.findall(r"[a-z]+", o["item"].lower()) if len(t) >= 4}
-        score = len(toks & words)
-        if score > best:
-            best, best_ids = score, [o["id"]]
-        elif score == best and score:
-            best_ids.append(o["id"])
-    return best_ids[0] if len(best_ids) == 1 else None
-
-
-def _money(clause: str) -> int | None:
-    m = re.search(r"\$\s?(\d+(?:[.,]\d{1,2})?)|(\d+(?:\.\d{1,2})?)\s*(?:dollars|usd|\$)", clause, re.I)
-    if not m:
-        return None
-    return round(float((m.group(1) or m.group(2)).replace(",", ".")) * 100)
-
-
-def _parse_address(clause: str) -> tuple[str, dict]:
-    kind = "billing" if re.search(r"billing", clause, re.I) else "shipping"
-    m = re.search(r"address\s*(?:is|to|:)\s*(.+)$", clause, re.I) or re.search(r"[:]\s*(.+)$", clause) \
-        or re.search(r"\bto\s+(.+)$", clause, re.I)
-    parts = {}
-    if m:
-        pieces = [p.strip(" .!") for p in m.group(1).split(",") if p.strip(" .!")]
-        if pieces and re.search(r"\d", pieces[0]) or len(pieces) > 1:
-            parts["line1"] = pieces[0]
-            for p in pieces[1:]:
-                if p.lower() in COUNTRIES:
-                    parts["country"] = COUNTRIES[p.lower()]
-                elif re.fullmatch(r"[A-Z]{2}", p):
-                    parts["country"] = p
-                elif re.search(r"\d", p):
-                    pm = re.search(r"\d[\d\- ]*\d|\d", p)
-                    parts["postal_code"] = pm.group().strip()
-                    rest = (p[: pm.start()] + " " + p[pm.end():]).strip()
-                    if rest:
-                        parts["city"] = rest
-                else:
-                    parts["city"] = p
-    return kind, parts
-
-
-def _address_text(account: dict, ctx: NodeContext, kind: str, parts: dict) -> str:
-    if account["status"] != "active":
-        return "Your account is not active, so I cannot change its address. Please call support."
-    missing = [f for f in ("line1", "city", "postal_code", "country") if not parts.get(f)]
-    if missing:
-        return "Please send the full new address: " + ", ".join(missing) + " are missing."
-    update_address.func(_tool_runtime(ctx), account_id=account["id"], kind=kind, **parts)
-    return (
-        f"Your {kind} address is now {parts['line1']}, {parts['postal_code']} "
-        f"{parts['city']}, {parts['country']}."
-    )
-
-
-def _pref_text(account: dict, ctx: NodeContext, clause: str, model_keys: list[str]) -> str:
-    done, refused = [], []
-
-    def write(key: str, value: str, label: str) -> None:
-        set_preference.func(_tool_runtime(ctx), account_id=account["id"], key=key, value=value)
-        done.append(f"{label} is now {value}")
-
-    for piece in re.split(r"\s+and\s+|,\s*", clause):
-        low = piece.lower()
-        value = "off" if OFF.search(low) else "on"
-        if re.search(r"marketing|promotional|newsletter", low):
-            write("marketing_emails", value, "marketing emails")
-        elif re.search(r"\bsms\b|text message", low):
-            write("sms_notifications", value, "SMS notifications")
-        elif "paperless" in low:
-            write("paperless_billing", value, "paperless billing")
-        elif "language" in low or re.search(r"\b(?:to|in)\s+(?:%s)\b" % "|".join(LANGS), low):
-            code = next((c for n, c in LANGS.items() if re.search(rf"\b{n}\b", low)), None)
-            if code:
-                write("language", code, f"language ({LANG_NAMES[code]})")
-            else:
-                refused.append("that language")
-        elif re.search(r"dark[ _-]?mode|\btheme\b", low):
-            refused.append("dark mode")
-    out = []
-    if done:
-        out.append("Done: " + "; ".join(done) + ".")
-    if refused:
-        out.append("Not available: " + ", ".join(refused) + ". I changed nothing for it.")
-    return " ".join(out)
-
-
-def _tracking(order: dict) -> str:
-    st = order["status"]
-    if st == "shipped":
-        return f"Order {order['id']} ({order['item']}) has shipped and is in transit; it has not been delivered yet."
-    if st == "pending":
-        return f"Order {order['id']} ({order['item']}) is pending and has not shipped yet."
-    if st == "delivered":
-        return f"Order {order['id']} ({order['item']}) was delivered on {order['delivered_at']}."
-    return f"Order {order['id']} ({order['item']}) was cancelled."
-
-
-def _code_first(state: CodeCase, ctx: NodeContext, account: dict | None, has_email: bool) -> str | None:
-    """Answer the message clause by clause. None when no clause is recognised."""
-    text = state.request
-    clauses = [c.strip() for c in SPLIT.split(text) if c and c.strip()]
-    orders: list[dict] = []
-    refunds_by_order: dict[str, int] = {}
-    if account:
-        con = connect(ctx.context.db_path)
-        try:
-            orders = [dict(r) for r in con.execute("SELECT * FROM orders WHERE account_id = ?", (account["id"],))]
-            refunds_by_order = {
-                r[0]: r[1]
-                for r in con.execute("SELECT order_id, SUM(amount_cents) FROM refunds GROUP BY order_id")
-            }
-        finally:
-            con.close()
-    answers: list[str] = []
-    refunded_here: set[str] = set()
-    recognised = False
-    need_email = False
-    last_target: list[str] = []
-    for clause in clauses:
-        ids = ORDER.findall(clause)
-        item_id = None if ids else _find_order_by_item(clause, orders)
-        target = ids or ([item_id] if item_id else [])
-        if len(set(target)) == 1:
-            own_target = list(target)
-        else:
-            own_target = []
-        if not target and last_target:
-            target = list(last_target)
-        if own_target:
-            last_target = own_target
-        is_q = "?" in clause
-        if is_q and not target and not STATUS_Q.search(clause):
-            topic = next((a for pat, a in POLICY if re.search(pat, clause, re.I)), None)
-            if topic and re.search(r"suspend", text, re.I) and re.search(r"refund|money back", clause, re.I):
-                topic = POLICY[1][1]
-            if topic and not WHERE_Q.search(clause):
-                recognised = True
-                answers.append(topic)
-                continue
-        kind = None
-        if STATUS_Q.search(clause) and re.search(r"refund", clause, re.I):
-            kind = "status"
-        elif WHERE_Q.search(clause) and not REFUND_WORD.search(clause):
-            kind = "where"
-        elif PREF_WORD.search(clause):
-            kind = "pref"
-        elif ADDRESS_WORD.search(clause) and (re.search(r"\d", clause) or re.search(r"moved|new address", clause, re.I)):
-            kind = "address"
-        elif REFUND_WORD.search(clause):
-            kind = "refund"
-        if kind is None:
-            continue
-        recognised = True
-        if account is None:
-            need_email = True
-            continue
-        if kind == "pref":
-            answers.append(_pref_text(account, ctx, clause, []))
-        elif kind == "address":
-            k, parts = _parse_address(clause)
-            answers.append(_address_text(account, ctx, k, parts))
-        elif kind in ("status", "where"):
-            if not target and not item_id:
-                target = [o["id"] for o in orders if (o["status"] != "delivered" if kind == "where" else o["id"] in refunds_by_order)]
-            if len(target) != 1:
-                answers.append("Which order is this about? Please send the order number, for example O-1234.")
-                continue
-            o = next((x for x in orders if x["id"] == target[0]), None)
-            if o is None:
-                answers.append(f"I cannot find order {target[0]} on your account.")
-            elif kind == "where":
-                answers.append(_tracking(o))
-            elif o["id"] in refunds_by_order:
-                answers.append(f"Yes, your refund of ${refunds_by_order[o['id']] / 100:.2f} for order {o['id']} went through.")
-            else:
-                answers.append(f"There is no refund recorded for order {o['id']}.")
-        else:  # refund
-            if not target:
-                answers.append("Which order is this about? Please send the order number, for example O-1234.")
-                continue
-            amount = _money(clause) if len(target) == 1 else None
-            for oid in dict.fromkeys(target):
-                if oid in refunded_here:
-                    continue
-                refunded_here.add(oid)
-                answers.append(_refund(state, ctx, account, oid, amount))
-    if not recognised:
-        return None
-    if need_email:
-        return "Please send the email address of your account."
-    return " ".join(dict.fromkeys(a for a in answers if a)) or None
-
-
 def handle(state: CodeCase, ctx: NodeContext) -> dict[str, Any]:
-    """Run the request in code and write the reply. A retry after a lost refund reply runs
-    this node again; the refund service returns the first receipt."""
-    email = EMAIL.search(state.request)
-    orders = ORDER.findall(state.request)
-    account = None
-    if email is not None:
-        con = connect(ctx.context.db_path)
-        try:
-            row = con.execute(
-                "SELECT * FROM accounts WHERE lower(email) = lower(?)", (email.group(),)
-            ).fetchone()
-        finally:
-            con.close()
-        if row is not None:
-            account = dict(row)
-    if email is not None and account is None:
-        return {"answer": "I cannot find an account with that email address."}
-    answer = _code_first(state, ctx, account, email is not None)
-    if answer:
-        return {"answer": answer}
-    if email is None:
+    """Check each request independently, then apply the allowed writes."""
+    emails = EMAIL.findall(state.request)
+    if not emails:
         return {"answer": "Please send the email address of your account."}
-    if state.kind == "refund" and not REFUND_WORD.search(state.request):
-        return {"answer": "I have passed your message to a colleague, who will reply soon."}
-    if state.kind == "refund":
-        return {
-            "answer": _refund(
-                state, ctx, account, orders[0] if len(orders) == 1 else None, state.amount_cents
-            )
-        }
-    if state.kind == "address":
-        return {"answer": _address(state, ctx, account)}
-    if state.kind == "preferences":
-        return {"answer": _preferences(state, ctx, account)}
-    return {"answer": "I have passed your message to a colleague, who will reply soon."}
+    if state.refunds and len({email.lower() for email in emails}) > 1:
+        return {"answer": "Please confirm which email address identifies your account."}
+
+    mentioned_orders = set(ORDER.findall(state.request))
+    by_order: dict[str, list[Refund]] = {}
+    outcomes: list[str] = []
+    for refund in state.refunds:
+        if refund.order_id is not None and refund.order_id in mentioned_orders:
+            by_order.setdefault(refund.order_id, []).append(refund)
+    if any(refund.order_id not in mentioned_orders for refund in state.refunds):
+        outcomes.append("Which order is this refund about? Please send its order number.")
+
+    c = ctx.context
+    con = connect(c.db_path)
+    planned: dict[str, int] = {}
+    try:
+        row = con.execute(
+            "SELECT * FROM accounts WHERE lower(email) = lower(?)", (emails[0],)
+        ).fetchone()
+        if row is None:
+            return {"answer": "I cannot find an account with that email address."}
+        account = dict(row)
+        prior = {op["order_id"]: op for op in operations(c.db_path, c.case_id)} if by_order else {}
+        for order_id, requests in by_order.items():
+            amounts = {(r.amount_cents, r.amount_cents is None and r.full_refund) for r in requests}
+            if len(amounts) > 1:
+                outcomes.append(f"Please confirm one refund amount for order {order_id}.")
+                continue
+            result = _prepare_refund(con, account["id"], order_id, requests[0], prior.get(order_id))
+            if isinstance(result, str):
+                outcomes.append(result)
+            else:
+                planned[order_id] = result
+    finally:
+        con.close()
+
+    held = {order_id: amount for order_id, amount in planned.items() if needs_approval(amount)}
+    if held:
+        # The escalation policy allows the refund hold but no other changes.
+        for order_id in planned.keys() - held.keys():
+            outcomes.append(f"I did not issue the refund for order {order_id} while requesting approval.")
+        if state.addresses or state.settings:
+            outcomes.append("I did not make the requested account changes while requesting approval.")
+        pending = [_submit_refund(ctx, order_id, amount) for order_id, amount in held.items()]
+        return {"answer": " ".join(outcomes + pending), "companion_answer": " ".join(outcomes)}
+
+    outcomes.extend(_submit_refund(ctx, order_id, amount) for order_id, amount in planned.items())
+    outcomes.extend(_address(address, ctx, account) for address in state.addresses)
+    if state.settings:
+        outcomes.append(_preferences(state, ctx, account))
+    return {"answer": " ".join(outcomes) or "I have passed your message to a colleague, who will reply soon."}
+
+
+def approval_reply(state: CodeCase, ctx: NodeContext) -> dict[str, Any]:
+    final = supervisor_reply(state, ctx)["reply"]
+    return {"reply": " ".join(part for part in (state.companion_answer, final) if part)}

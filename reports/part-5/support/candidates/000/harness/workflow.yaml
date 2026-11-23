@@ -13,7 +13,7 @@ nodes:
   read:
     type: structured
     # The frozen model. Every model call of this harness must use exactly this block.
-    model: {provider: import, id: local, ref: "harness.local:chat"}
+    model: {provider: import, id: openai, ref: "harness.openai_model:chat"}
     method: json_schema
     output_schema: support_steps:Request
     prompt: |

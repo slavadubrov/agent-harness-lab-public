@@ -1,19 +1,19 @@
 {
   "usecase": "support-desk",
-  "usecase_version": "3-loop",
-  "fingerprint": "d2981033a99deda6",
+  "usecase_version": "5-loop",
+  "fingerprint": "e70e26ed78755c39",
   "split": "val",
   "frozen": {
-    "model": "gemma3n:latest",
-    "weights": "15cb39fd9394",
-    "endpoint": "http://localhost:11434/v1",
-    "sampling": "the model's defaults at the endpoint; seed = trial number"
+    "model": "gpt-6.2-sol",
+    "endpoint": "https://api.openai.com/v1",
+    "reasoning_effort": "low",
+    "sampling": "API defaults; reasoning_effort=low; seed = trial number"
   },
   "harnesses": [
     "000"
   ],
   "trials": 3,
   "evaluator": "harness-evals 0.6.0",
-  "started": "2026-11-16T23:09:40+00:00",
-  "finished": "2026-11-16T23:14:16+00:00"
+  "started": "2026-11-23T08:37:45+00:00",
+  "finished": "2026-11-23T08:38:11+00:00"
 }

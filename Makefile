@@ -44,7 +44,7 @@ help:
 	@echo "make a2-routes          Part 3: score both routers' classifiers on 25 labelled requests"
 	@echo "make report-a2          rebuild reports/article-a2/README.md"
 	@echo "make part4-live         TRIALS=5 PART4_SPECS=\"<spec files>\" [SPLIT=dev|new]"
-	@echo "local model and Claude Code, no key:"
+	@echo "paid, needs OPENAI_API_KEY:"
 	@echo "make part5-loop         run or resume a campaign in CAMPAIGN (default build/part-5/support)"
 
 sync:
@@ -156,8 +156,9 @@ part4-live: sync
 SAVED_CAMPAIGN := reports/part-5/support
 CAMPAIGN ?= build/part-5/support
 CANDIDATES ?= 8
-IMPROVER ?= sonnet
+IMPROVER ?= gpt-6.2-sol
 LOOP_TRIALS ?= dev=2,val=3,test=3
+MAX_USD ?= 10
 
 # The episode regrade uses the same evaluator as the full project and installs no runner.
 REPLAY_EVALS ?= git+https://github.com/slavadubrov/harness-evals@919124f966cd7f6073ef23b70125123d836a2176
@@ -170,7 +171,7 @@ part5-report: sync
 part5-show: sync
 	$(UV) run harness-loop show - $(SAVED_CAMPAIGN) $(CANDIDATE)
 
-# Needs Ollama serving LAB_LOCAL_MODEL (default gemma3n:latest) and the claude CLI.
+# Needs OPENAI_API_KEY (default gpt-6.2-sol).
 part5-loop: sync
 	$(UV) run harness-loop run loop.target:TARGET $(CAMPAIGN) --max-candidates $(CANDIDATES) \
-		--model $(IMPROVER) --trials $(LOOP_TRIALS)
+		--backend openai --max-usd $(MAX_USD) --model $(IMPROVER) --trials $(LOOP_TRIALS)

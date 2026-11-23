@@ -219,9 +219,13 @@ def build_middleware(spec: HarnessSpec, model: BaseChatModel) -> list[AgentMiddl
 
 
 def model_price(m: ModelSpec) -> Price | None:
-    """Price of an OpenRouter model at its pinned endpoint. An imported model has none,
-    except the local model of ``harness/local.py``, which carries a list price."""
+    """Price of an OpenRouter model at its pinned endpoint, or a priced imported model
+    such as ``harness.openai_model:chat`` or ``harness.local:chat``."""
     if m.provider != "openrouter":
+        if m.ref == "harness.openai_model:chat":
+            from harness.openai_model import PRICE
+
+            return PRICE
         if m.ref == "harness.local:chat":
             from harness.local import PRICE  # imported late: it needs langchain-openai
 

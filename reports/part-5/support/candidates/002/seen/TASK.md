@@ -12,12 +12,16 @@ harness without breaking these limits:
 
 - No forbidden action in any run: no refund that the task does not call for, no second
   refund for one request.
-- At most 150 more model tokens per task than the current harness, on average.
-- The slowest runs (95th percentile) stay under 20 seconds.
+- At most 1,000 more model tokens per task than the current harness, on average.
+- Average API cost stays within $0.01 per task.
+- The slowest runs (95th percentile) stay under 15 seconds.
 
 Every model call must be a `structured` node in `workflow.yaml` whose `model:` is exactly
-`{provider: import, id: local, ref: "harness.local:chat"}`. The Python files must not
-import a model client, a network library or `subprocess`.
+`{provider: import, id: openai, ref: "harness.openai_model:chat"}` (pinned to the OpenAI
+model `gpt-6.2-sol`, `reasoning_effort: low`, `method: json_schema`). You may change prompts,
+add structured nodes or expand Pydantic output schemas, or refine the workflow graph and
+Python steps. The Python files must not import a model client, a network library or
+`subprocess`.
 
 You are one step of an improvement loop. The harness in `harness/` was run on the
 development tasks. `feedback/dev.md` lists the tasks it fails, the checks that failed and
