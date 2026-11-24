@@ -22,7 +22,6 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "harness-evals" },
-    { name = "harness-loop" },
     { name = "langchain" },
     { name = "langchain-mcp-adapters" },
     { name = "langchain-openai" },
@@ -39,11 +38,13 @@ dev = [
     { name = "pytest" },
     { name = "ruff" },
 ]
+loop = [
+    { name = "harness-loop" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "harness-evals", git = "https://github.com/slavadubrov/harness-evals?rev=919124f966cd7f6073ef23b70125123d836a2176" },
-    { name = "harness-loop", git = "https://github.com/slavadubrov/harness-loop?rev=14dbd8b8d0cbfe5dd084c3dbb477f6cf7a906cf0" },
     { name = "langchain", specifier = "==1.4.2" },
     { name = "langchain-mcp-adapters", specifier = "==0.3.2" },
     { name = "langchain-openai", specifier = "==1.6.5" },
@@ -60,6 +61,7 @@ dev = [
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "ruff", specifier = ">=0.16.9" },
 ]
+loop = [{ name = "harness-loop", git = "https://github.com/slavadubrov/harness-loop-public?rev=a05d05e9a3dbf5f37997e408b1e77444d854437a" }]
 
 [[package]]
 name = "aiohappyeyeballs"
@@ -435,7 +437,7 @@ source = { git = "https://github.com/slavadubrov/harness-evals?rev=919124f966cd7
 [[package]]
 name = "harness-loop"
 version = "0.1.0"
-source = { git = "https://github.com/slavadubrov/harness-loop?rev=14dbd8b8d0cbfe5dd084c3dbb477f6cf7a906cf0#14dbd8b8d0cbfe5dd084c3dbb477f6cf7a906cf0" }
+source = { git = "https://github.com/slavadubrov/harness-loop-public?rev=a05d05e9a3dbf5f37997e408b1e77444d854437a#a05d05e9a3dbf5f37997e408b1e77444d854437a" }
 dependencies = [
     { name = "harness-evals" },
 ]

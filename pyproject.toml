@@ -17,12 +17,11 @@ dependencies = [
     # τ³-bench (package name tau2), pinned to commit b7ea907 (v1.0.1 + 46 commits).
     "tau2 @ git+https://github.com/sierra-research/tau2-bench@b7ea9074c1cba482b30687fecdb5c8425fd6f619",
     "langchain-typesafe[experimental]==0.0.1a3",
-    # The evaluator (evaluator/) and the improvement loop (loop/); pinned in [tool.uv.sources].
     "harness-evals",
-    "harness-loop",
 ]
 
 [dependency-groups]
+loop = ["harness-loop"]
 dev = [
     "pytest>=8.3.5",
     "ruff>=0.16.9",
@@ -33,7 +32,7 @@ package = false
 
 [tool.uv.sources]
 harness-evals = { git = "https://github.com/slavadubrov/harness-evals", rev = "919124f966cd7f6073ef23b70125123d836a2176" }
-harness-loop = { git = "https://github.com/slavadubrov/harness-loop", rev = "14dbd8b8d0cbfe5dd084c3dbb477f6cf7a906cf0" }
+harness-loop = { git = "https://github.com/slavadubrov/harness-loop-public", rev = "a05d05e9a3dbf5f37997e408b1e77444d854437a" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -51,7 +51,7 @@ sync:
 	$(UV) sync --frozen
 
 test: sync
-	$(UV) run pytest -q
+	$(UV) run --group loop pytest -q
 
 fmt:
 	$(UV) run ruff check --select I --fix .
@@ -166,12 +166,12 @@ part5-regrade:
 	$(UV) run --no-project --with "$(REPLAY_EVALS)" python -m loop.regrade
 
 part5-report: sync
-	$(UV) run harness-loop report loop.target:TARGET $(SAVED_CAMPAIGN)
+	$(UV) run --group loop harness-loop report loop.target:TARGET $(SAVED_CAMPAIGN)
 
 part5-show: sync
-	$(UV) run harness-loop show - $(SAVED_CAMPAIGN) $(CANDIDATE)
+	$(UV) run --group loop harness-loop show - $(SAVED_CAMPAIGN) $(CANDIDATE)
 
 # Needs OPENAI_API_KEY (default gpt-6.2-sol).
 part5-loop: sync
-	$(UV) run harness-loop run loop.target:TARGET $(CAMPAIGN) --max-candidates $(CANDIDATES) \
+	$(UV) run --group loop harness-loop run loop.target:TARGET $(CAMPAIGN) --max-candidates $(CANDIDATES) \
 		--backend openai --max-usd $(MAX_USD) --model $(IMPROVER) --trials $(LOOP_TRIALS)

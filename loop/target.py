@@ -8,8 +8,8 @@
 - The model: one pinned OpenAI model behind an HTTPS endpoint (``harness/openai_model.py``),
   held fixed for every candidate.
 
-    uv run harness-loop run loop.target:TARGET reports/part-5/support
-    uv run harness-loop report loop.target:TARGET reports/part-5/support   # offline
+    uv run --group loop harness-loop run loop.target:TARGET build/part-5/support
+    uv run --group loop harness-loop report loop.target:TARGET reports/part-5/support   # offline
 """
 
 from __future__ import annotations

@@ -17,9 +17,8 @@ Read the [Part 4 evaluation](reports/part-4/RESULTS.md) or
 [regrade the Part 5 campaign](#let-a-program-improve-a-design) with public dependencies
 and no API key.
 
-The Part 4 commands below require [uv](https://docs.astral.sh/uv/) and access to the
-private harness-loop dependency pinned in [`pyproject.toml`](pyproject.toml).
-Once dependencies are installed, they use the saved runs without model calls.
+The Part 4 commands below require [uv](https://docs.astral.sh/uv/). Once dependencies
+are installed, they use the saved runs without model calls.
 The archive contains 10 runs per design on 16 known tasks and 5 runs per design on
 32 new messages.
 
@@ -115,10 +114,12 @@ This command installs only the pinned harness-evals library. After the first ins
 `UV_OFFLINE=1 make part5-regrade` runs without network access. It prints the scores for
 development, validation and test, the noise check, the candidate decisions and the
 development tasks that still fail. The saved [report](reports/part-5/support/REPORT.md)
-and [ledger](reports/part-5/support/ledger.jsonl) can also be read directly. With access
-to the harness-loop dependency pinned in [`pyproject.toml`](pyproject.toml),
+and [ledger](reports/part-5/support/ledger.jsonl) can also be read directly.
+
 `make part5-report` rebuilds the Markdown report and figure, and
-`make part5-show CANDIDATE=001` prints the saved decision, note and diff.
+`make part5-show CANDIDATE=001` prints the saved decision, note and diff. These
+targets, `make part5-loop` and the full test suite install the runner from the
+`loop` dependency group pinned in [`pyproject.toml`](pyproject.toml).
 
 The campaign used support rubric `5-loop`. A handoff reply must state a transfer or direct
 the customer to a person or team, refunds over $200 must pause for supervisor approval,
