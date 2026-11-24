@@ -39,7 +39,7 @@ from envs.custom.tasks import SUITES, CheckResult, Task
 from envs.custom.tools import WRITE_TOOLS, AccountContext
 from harness.accounting import UsageRecorder
 from harness.agent import build_harness, spec_prices
-from harness.env import load_api_key
+from harness.env import load_api_key, load_openai_key
 from harness.runinfo import git_sha, now, packages
 from harness.spec import REPO_ROOT, HarnessSpec, WorkflowSpec, load_any
 from harness.workflow import assemble, get_engine, workflow_prices
@@ -213,7 +213,13 @@ async def run_task(target, task: Task, seed: Path, workdir: Path, prices) -> tup
 async def main_async(args) -> int:
     spec = load_any(args.spec)
     prices = workflow_prices(spec) if isinstance(spec, WorkflowSpec) else spec_prices(spec)
-    if any(p.provider_tag != "local" for p in prices):
+    raw_spec = spec.model_dump_json()
+    if (
+        any(p.provider_tag == "openai-api" for p in prices)
+        or "harness.openai_model:chat" in raw_spec
+    ):
+        load_openai_key()
+    if any(p.provider_tag not in {"local", "openai-api"} for p in prices):
         load_api_key()  # the resolved prices include hosted agents in nested workflow specs
     suite = SUITES[args.suite]
     wanted = args.tasks.split(",") if args.tasks else [t.id for t in suite]

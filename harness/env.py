@@ -1,23 +1,43 @@
-"""Load the API key for entry points (runners, the τ³ CLI shim). Not used by build_harness."""
+"""Load API keys for entry points (runners, the τ³ CLI shim). Not used by build_harness."""
 
 from __future__ import annotations
 
 import os
 
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 
 from harness.spec import REPO_ROOT
 
 
-def load_api_key() -> None:
-    """Read .env and expose the key as OPENROUTER_API_KEY (the name LangChain and litellm use).
+def _from_env(*names: str) -> str | None:
+    for name in names:
+        if val := os.environ.get(name):
+            return val
+    merged = {
+        **dotenv_values(REPO_ROOT / ".env"),
+        **dotenv_values(REPO_ROOT / ".env.local"),
+    }
+    for name in names:
+        if val := merged.get(name):
+            return val
+    return None
 
-    Accepts OPENROUTER_API_KEY or OPEN_ROUTER_API_KEY.
-    """
-    load_dotenv(REPO_ROOT / ".env", override=False)
-    key = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("OPEN_ROUTER_API_KEY")
+
+def load_api_key() -> None:
+    """Read .env / .env.local and expose the key as OPENROUTER_API_KEY (the name LangChain
+    and litellm use). Accepts OPENROUTER_API_KEY or OPEN_ROUTER_API_KEY."""
+    key = _from_env("OPENROUTER_API_KEY", "OPEN_ROUTER_API_KEY")
     if not key:
         raise SystemExit(
             "Set OPENROUTER_API_KEY (or OPEN_ROUTER_API_KEY) in the environment or .env"
         )
     os.environ["OPENROUTER_API_KEY"] = key
+
+
+def load_openai_key() -> str:
+    """Read .env / .env.local and expose OPENAI_API_KEY for direct OpenAI API runs."""
+    key = _from_env("OPENAI_API_KEY")
+    if not key:
+        raise SystemExit("Set OPENAI_API_KEY in the environment or .env")
+    os.environ["OPENAI_API_KEY"] = key
+    return key

@@ -268,14 +268,7 @@ def test_retry_tools_field_defaults_to_all():
         ToolRetrySpec(type="ToolRetryMiddleware", tool="x")
 
 
-@pytest.mark.parametrize(
-    "spec,needs_key",
-    [
-        ("harness/spec/workflows/refund-approval.yaml", True),
-        ("loop/seed/workflow.yaml", False),
-    ],
-)
-def test_runner_loads_dotenv_only_for_hosted_models(spec, needs_key, tmp_path, monkeypatch):
+def test_runner_loads_dotenv_only_for_hosted_models(tmp_path, monkeypatch):
     import os
     from types import SimpleNamespace
 
@@ -283,14 +276,33 @@ def test_runner_loads_dotenv_only_for_hosted_models(spec, needs_key, tmp_path, m
     from harness import env
     from harness.accounting import Price
 
-    (tmp_path / ".env").write_text("OPEN_ROUTER_API_KEY=test-nested-key\n")
+    local_wf = tmp_path / "local-wf.yaml"
+    local_wf.write_text(
+        Path("loop/seed/workflow.yaml")
+        .read_text()
+        .replace(
+            '{provider: import, id: openai, ref: "harness.openai_model:chat"}',
+            '{provider: import, id: local, ref: "harness.local:chat"}',
+        )
+    )
+    (tmp_path / ".env").write_text("OPEN_ROUTER_API_KEY=test-openrouter-key\n")
+    (tmp_path / ".env.local").write_text("OPENAI_API_KEY=test-openai-key\n")
     monkeypatch.setattr(env, "REPO_ROOT", tmp_path)
-    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
-    monkeypatch.delenv("OPEN_ROUTER_API_KEY", raising=False)
     monkeypatch.setattr(
         "harness.agent.fetch_price", lambda model, provider: Price(model, provider, 0, 0)
     )
 
-    with pytest.raises(SystemExit, match="unknown task"):
-        asyncio.run(run.main_async(SimpleNamespace(spec=spec, suite="a1", tasks="no-such-task")))
-    assert os.environ.get("OPENROUTER_API_KEY") == ("test-nested-key" if needs_key else None)
+    for spec, openrouter_val, openai_val in [
+        ("harness/spec/workflows/refund-approval.yaml", "test-openrouter-key", None),
+        ("loop/seed/workflow.yaml", None, "test-openai-key"),
+        (str(local_wf), None, None),
+    ]:
+        monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+        monkeypatch.delenv("OPEN_ROUTER_API_KEY", raising=False)
+        monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+        with pytest.raises(SystemExit, match="unknown task"):
+            asyncio.run(
+                run.main_async(SimpleNamespace(spec=spec, suite="a1", tasks="no-such-task"))
+            )
+        assert os.environ.get("OPENROUTER_API_KEY") == openrouter_val
+        assert os.environ.get("OPENAI_API_KEY") == openai_val

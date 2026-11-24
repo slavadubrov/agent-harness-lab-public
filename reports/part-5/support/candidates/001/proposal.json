@@ -1,0 +1,38 @@
+{
+  "id": "001",
+  "parent": "000",
+  "decision": "",
+  "reasons": [],
+  "note": "Added a read-only policy route to the existing structured call. It distinguishes questions about shop rules from requests to take action and returns policy-backed answers before account lookup, without calling any write tool or adding a model call. This should fix the policy-question failures where the harness asked for an email or order number instead of explaining refund rules, address changes, or supported languages.",
+  "files": [
+    {
+      "path": "support_steps.py",
+      "added": 73,
+      "removed": 2
+    },
+    {
+      "path": "workflow.yaml",
+      "added": 19,
+      "removed": 3
+    }
+  ],
+  "tree": "6f198bf065a8",
+  "improver": {
+    "note": "",
+    "cost_usd": 0.118257,
+    "seconds": 54.81922874998418,
+    "model": "gpt-6.2-sol",
+    "denied": [],
+    "error": null
+  },
+  "dev": null,
+  "val": null,
+  "delta": null,
+  "eval": {
+    "episodes": 0,
+    "cost_usd": 0.0,
+    "unknown_cost": 0,
+    "seconds": 0.0
+  },
+  "at": "2026-11-23T08:40:08+00:00"
+}

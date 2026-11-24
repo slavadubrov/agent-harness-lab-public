@@ -1,0 +1,38 @@
+{
+  "id": "003",
+  "parent": "000",
+  "decision": "",
+  "reasons": [],
+  "note": "The harness now resolves an order without a number only when the customer\u2019s product wording matches exactly one order on their account; otherwise it asks for the order number. This should fix the missing-order-number refund failures and lets the same lookup answer shipping and refund status questions without issuing a refund. The existing refund policy and supervisor approval flow still apply, and retries recover the original receipt instead of recalculating the refund. No model call was added, and evaluation was not run.\n",
+  "files": [
+    {
+      "path": "support_steps.py",
+      "added": 83,
+      "removed": 17
+    },
+    {
+      "path": "workflow.yaml",
+      "added": 18,
+      "removed": 2
+    }
+  ],
+  "tree": "b54559dc15c1",
+  "improver": {
+    "note": "",
+    "cost_usd": 0.173167,
+    "seconds": 90.38200924999546,
+    "model": "gpt-6.2-sol",
+    "denied": [],
+    "error": null
+  },
+  "dev": null,
+  "val": null,
+  "delta": null,
+  "eval": {
+    "episodes": 0,
+    "cost_usd": 0.0,
+    "unknown_cost": 0,
+    "seconds": 0.0
+  },
+  "at": "2026-11-23T08:44:24+00:00"
+}

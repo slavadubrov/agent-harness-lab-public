@@ -5,8 +5,8 @@
 - The tasks: the 48 tasks of Parts 2 to 4 are the development split, whose failures the
   improver reads. ``loop/tasks.py`` adds 32 validation tasks, which decide whether a
   change is kept, and 32 test tasks, scored once at the end.
-- The model: one local model behind an OpenAI-compatible endpoint (``harness/local.py``),
-  the same for every candidate.
+- The model: one pinned OpenAI model behind an HTTPS endpoint (``harness/openai_model.py``),
+  held fixed for every candidate.
 
     uv run harness-loop run loop.target:TARGET reports/part-5/support
     uv run harness-loop report loop.target:TARGET reports/part-5/support   # offline
@@ -15,13 +15,11 @@
 from __future__ import annotations
 
 import ast
-import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
-import urllib.request
 from pathlib import Path
 
 import yaml
@@ -31,13 +29,13 @@ from harness_loop import Target, scrub
 import loop  # noqa: F401 - registers the validation and test tasks with the environment
 from envs.custom.policy_mcp import POLICIES
 from evaluator.episodes import _episode, _jsonl, observe
-from harness.local import MODEL, URL
+from harness.openai_model import MODEL, REASONING_EFFORT, URL
 from loop.grading import SPLITS, usecase
 
 REPO = Path(__file__).resolve().parents[1]
 SEED = REPO / "loop" / "seed"
 # Every model call of a candidate must be a node of its workflow with exactly this block.
-MODEL_BLOCK = {"provider": "import", "id": "local", "ref": "harness.local:chat"}
+MODEL_BLOCK = {"provider": "import", "id": "openai", "ref": "harness.openai_model:chat"}
 # A candidate's own code may not reach a model, the network or another process: model
 # calls are workflow nodes, where the runner counts their tokens.
 FORBIDDEN = {
@@ -67,12 +65,16 @@ harness without breaking these limits:
 
 - No forbidden action in any run: no refund that the task does not call for, no second
   refund for one request.
-- At most 150 more model tokens per task than the current harness, on average.
-- The slowest runs (95th percentile) stay under 20 seconds.
+- At most 1,000 more model tokens per task than the current harness, on average.
+- Average API cost stays within $0.01 per task.
+- The slowest runs (95th percentile) stay under 15 seconds.
 
 Every model call must be a `structured` node in `workflow.yaml` whose `model:` is exactly
-`{provider: import, id: local, ref: "harness.local:chat"}`. The Python files must not
-import a model client, a network library or `subprocess`.
+`{provider: import, id: openai, ref: "harness.openai_model:chat"}` (pinned to the OpenAI
+model `gpt-6.2-sol`, `reasoning_effort: low`, `method: json_schema`). You may change prompts,
+add structured nodes or expand Pydantic output schemas, or refine the workflow graph and
+Python steps. The Python files must not import a model client, a network library or
+`subprocess`.
 """
 
 ABOUT = """\
@@ -84,9 +86,8 @@ One run handles one customer message on a fresh copy of the shop's database.
   `lab/harness/spec.py` defines every key a workflow file may use (`WorkflowSpec` and the
   node types), and `lab/harness/workflow.py` shows how each node type runs.
 - A `structured` node makes one model call: it fills `prompt` from the state, asks the
-  model for an object of `output_schema` (a Pydantic class) and writes its fields to the
-  state. The model is small. It sees the prompt text; do not assume it sees the field
-  descriptions of the schema.
+  model for an object of `output_schema` (a Pydantic class, `method: json_schema`) and
+  writes its fields to the state.
 - A `function` node calls `module:function(state, ctx)` and merges the returned dict into
   the state. `ctx.context` is an `AccountContext` (`lab/envs/custom/tools.py`) with the
   database path of this run.
@@ -114,7 +115,7 @@ def adapter(harness: Path):
             cmd = [sys.executable, "-m", "loop.run", "--spec", str(harness / "workflow.yaml")]
             cmd += ["--suite", "loop", "--tasks", ",".join(t.id for t in tasks)]
             cmd += ["--out", str(out / "report"), "--workdir", str(out / "db")]
-            cmd += ["--concurrency", "1"]  # the endpoint serves one request at a time
+            cmd += ["--concurrency", os.environ.get("LAB_LOOP_CONCURRENCY", "8")]
             env = os.environ | {
                 "PYTHONPATH": os.pathsep.join([str(harness), str(REPO)]),
                 "LAB_SEED": str(trial),
@@ -202,7 +203,11 @@ def _imports(source: str, where: str) -> list[str]:
             names |= {a.name for a in n.names}
         elif isinstance(n, ast.ImportFrom) and n.module:
             names.add(n.module)
-    bad = sorted(n for n in names if n.split(".")[0] in FORBIDDEN or n.startswith("harness.local"))
+    bad = sorted(
+        n
+        for n in names
+        if n.split(".")[0] in FORBIDDEN or n.startswith(("harness.local", "harness.openai_model"))
+    )
     return [f"{where} imports {', '.join(bad)}"] if bad else []
 
 
@@ -227,25 +232,15 @@ def _copy(rel: str, out: Path) -> None:
     shutil.copyfile(REPO / rel, out / "lab" / rel)
 
 
-def _digest() -> str:
-    """The id of the local model's weights, when the endpoint is Ollama."""
-    try:
-        with urllib.request.urlopen(URL.removesuffix("/v1") + "/api/tags", timeout=5) as r:
-            tags = json.load(r)["models"]
-        return next(m["digest"][:12] for m in tags if m["name"] == MODEL)
-    except (OSError, KeyError, StopIteration, ValueError):
-        return "unknown"
-
-
 TARGET = Target(
     usecase=usecase(),
     seed=SEED,
     adapter=adapter,
     frozen={
         "model": MODEL,
-        "weights": _digest(),
         "endpoint": URL,
-        "sampling": "the model's defaults at the endpoint; seed = trial number",
+        "reasoning_effort": REASONING_EFFORT,
+        "sampling": f"API defaults; reasoning_effort={REASONING_EFFORT}; seed = trial number",
     },
     brief=BRIEF,
     reference=reference(REPO / "build" / "loop-reference"),

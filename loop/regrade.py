@@ -13,17 +13,23 @@ SAVED = Path(__file__).resolve().parents[1] / "reports" / "part-5" / "support"
 def main() -> None:
     uc = usecase()
     config = json.loads((SAVED / "campaign.json").read_text())
+    rows = [json.loads(line) for line in (SAVED / "ledger.jsonl").read_text().splitlines() if line]
+    result = json.loads((SAVED / "result.json").read_text())
+    final_id = result["final"]
     groups = {}
     print(f"Support campaign {config['usecase_version']} regraded with {uc.version}.")
-    # These are the nine batches the recorded campaign actually ran. An absent file
-    # must stop the regrade instead of removing tasks from a reported result.
-    batches = [
-        (cid, split, SAVED / "candidates" / cid / split)
-        for cid in ("000", "001", "002")
-        for split in ("dev", "val")
-    ]
+
+    batches: list[tuple[str, str, Path]] = []
+    for row in rows:
+        cid = row["id"]
+        if row.get("dev") is not None or row["parent"] is None:
+            batches.append((cid, "dev", SAVED / "candidates" / cid / "dev"))
+        if row.get("val") is not None or row["parent"] is None:
+            batches.append((cid, "val", SAVED / "candidates" / cid / "val"))
     batches.append(("000", "noise", SAVED / "candidates" / "000" / "val-again"))
-    batches.extend((cid, "test", SAVED / "test" / cid) for cid in ("000", "002"))
+    test_ids = ["000"] if final_id == "000" else ["000", final_id]
+    batches.extend((cid, "test", SAVED / "test" / cid) for cid in test_ids)
+
     for cid, group, folder in batches:
         split = "val" if group == "noise" else group
         manifest = json.loads((folder / "manifest.json").read_text())
@@ -41,30 +47,50 @@ def main() -> None:
 
     summaries = {key: summarize(grades, uc.metrics) for key, grades in groups.items()}
     print(table({f"{cid} {split}": summary for (cid, split), summary in summaries.items()}))
-    for label, base, candidate in [
-        ("Same starting harness", ("000", "val"), ("000", "noise")),
-        ("First proposal against its recorded parent", ("000", "val"), ("001", "val")),
-        ("Second proposal against its recorded parent", ("000", "val"), ("002", "val")),
-        ("Test", ("000", "test"), ("002", "test")),
-    ]:
-        if candidate[1] == "val" and config["screen"]:
-            before = summaries[base[0], "dev"]["success"]
-            after = summaries[candidate[0], "dev"]["success"]
+
+    noise = compare(
+        uc, groups["000", "val"], groups["000", "noise"], step=True, level=config["level"]
+    )
+    print(f"\nSame starting harness\n{comparison(noise)}")
+
+    for row in rows[1:]:
+        cid, parent = row["id"], row["parent"]
+        label = f"Candidate {int(cid)} against parent {parent}"
+        if row["decision"] in ("invalid", "error"):
+            print(f"\n{label}\nRecorded {row['decision']}: {'; '.join(row['reasons'])}")
+            continue
+        if (cid, "val") not in groups:
+            before = summaries[parent, "dev"]["success"]
+            after = summaries[cid, "dev"]["success"]
+            print(f"\n{label}\nScreened on development ({before:.3f} to {after:.3f}).")
+            continue
+        if config["screen"]:
+            before = summaries[parent, "dev"]["success"]
+            after = summaries[cid, "dev"]["success"]
             if after <= before:
                 print(f"\n{label}\nScreened on development ({before:.3f} to {after:.3f}).")
                 continue
-        decision = compare(uc, groups[base], groups[candidate], step=True, level=config["level"])
+        decision = compare(
+            uc, groups[parent, "val"], groups[cid, "val"], step=True, level=config["level"]
+        )
         print(f"\n{label}\n{comparison(decision)}")
-    print("\nTest runs passed by request type (start, final)")
+
+    if final_id != "000":
+        test_decision = compare(
+            uc, groups["000", "test"], groups[final_id, "test"], step=True, level=config["level"]
+        )
+        print(f"\nTest\n{comparison(test_decision)}")
+
+    print(f"\nTest runs passed by request type (start, {final_id})")
     for tag in sorted({t.tags[0] for t in uc.split("test")}):
         ids = {t.id for t in uc.split("test") if t.tags[0] == tag}
         counts = []
-        for cid in ("000", "002"):
+        for cid in test_ids:
             selected = [g for g in groups[cid, "test"] if g.episode.task_id in ids]
             counts.append(f"{sum(g.passed for g in selected)}/{len(selected)}")
         print(f"{tag}: {', '.join(counts)}")
-    print("\nDevelopment tasks still failing in the recorded final harness:")
-    print("\n".join(sorted(failures(groups["002", "dev"]))))
+    print(f"\nDevelopment tasks still failing in the recorded final harness ({final_id}):")
+    print("\n".join(sorted(failures(groups[final_id, "dev"]))) or "(none)")
 
 
 if __name__ == "__main__":
