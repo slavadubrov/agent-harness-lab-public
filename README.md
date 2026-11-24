@@ -11,11 +11,17 @@ The assistant issues refunds, changes addresses and updates account settings. Re
 above $200 need a supervisor's decision. The evaluator is built on the
 [harness-evals](https://github.com/slavadubrov/harness-evals) library.
 
-## Try it in ten minutes, with no API key
+## Read and replay the saved runs
 
-You need [uv](https://docs.astral.sh/uv/). Every command below works offline on the runs
-saved in this repository: 10 runs of each design on 16 known tasks, and 5 runs on 32 new
-messages no design was written for.
+Read the [Part 4 evaluation](reports/part-4/RESULTS.md) or
+[regrade the Part 5 campaign](#let-a-program-improve-a-design) with public dependencies
+and no API key.
+
+The Part 4 commands below require [uv](https://docs.astral.sh/uv/) and access to the
+private harness-loop dependency pinned in [`pyproject.toml`](pyproject.toml).
+Once dependencies are installed, they use the saved runs without model calls.
+The archive contains 10 runs per design on 16 known tasks and 5 runs per design on
+32 new messages.
 
 ```bash
 git clone https://github.com/slavadubrov/agent-harness-lab-public
@@ -27,8 +33,7 @@ make part4-compare BASE=3 CANDIDATE=5 SPLIT=new       # would design 5 replace d
 make mine                                             # score the function in examples/your_harness.py
 ```
 
-The first command installs the dependencies and takes about half a minute; the others
-take a second or two. `make help` lists every target.
+`make help` lists every target.
 
 ## What you get
 
@@ -94,12 +99,13 @@ database before and after the run and grades the refunds it finds there
 ## Let a program improve a design
 
 Part 5, *Closing the loop*, runs an improvement loop on design 5, the workflow with no
-agent. A coding agent edits a copy of the harness in [`loop/seed/`](loop/seed/), the
-evaluator scores each candidate on tasks the agent cannot see, and a rule keeps the
-change or drops it. The loop is the [harness-loop](https://github.com/slavadubrov/harness-loop)
-library. [`loop/target.py`](loop/target.py) connects this assistant to the runner.
+agent. A coding agent edits a copy of the workflow after reading its development failures.
+The evaluator uses a separate validation set to decide whether to keep each change.
+The final workflow is scored on held-out test tasks.
 
-The saved campaign ran on OpenAI `gpt-6.2-sol` ($0.49 improver, $1.53 evaluation across 960 runs). Regrade all 960 recorded runs with uv and Python 3.12 from this checkout:
+The saved campaign used OpenAI `gpt-6.2-sol` and kept none of its three candidates.
+The improver cost $0.49 and evaluation cost $1.53. Regrade all 960 saved runs with uv
+and Python 3.12, without an API key:
 
 ```bash
 make part5-regrade
@@ -108,14 +114,17 @@ make part5-regrade
 This command installs only the pinned harness-evals library. After the first install,
 `UV_OFFLINE=1 make part5-regrade` runs without network access. It prints the scores for
 development, validation and test, the noise check, the candidate decisions and the
-development tasks that still fail. With access to harness-loop, `make part5-report`
-also rebuilds the Markdown report and figure, and `make part5-show CANDIDATE=001`
-prints the saved decision, note and diff.
+development tasks that still fail. The saved [report](reports/part-5/support/REPORT.md)
+and [ledger](reports/part-5/support/ledger.jsonl) can also be read directly. With access
+to the harness-loop dependency pinned in [`pyproject.toml`](pyproject.toml),
+`make part5-report` rebuilds the Markdown report and figure, and
+`make part5-show CANDIDATE=001` prints the saved decision, note and diff.
 
 The campaign used support rubric `5-loop`. A handoff reply must state a transfer or direct
 the customer to a person or team, refunds over $200 must pause for supervisor approval,
 and an account language lookup must identify the stored language rather than list choices.
-[`loop/grading.py`](loop/grading.py) also caps tokens per task at `1,000`.
+[`loop/grading.py`](loop/grading.py) checks that the paired interval for the increase
+in average tokens per task stays within the 1,000-token guardrail.
 
 | Harness | Development, 48 tasks | Validation, 32 tasks | Test, 32 tasks |
 | --- | --- | --- | --- |
@@ -124,15 +133,24 @@ and an account language lookup must identify the stored language rather than lis
 | Candidate 2, inconclusive | 0.65 | 0.59 (0.44–0.75) | not run |
 | Candidate 3, inconclusive | 0.69 | 0.59 (0.44–0.78) | not run |
 
-All three candidates lifted development accuracy cleanly and proposed targeted fixes without
-adding model calls, yet all three missed adoption on validation (`+0.18`, `+0.12`, `+0.12`)
-and the campaign stopped after three non-adopted candidates in a row. With only 6 validation
-tasks per failure category (`policy` and `two_requests`), even fixing every task in a single
-category yields `4/4` or `6/7` (`sign test p = 0.125 > 0.05`). Test `pass^k` on the starting
-harness stayed at `0.44`, with `0/18` runs passing on both `policy` and `two_requests`.
-[REPORT.md](reports/part-5/support/REPORT.md) and the [ledger](reports/part-5/support/ledger.jsonl)
-record the `5-loop` decisions, noise check, and spend across 768 candidate runs, 96 noise
-runs, and 96 test runs.
+Each candidate improved both development and validation success. The adoption rule
+compares task pass rates across the three validation runs per task.
+
+| Candidate | Tasks better / worse | Why the workflow stayed unchanged |
+| --- | --- | --- |
+| [1. Answer policy questions](reports/part-5/support/candidates/001/patch.diff) | 6 / 1 | Fixed all six policy tasks. One of three runs on a name-change request refused it instead of referring it to a person. The sign test gave p = 0.125. |
+| [2. Handle several requests](reports/part-5/support/candidates/002/patch.diff) | 6 / 2 | Fixed all six multi-request tasks. The name-change and password-reset requests were classified as unsupported settings. The interval for the gain crossed zero. |
+| [3. Find an order by product name](reports/part-5/support/candidates/003/patch.diff) | 4 / 0 | Improved three vague requests and one delivery question. The sign test gave p = 0.125. |
+
+At the 95% setting, six better and zero worse would clear the sign test (p = 0.03125).
+The paired gain and guardrails still have to pass. A focused fix can improve only the
+tasks where the current workflow has room to improve. For the vague-request category,
+only three of six validation tasks had any failing runs at the start.
+
+The campaign stopped after three inconclusive candidates. The starting workflow
+remained in place and passed 44% of held-out runs. Its test `pass^k` was also 0.44
+with three runs per task. Both the policy and multi-request test categories passed
+0 of their 18 runs.
 
 - **The tasks.** The 48 tasks of Parts 2 to 4 are the development set, whose failures the
   improver reads. [`loop/tasks.py`](loop/tasks.py) adds 32 validation tasks, which decide
@@ -199,6 +217,8 @@ does not call the judge, whose saved verdicts cover the saved runs only.
 - The Part 5 campaign is one run of the loop with `gpt-6.2-sol`. Its 64
   validation and test tasks were written by a model and checked against the database by
   [`tests/test_loop_tasks.py`](tests/test_loop_tasks.py); no person has reviewed them.
+  Earlier campaigns informed changes to the checks and token guardrail. All three
+  saved candidates would have exceeded the earlier 150-token limit.
 - The improver cannot read outside its working directory while it proposes, but a
   candidate's code runs with the evaluator's permissions. Do not run candidates from an
   improver you do not trust outside a sandbox.
