@@ -1,0 +1,38 @@
+{
+  "id": "001",
+  "parent": "000",
+  "decision": "",
+  "reasons": [],
+  "note": "Added a read-only policy route to the existing structured model call. General policy questions now select answers grounded in the shop\u2019s rules and finish without an account lookup or any writes, even if the customer includes an email. This should fix the policy failures where the harness asked for an email or order number instead of answering questions about refund eligibility, cancellations, approval limits, partial refunds, account languages, or address changes after shipping. The model and existing transaction paths are unchanged.\n",
+  "files": [
+    {
+      "path": "support_steps.py",
+      "added": 40,
+      "removed": 1
+    },
+    {
+      "path": "workflow.yaml",
+      "added": 12,
+      "removed": 2
+    }
+  ],
+  "tree": "1f6cb7dc7fd8",
+  "improver": {
+    "note": "",
+    "cost_usd": 0.122016,
+    "seconds": 61.17044483299833,
+    "model": "gpt-6.2-sol",
+    "denied": [],
+    "error": null
+  },
+  "dev": null,
+  "val": null,
+  "delta": null,
+  "eval": {
+    "episodes": 0,
+    "cost_usd": 0.0,
+    "unknown_cost": 0,
+    "seconds": 0.0
+  },
+  "at": "2026-11-25T21:53:17+00:00"
+}

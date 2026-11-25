@@ -1,0 +1,19 @@
+{
+  "usecase": "support-desk",
+  "usecase_version": "5-loop",
+  "fingerprint": "dd5086b892f61947",
+  "split": "dev",
+  "frozen": {
+    "model": "gpt-6.2-sol",
+    "endpoint": "https://api.openai.com/v1",
+    "reasoning_effort": "low",
+    "sampling": "API defaults; reasoning_effort=low; seed = trial number"
+  },
+  "harnesses": [
+    "000"
+  ],
+  "trials": 2,
+  "evaluator": "harness-evals 0.8.0",
+  "started": "2026-11-25T21:52:02+00:00",
+  "finished": "2026-11-25T21:52:26+00:00"
+}

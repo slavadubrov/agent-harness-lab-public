@@ -106,10 +106,16 @@ Part 5 has two campaign folders:
 
 - [`reports/part-5/support-sign-test/`](reports/part-5/support-sign-test/) holds the saved
   campaign. Its adoption rule used a sign test.
-- `reports/part-5/support/` is for a campaign under the current rule, which uses the
-  Wilcoxon signed-rank test. It is empty until that campaign runs.
+- [`reports/part-5/support/`](reports/part-5/support/) holds the campaign under the current
+  rule, which uses the Wilcoxon signed-rank test. It used OpenAI `gpt-6.2-sol`, tried six
+  candidates and kept two: answers to policy questions (7 validation tasks better, 0 worse)
+  and handling of several requests in one message (6 better, 0 worse). On the 32 test
+  tasks, success rose from 0.44 to 0.81 (+0.375, interval +0.219 to +0.531; 12 tasks
+  better, 0 worse). The final harness still misses the release bar: `pass^3` is 0.81 and
+  the bar is 0.90. The improver cost $0.72 and evaluation cost $3.06. Regrade it with
+  `make part5-regrade`.
 
-The saved campaign used OpenAI `gpt-6.2-sol` and kept none of its three candidates.
+The sign-test campaign used OpenAI `gpt-6.2-sol` and kept none of its three candidates.
 The improver cost $0.49 and evaluation cost $1.53. Regrade all 960 saved runs with uv
 and Python 3.12, without an API key:
 

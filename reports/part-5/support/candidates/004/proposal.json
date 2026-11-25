@@ -1,0 +1,38 @@
+{
+  "id": "004",
+  "parent": "003",
+  "decision": "",
+  "reasons": [],
+  "note": "Added read-only delivery and refund-status inquiries to the existing structured model call. The harness checks only the identified account\u2019s orders, using an order number supplied in the message or a product phrase that matches exactly one order. It asks for the order number when the match is unclear, and reports shipment status or the amount already refunded without issuing a refund. This targets the two status questions previously handed off, without adding a model call or changing refund execution.\n",
+  "files": [
+    {
+      "path": "support_steps.py",
+      "added": 60,
+      "removed": 2
+    },
+    {
+      "path": "workflow.yaml",
+      "added": 10,
+      "removed": 3
+    }
+  ],
+  "tree": "67d46d0bb2b9",
+  "improver": {
+    "note": "",
+    "cost_usd": 0.124586,
+    "seconds": 78.01956770800462,
+    "model": "gpt-6.2-sol",
+    "denied": [],
+    "error": null
+  },
+  "dev": null,
+  "val": null,
+  "delta": null,
+  "eval": {
+    "episodes": 0,
+    "cost_usd": 0.0,
+    "unknown_cost": 0,
+    "seconds": 0.0
+  },
+  "at": "2026-11-25T21:59:42+00:00"
+}
