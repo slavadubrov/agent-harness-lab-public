@@ -1,0 +1,38 @@
+{
+  "id": "002",
+  "parent": "001",
+  "decision": "",
+  "reasons": [],
+  "note": "Refund requests that name a specific product but omit the order number now use the existing model call to extract the product phrase. The harness checks that the phrase appears in the message and matches exactly one order on the identified account; otherwise it still asks for the order number. The existing refund checks then decide whether to issue the refund, report that it was already issued, or explain that the order is outside the refund window or has not yet been delivered. This targets the five vague-refund failures without adding a model call.\n",
+  "files": [
+    {
+      "path": "support_steps.py",
+      "added": 35,
+      "removed": 1
+    },
+    {
+      "path": "workflow.yaml",
+      "added": 5,
+      "removed": 1
+    }
+  ],
+  "tree": "0ccd97d3fa66",
+  "improver": {
+    "note": "",
+    "cost_usd": 0.093684,
+    "seconds": 45.9623940829988,
+    "model": "gpt-6.2-sol",
+    "denied": [],
+    "error": null
+  },
+  "dev": null,
+  "val": null,
+  "delta": null,
+  "eval": {
+    "episodes": 0,
+    "cost_usd": 0.0,
+    "unknown_cost": 0,
+    "seconds": 0.0
+  },
+  "at": "2026-11-25T21:55:09+00:00"
+}

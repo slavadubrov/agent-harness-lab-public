@@ -1,0 +1,38 @@
+{
+  "id": "003",
+  "parent": "001",
+  "decision": "",
+  "reasons": [],
+  "note": "The harness now uses its existing structured model call to extract independent requests and reports the outcome of each, rather than dropping everything except the primary intent. This targets the mixed refund, address, and preference failures, including requests with separate refunds for multiple orders and cases where one action is allowed but another is refused. Refund handling checks explicit order IDs against the message, prevents repeat issuance on retries, and preserves the supervisor approval workflow without adding a model call.\n",
+  "files": [
+    {
+      "path": "support_steps.py",
+      "added": 117,
+      "removed": 51
+    },
+    {
+      "path": "workflow.yaml",
+      "added": 22,
+      "removed": 12
+    }
+  ],
+  "tree": "45b8a7cc2f1b",
+  "improver": {
+    "note": "",
+    "cost_usd": 0.186609,
+    "seconds": 116.47907079199649,
+    "model": "gpt-6.2-sol",
+    "denied": [],
+    "error": null
+  },
+  "dev": null,
+  "val": null,
+  "delta": null,
+  "eval": {
+    "episodes": 0,
+    "cost_usd": 0.0,
+    "unknown_cost": 0,
+    "seconds": 0.0
+  },
+  "at": "2026-11-25T21:56:50+00:00"
+}

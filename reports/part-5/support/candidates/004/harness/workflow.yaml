@@ -1,0 +1,81 @@
+# The support assistant with no agent. One model call reads the message into typed
+# fields; code does the rest: regular expressions, the policy rules, the writes and a
+# template reply. A refund above $200 goes to the environment's approval steps.
+# Functions of this harness: support_steps.py, next to this file.
+kind: workflow
+name: support
+description: One structured model call, then code for the checks, the writes and the reply.
+engine: {name: langgraph}
+state_schema: support_steps:CodeCase
+context_schema: envs.custom.tools:AccountContext
+
+nodes:
+  read:
+    type: structured
+    # The frozen model. Every model call of this harness must use exactly this block.
+    model: {provider: import, id: openai, ref: "harness.openai_model:chat"}
+    method: json_schema
+    output_schema: support_steps:Request
+    prompt: |
+      Extract all independent requests in the customer message below. Fill only the
+      categories actually requested; don't treat a mention, example, negation, or
+      hypothetical as a request to make a change.
+
+      For refunds, include one entry per order the customer explicitly asks to refund,
+      even when phrased as a question. Copy the order ID tied to each refund exactly;
+      leave it null if missing or ambiguous. Bind each stated amount only to its own
+      refund, in cents. If the customer asks for a partial or specific amount that
+      cannot be determined, set amount_unclear. Use a null amount with amount_unclear
+      false for an ordinary whole-order refund with no stated amount. Don't create
+      another entry for a repeated request about the same order.
+
+      Use order_inquiries for read-only questions about a specific order's delivery
+      status (kind delivery) or an existing refund's status or amount (kind refund).
+      Copy the associated order ID if supplied; otherwise copy a specific product
+      name verbatim from the question, not a generic reference such as 'my order'.
+      Leave both null if the reference is missing or ambiguous. A status inquiry is
+      never a request to issue a refund, even if the customer says it hasn't arrived.
+      Populate refunds only for a separate request to actually issue one.
+
+      Extract each requested address change with only the supplied components, and
+      all requested preference changes. Select policy topics for questions about
+      general rules or hypothetical eligibility, even if an email is present. Flag
+      handoff for requests outside these capabilities, without inventing a change.
+
+      Customer message:
+      {request}
+    writes: {refunds: refunds, order_inquiries: order_inquiries, addresses: addresses, settings: settings, policy_topics: policy_topics, handoff: handoff}
+  handle:
+    type: function
+    ref: support_steps:handle
+    # Safe to retry: the refund service deduplicates by operation key.
+    retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
+  find_held:
+    type: function
+    ref: envs.custom.approval:find_held
+  approval:
+    type: function
+    ref: envs.custom.approval:wait_for_supervisor
+  issue:
+    type: function
+    ref: envs.custom.approval:issue_approved
+    retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
+  reply:
+    type: function
+    ref: support_steps:approval_reply
+
+edges:
+  - [START, read]
+  - [read, handle]
+  - [approval, issue]
+  - [issue, reply]
+  - [reply, END]
+conditional_edges:
+  - source: handle
+    field: next_step
+    routes: {check_approval: find_held}
+    default: END
+  - source: find_held
+    field: next_step
+    routes: {approval: approval}
+    default: END

@@ -1,0 +1,54 @@
+# The support assistant with no agent. One model call reads the message into typed
+# fields; code does the rest: regular expressions, the policy rules, the writes and a
+# template reply. A refund above $200 goes to the environment's approval steps.
+# Functions of this harness: support_steps.py, next to this file.
+kind: workflow
+name: support
+description: One structured model call, then code for the checks, the writes and the reply.
+engine: {name: langgraph}
+state_schema: support_steps:CodeCase
+context_schema: envs.custom.tools:AccountContext
+
+nodes:
+  read:
+    type: structured
+    # The frozen model. Every model call of this harness must use exactly this block.
+    model: {provider: import, id: openai, ref: "harness.openai_model:chat"}
+    method: json_schema
+    output_schema: support_steps:Request
+    prompt: |
+      Read this message to an online shop's customer support and fill in the fields.
+
+      {request}
+    writes: {kind: kind, amount_cents: amount_cents, address: address, settings: settings}
+  handle:
+    type: function
+    ref: support_steps:handle
+    # Safe to retry: the refund service deduplicates by operation key.
+    retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
+  find_held:
+    type: function
+    ref: envs.custom.approval:find_held
+  approval:
+    type: function
+    ref: envs.custom.approval:wait_for_supervisor
+  issue:
+    type: function
+    ref: envs.custom.approval:issue_approved
+    retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
+  reply:
+    type: function
+    ref: envs.custom.approval:reply
+
+edges:
+  - [START, read]
+  - [read, handle]
+  - [handle, find_held]
+  - [approval, issue]
+  - [issue, reply]
+  - [reply, END]
+conditional_edges:
+  - source: find_held
+    field: next_step
+    routes: {approval: approval}
+    default: END
