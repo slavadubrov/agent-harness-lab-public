@@ -100,13 +100,23 @@ def test_malformed_yaml_is_reported_as_invalid(candidate):
 
 
 def test_regrade_of_all_saved_runs_reports_the_observed_results(capsys):
-    from loop.regrade import main
+    from loop.regrade import REPORTS, main
 
-    main()
+    main(REPORTS / "support-sign-test")
     output = capsys.readouterr().out
     assert "5-loop regraded with 5-loop" in output
     assert "Better on 6 tasks, worse on 1 task" in output
     assert "Better on 4 tasks, worse on 0 tasks" in output
+    # The campaign was decided with the sign test; the Wilcoxon rule adopts candidate 1.
+    assert (
+        "Recorded: inconclusive. Current rule: adopt. 6 better, 1 worse;"
+        " sign test p = 0.125, Wilcoxon p = 0.031." in output
+    )
+    assert "6 better, 2 worse; sign test p = 0.289, Wilcoxon p = 0.289." in output
+    assert (
+        "Recorded: inconclusive. Current rule: inconclusive. 4 better, 0 worse;"
+        " sign test p = 0.125, Wilcoxon p = 0.125." in output
+    )
     assert "policy: 0/18" in output
     assert "two-address-allowed-refund-refused" in output
 
@@ -120,6 +130,6 @@ def test_regrade_skips_validation_decisions_on_a_development_tie(capsys, monkeyp
     monkeypatch.setattr(
         regrade, "usecase", lambda: replace(uc, tasks=[replace(t, checks=()) for t in uc.tasks])
     )
-    regrade.main()
+    regrade.main(regrade.REPORTS / "support-sign-test")
     output = capsys.readouterr().out
     assert output.count("Screened on development") == 3
