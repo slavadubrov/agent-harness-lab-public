@@ -19,7 +19,7 @@ TAU3_CONCURRENCY ?= 4
 CUSTOM_SPECS := harness/spec/base.yaml harness/spec/plain.yaml harness/spec/glm-5.3-flash.yaml harness/spec/mimo-v2.6-flash.yaml
 A2_SPECS := harness/spec/plain.yaml harness/spec/approval-agent.yaml harness/spec/workflows/refund-approval.yaml harness/spec/workflows/support-router.yaml harness/spec/workflows/support-code.yaml
 
-.PHONY: help sync test fmt lint mine show failures a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 part4-regrade part4-agreement part4-compare part4-live part5-report part5-regrade part5-show part5-loop
+.PHONY: help sync test fmt lint mine show failures a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 part4-regrade part4-agreement part4-compare part4-live part5-report part5-regrade part5-show part5-loop part5-campaign
 
 help:
 	@echo "offline, no key:"
@@ -29,9 +29,11 @@ help:
 	@echo "make part4-compare      BASE=3 CANDIDATE=5 (design numbers) [SPLIT=dev|new] [LEVEL=state|obligations|judge]"
 	@echo "make part4-agreement    the judge and the held-reply check against labels"
 	@echo "make mine               score the function in examples/your_harness.py on the 16 known tasks"
-	@echo "make part5-regrade      regrade the saved support campaign using only public dependencies"
-	@echo "make part5-report       grade the saved Part 5 campaign again, write its REPORT.md and trajectory.svg"
-	@echo "make part5-show [CANDIDATE=003]   the campaign's ledger, or one candidate with its note and diff"
+	@echo "make part5-regrade [CAMPAIGN=...]   regrade a Part 5 campaign using only public dependencies"
+	@echo "make part5-report [CAMPAIGN=...]    grade a Part 5 campaign again, write its REPORT.md and trajectory.svg"
+	@echo "make part5-show [CAMPAIGN=...] [CANDIDATE=003]   a campaign's ledger, or one candidate with its note and diff"
+	@echo "                        CAMPAIGN defaults to reports/part-5/support; the saved sign-test campaign is"
+	@echo "                        CAMPAIGN=reports/part-5/support-sign-test"
 	@echo "make test | fmt | lint"
 	@echo "paid, needs a key:"
 	@echo "make a1-custom          Part 2: run the 12 support tasks with SPEC (default base.yaml)"
@@ -45,7 +47,7 @@ help:
 	@echo "make report-a2          rebuild reports/article-a2/README.md"
 	@echo "make part4-live         TRIALS=5 PART4_SPECS=\"<spec files>\" [SPLIT=dev|new]"
 	@echo "paid, needs OPENAI_API_KEY:"
-	@echo "make part5-loop         run or resume a campaign in CAMPAIGN (default build/part-5/support)"
+	@echo "make part5-loop         run or resume a campaign in CAMPAIGN (default reports/part-5/support)"
 
 sync:
 	$(UV) sync --frozen
@@ -151,25 +153,28 @@ part4-live: sync
 	$(UV) run python -m evaluator live --trials $(TRIALS) --split $(SPLIT) $(PART4_SPECS)
 
 
-# Part 5: the improvement loop on the workflow with no agent. The saved campaign is in
-# reports/part-5/support; a new one goes to build/ unless CAMPAIGN says otherwise.
-SAVED_CAMPAIGN := reports/part-5/support
-CAMPAIGN ?= build/part-5/support
+# Part 5: the improvement loop on the workflow with no agent. The campaign decided with
+# the sign test is in reports/part-5/support-sign-test. A campaign under the current rule
+# (the Wilcoxon signed-rank test) goes to reports/part-5/support unless CAMPAIGN says otherwise.
+CAMPAIGN ?= reports/part-5/support
 CANDIDATES ?= 8
 IMPROVER ?= gpt-6.2-sol
 LOOP_TRIALS ?= dev=2,val=3,test=3
 MAX_USD ?= 10
 
 # The episode regrade uses the same evaluator as the full project and installs no runner.
-REPLAY_EVALS ?= git+https://github.com/slavadubrov/harness-evals@919124f966cd7f6073ef23b70125123d836a2176
-part5-regrade:
-	$(UV) run --no-project --with "$(REPLAY_EVALS)" python -m loop.regrade
+REPLAY_EVALS ?= git+https://github.com/slavadubrov/harness-evals@d391e288d087671f94b09793d21dc5401e8b6296
+part5-regrade: part5-campaign
+	$(UV) run --no-project --with "$(REPLAY_EVALS)" python -m loop.regrade '$(CAMPAIGN)'
 
-part5-report: sync
-	$(UV) run --group loop harness-loop report loop.target:TARGET $(SAVED_CAMPAIGN)
+part5-report: part5-campaign sync
+	$(UV) run --group loop harness-loop report loop.target:TARGET '$(CAMPAIGN)'
 
-part5-show: sync
-	$(UV) run --group loop harness-loop show - $(SAVED_CAMPAIGN) $(CANDIDATE)
+part5-show: part5-campaign sync
+	$(UV) run --group loop harness-loop show - '$(CAMPAIGN)' $(CANDIDATE)
+
+part5-campaign:
+	@test -f '$(CAMPAIGN)/campaign.json' || { echo "No campaign in $(CAMPAIGN). For the saved sign-test campaign, add CAMPAIGN=reports/part-5/support-sign-test"; exit 1; }
 
 # Needs OPENAI_API_KEY (default gpt-6.2-sol).
 part5-loop: sync

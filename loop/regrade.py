@@ -1,17 +1,37 @@
-"""Replay the archived support campaign using only the public evaluation library."""
+"""Replay a saved support campaign using only the public evaluation library.
+
+    python -m loop.regrade [reports/part-5/support-sign-test]
+
+The folder defaults to reports/part-5/support. For each candidate that reached validation
+it prints the recorded decision next to the decision under the current rule, with the
+sign-test and Wilcoxon p-values, because the saved campaign was decided with the sign test.
+"""
 
 import json
+import sys
 from pathlib import Path
 
-from harness_evals import comparable, compare, comparison, failures, load, summarize, table
+from harness_evals import (
+    comparable,
+    compare,
+    comparison,
+    failures,
+    load,
+    sign_test,
+    summarize,
+    table,
+    wilcoxon_test,
+)
+from harness_evals.metrics import task_rates
 
 from loop.grading import usecase
 
-SAVED = Path(__file__).resolve().parents[1] / "reports" / "part-5" / "support"
+REPORTS = Path(__file__).resolve().parents[1] / "reports" / "part-5"
 
 
-def main() -> None:
+def main(saved: Path = REPORTS / "support") -> None:
     uc = usecase()
+    SAVED = Path(saved)
     config = json.loads((SAVED / "campaign.json").read_text())
     rows = [json.loads(line) for line in (SAVED / "ledger.jsonl").read_text().splitlines() if line]
     result = json.loads((SAVED / "result.json").read_text())
@@ -74,6 +94,14 @@ def main() -> None:
             uc, groups[parent, "val"], groups[cid, "val"], step=True, level=config["level"]
         )
         print(f"\n{label}\n{comparison(decision)}")
+        rb, rc = task_rates(groups[parent, "val"]), task_rates(groups[cid, "val"])
+        diffs = [rc[t] - rb[t] for t in rb]
+        better, worse = len(decision.better), len(decision.worse)
+        print(
+            f"Recorded: {row['decision']}. Current rule: {decision.decision}."
+            f" {better} better, {worse} worse; sign test p = {sign_test(better, worse):.3f},"
+            f" Wilcoxon p = {wilcoxon_test(diffs):.3f}."
+        )
 
     if final_id != "000":
         test_decision = compare(
@@ -94,4 +122,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main(*sys.argv[1:2])
