@@ -110,11 +110,11 @@ def test_regrade_of_all_saved_runs_reports_the_observed_results(capsys):
     # Candidates 1 to 3 were adopted; 4 and 6 stay within run noise; 5 broke a task.
     assert (
         "Recorded: adopt. Current rule: adopt. 3 better, 1 worse; largest task loss"
-        " 0.33, broken tasks 0; permutation p = 0.00363;" in output
+        " 0.33, broken tasks 0; permutation p = 0.00181;" in output
     )
     assert (
         "Recorded: inconclusive. Current rule: inconclusive. 2 better, 1 worse; largest task"
-        " loss 0.67, broken tasks 0; permutation p = 0.63;" in output
+        " loss 0.67, broken tasks 0; permutation p = 0.315;" in output
     )
     assert (
         "Recorded: reject. Current rule: reject. 1 better, 5 worse; largest task loss"
