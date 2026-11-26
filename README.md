@@ -111,8 +111,12 @@ Part 5 has three campaign folders:
   test over tasks. It tried six candidates and kept two. On the 32 test tasks, success
   rose from 0.44 to 0.81 (+0.375, interval +0.219 to +0.531; 12 tasks better, 0 worse).
   The improver cost $0.72 and evaluation cost $3.06.
-- `reports/part-5/support/`: the place for a campaign under the current step rule: no
-  task may break, and the gain must be larger than the difference between repeated runs.
+- [`reports/part-5/support/`](reports/part-5/support/): the campaign under the current step
+  rule. It used OpenAI `gpt-6.2-sol`, tried six candidates and kept three: answers to
+  policy questions, finding an order by the product name, and several requests in one
+  message. On the 32 test tasks, success rose from 0.44 to 0.90 (+0.458, interval +0.292
+  to +0.625; 15 tasks better, 0 worse). `pass^3` is 0.875 and the release bar is 0.90.
+  The improver cost $0.88 and evaluation cost $3.13. `make part5-regrade` regrades it.
 
 The sign-test campaign used OpenAI `gpt-6.2-sol` and kept none of its three candidates.
 The improver cost $0.49 and evaluation cost $1.53. Regrade all 960 saved runs with uv

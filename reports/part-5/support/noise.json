@@ -1,0 +1,30 @@
+{
+  "decision": "inconclusive",
+  "reasons": [
+    "success difference +0.000 to +0.000 does not establish a benefit; keep the base"
+  ],
+  "delta": {
+    "success": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "cost_per_task": [
+      1.041666666666552e-06,
+      -1.5729166666666712e-05,
+      1.9583333333333258e-05
+    ],
+    "latency_p95": [
+      0.07200000000000006,
+      -0.08999999999999986,
+      0.5449999999999999
+    ],
+    "tokens_per_task": [
+      0.10416666666668561,
+      -1.5729166666666856,
+      1.9583333333333712
+    ]
+  },
+  "episodes": 96,
+  "seconds": 26.5
+}

@@ -1,0 +1,38 @@
+{
+  "id": "004",
+  "parent": "003",
+  "decision": "",
+  "reasons": [],
+  "note": "The existing model call now separates order and refund status questions from requests to issue a refund. Status replies use only records on the identified account and ask for an order number when the target is unclear. The shared target prompt also extracts just the product name, so refund requests without an order number can reach the existing eligibility checks instead of failing on surrounding wording. This should fix the shipment-status, prior-refund-amount, and vague late-refund failures without adding a model call or changing refund eligibility or approval rules. I reviewed the workflow wiring but did not run it.\n",
+  "files": [
+    {
+      "path": "support_steps.py",
+      "added": 77,
+      "removed": 25
+    },
+    {
+      "path": "workflow.yaml",
+      "added": 15,
+      "removed": 10
+    }
+  ],
+  "tree": "0f9eca592f3a",
+  "improver": {
+    "note": "",
+    "cost_usd": 0.176285,
+    "seconds": 144.03242712499923,
+    "model": "gpt-6.2-sol",
+    "denied": [],
+    "error": null
+  },
+  "dev": null,
+  "val": null,
+  "delta": null,
+  "eval": {
+    "episodes": 0,
+    "cost_usd": 0.0,
+    "unknown_cost": 0,
+    "seconds": 0.0
+  },
+  "at": "2026-11-26T15:47:18+00:00"
+}

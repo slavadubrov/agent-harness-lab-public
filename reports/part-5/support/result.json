@@ -1,0 +1,97 @@
+{
+  "stopped": "3 candidates in a row were not adopted",
+  "final": "003",
+  "test": {
+    "000": {
+      "success": 0.4375,
+      "pass^k": 0.4375,
+      "violations": 0,
+      "cost_per_task": 0.0012032500000000001,
+      "latency_p95": 2.775,
+      "tokens_per_task": 477.125,
+      "success_ci": [
+        0.25,
+        0.59375
+      ],
+      "k": 3,
+      "failing": [
+        "t-policy-address-kind",
+        "t-policy-currency",
+        "t-policy-large-refund",
+        "t-policy-notification-settings",
+        "t-policy-over-total",
+        "t-policy-three-weeks",
+        "t-std-prefs-one-unsupported",
+        "t-two-both-refused",
+        "t-two-language-and-refund",
+        "t-two-marketing-allowed-cancelled-refused",
+        "t-two-refund-allowed-refunded-refused",
+        "t-two-refund-and-incomplete-address",
+        "t-two-shipping-and-paperless",
+        "t-unusual-language-on-file",
+        "t-unusual-order-price",
+        "t-vague-rain-jacket",
+        "t-vague-sewing-machine-over-limit",
+        "t-vague-tent-late"
+      ]
+    },
+    "003": {
+      "success": 0.8958333333333334,
+      "pass^k": 0.875,
+      "violations": 0,
+      "cost_per_task": 0.0023211458333333335,
+      "latency_p95": 3.335,
+      "tokens_per_task": 948.1145833333334,
+      "success_ci": [
+        0.78125,
+        0.9895833333333334
+      ],
+      "k": 3,
+      "failing": [
+        "t-policy-large-refund",
+        "t-std-prefs-one-unsupported",
+        "t-unusual-language-on-file",
+        "t-unusual-order-price"
+      ]
+    },
+    "delta": {
+      "success": [
+        0.4583333333333333,
+        0.2916666666666667,
+        0.625
+      ],
+      "cost_per_task": [
+        0.0011178958333333334,
+        0.0010516458333333333,
+        0.0011856041666666664
+      ],
+      "latency_p95": [
+        0.56,
+        0.16999999999999993,
+        1.0859999999999999
+      ],
+      "tokens_per_task": [
+        470.98958333333337,
+        464.36458333333337,
+        477.76041666666663
+      ]
+    },
+    "decision": "adopt",
+    "reasons": [
+      "success is higher by +0.458 (interval +0.292 to +0.625): 15 tasks better, 0 worse, p < 0.001",
+      "still below the bar: pass^k = 0.875, needs >= 0.9"
+    ],
+    "misses": [
+      "pass^k = 0.875, needs >= 0.9"
+    ]
+  },
+  "spent": {
+    "improver_usd": 0.878127,
+    "improver_unknown": 0,
+    "improver_seconds": 661.3277664999987,
+    "eval_usd": 3.1320223,
+    "eval_unknown": 0,
+    "eval_seconds": 532.3,
+    "eval_episodes": 1632
+  }
+}

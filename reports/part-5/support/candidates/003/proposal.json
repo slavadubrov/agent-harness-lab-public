@@ -1,0 +1,38 @@
+{
+  "id": "003",
+  "parent": "002",
+  "decision": "",
+  "reasons": [],
+  "note": "The existing structured model call now extracts independent requests instead of choosing one intent. The harness checks each refund against its own order and amount, prevents duplicate refunds for the same order, and combines refund, address, and preference outcomes in one reply while preserving supervisor review. This targets the failures where a second request was ignored or two refunds were treated as an ambiguous single request. I reviewed the changes against the reference runner but did not execute the workflow.\n",
+  "files": [
+    {
+      "path": "support_steps.py",
+      "added": 143,
+      "removed": 81
+    },
+    {
+      "path": "workflow.yaml",
+      "added": 21,
+      "removed": 22
+    }
+  ],
+  "tree": "5d97af47c7b4",
+  "improver": {
+    "note": "",
+    "cost_usd": 0.229447,
+    "seconds": 196.48847404200205,
+    "model": "gpt-6.2-sol",
+    "denied": [],
+    "error": null
+  },
+  "dev": null,
+  "val": null,
+  "delta": null,
+  "eval": {
+    "episodes": 0,
+    "cost_usd": 0.0,
+    "unknown_cost": 0,
+    "seconds": 0.0
+  },
+  "at": "2026-11-26T15:42:55+00:00"
+}

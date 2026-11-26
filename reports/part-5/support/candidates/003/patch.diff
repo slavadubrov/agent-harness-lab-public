@@ -1,0 +1,348 @@
+--- a/support_steps.py
++++ b/support_steps.py
+@@ -17,7 +17,7 @@
+ 
+ from pydantic import BaseModel, Field
+ 
+-from envs.custom.approval import CaseState
++from envs.custom.approval import CaseState, reply as approval_reply
+ from envs.custom.db import TODAY, connect
+ from envs.custom.refunds import APPROVAL_LIMIT_CENTS, call_refund_service
+ from envs.custom.tools import set_preference, update_address
+@@ -116,30 +116,28 @@
+     value: str = Field(description="on or off, or an ISO 639-1 code for language.")
+ 
+ 
++class RefundRequest(BaseModel):
++    order_id: str | None = Field(None, description="Exact order number for this refund, if given.")
++    item: str | None = Field(None, description="Verbatim identifying product phrase if no order ID is given for this refund.")
++    amount_cents: int | None = Field(None, description="Amount stated for this refund, in cents. Null for full refunds.")
++    clarify_amount: bool = Field(False, description="True if only part of the price is requested but the amount is unclear.")
++
++
+ class Request(BaseModel):
+-    """What the customer asks for. Leave a field empty when the message does not say it."""
+-
+-    kind: Literal["refund", "address", "preferences", "policy", "other"]
+-    policy_topics: list[PolicyTopic] = Field(
+-        default_factory=list, description="For policy only: the shop rules needed to answer the question."
+-    )
+-    amount_cents: int | None = Field(
+-        None, description="Refund amount the customer states, in cents. Empty for the full amount."
+-    )
+-    refund_item: str | None = Field(
+-        None, description="Verbatim product phrase for one unambiguous refund without an order number."
+-    )
++    """Independent requests in one message; leave unrequested actions empty."""
++
++    policy_topics: list[PolicyTopic] = Field(default_factory=list)
++    refunds: list[RefundRequest] = Field(default_factory=list)
+     address: Address | None = None
+-    settings: list[Setting] = []
++    settings: list[Setting] = Field(default_factory=list)
+ 
+ 
+ class CodeCase(CaseState):
+-    kind: str = ""
+     policy_topics: list[PolicyTopic] = Field(default_factory=list)
+-    amount_cents: int | None = None
+-    refund_item: str | None = None
++    refunds: list[RefundRequest] = Field(default_factory=list)
+     address: Address | None = None
+-    settings: list[Setting] = []
++    settings: list[Setting] = Field(default_factory=list)
++    other_answer: str = ""  # results to keep when the pending refund notices are replaced
+ 
+ 
+ # -- code: checks, writes and replies ---------------------------------------------------
+@@ -153,12 +151,10 @@
+     return " ".join(re.findall(r"[^\W_]+", text.casefold()))
+ 
+ 
+-def _match_refund_item(state: CodeCase, con: Connection, account_id: str) -> str | None:
+-    if not state.refund_item or len(set(e.casefold() for e in EMAIL.findall(state.request))) != 1:
+-        return None
+-    item = _words(state.refund_item)
++def _match_refund_item(item: str, message: str, con: Connection, account_id: str) -> str | None:
++    item = _words(item)
+     phrase = f" {item} "
+-    if not item or phrase not in f" {_words(EMAIL.sub(' ', state.request))} ":
++    if not item or phrase not in f" {_words(message)} ":
+         return None
+     # Match the target before checking refund eligibility. An ineligible order must
+     # still count as a match; otherwise eligibility could silently pick another order.
+@@ -170,35 +166,26 @@
+     return matches[0] if len(matches) == 1 else None
+ 
+ 
+-def _refund(state: CodeCase, ctx: NodeContext, account: dict, orders: list[str]) -> str:
+-    c = ctx.context
+-    con = connect(c.db_path)
+-    try:
+-        order_id = orders[0] if len(orders) == 1 else None
+-        if not orders:
+-            order_id = _match_refund_item(state, con, account["id"])
+-        if order_id is None:
+-            return "Which order is this about? Please send the order number, for example O-1234."
+-        order = con.execute(
+-            "SELECT * FROM orders WHERE id = ? AND account_id = ?", (order_id, account["id"])
+-        ).fetchone()
+-        if order is None:
+-            return f"I cannot find order {order_id} on your account, so I cannot refund it."
+-        # A lost response may leave no refundable balance. Return the receipt for
+-        # this case rather than treating our own previous write as an older refund.
+-        issued = con.execute(
+-            "SELECT amount_cents, refund_id FROM refund_operations "
+-            "WHERE case_id = ? AND order_id = ? AND status = 'issued'",
+-            (c.case_id, order_id),
+-        ).fetchone()
+-        if issued is not None:
+-            return (f"I refunded ${issued['amount_cents'] / 100:.2f} for order {order_id} "
+-                    f"(refund {issued['refund_id']}).")
+-        refunded = con.execute(
+-            "SELECT COALESCE(SUM(amount_cents), 0) FROM refunds WHERE order_id = ?", (order_id,)
+-        ).fetchone()[0]
+-    finally:
+-        con.close()
++def _check_refund(
++    con: Connection, case_id: str, account_id: str, order_id: str, amount_cents: int | None
++) -> int | str:
++    order = con.execute(
++        "SELECT * FROM orders WHERE id = ? AND account_id = ?", (order_id, account_id)
++    ).fetchone()
++    if order is None:
++        return f"I cannot find order {order_id} on your account, so I cannot refund it."
++    # Recover a receipt after a lost response rather than refunding the balance again.
++    issued = con.execute(
++        "SELECT amount_cents, refund_id FROM refund_operations "
++        "WHERE case_id = ? AND order_id = ? AND status = 'issued'",
++        (case_id, order_id),
++    ).fetchone()
++    if issued is not None:
++        return (f"I refunded ${issued['amount_cents'] / 100:.2f} for order {order_id} "
++                f"(refund {issued['refund_id']}).")
++    refunded = con.execute(
++        "SELECT COALESCE(SUM(amount_cents), 0) FROM refunds WHERE order_id = ?", (order_id,)
++    ).fetchone()[0]
+     if order["status"] == "cancelled":
+         return f"Order {order_id} was cancelled, so it is refunded automatically."
+     if order["status"] != "delivered":
+@@ -208,21 +195,57 @@
+     remaining = order["total_cents"] - refunded
+     if remaining <= 0:
+         return f"Order {order_id} has already been refunded in full."
+-    amount = remaining if state.amount_cents is None else state.amount_cents
++    amount = remaining if amount_cents is None else amount_cents
+     if amount <= 0:
+         return "Please specify a positive refund amount."
+     if amount > remaining:
+         return f"I can refund at most ${remaining / 100:.2f} on order {order_id}."
+-    r = call_refund_service(
+-        c.db_path, c.case_id, order_id, amount, f"Customer request: {state.kind}", fault=c.fault
+-    )
++    return amount
++
++
++def _refund_plan(
++    state: CodeCase, con: Connection, case_id: str, account_id: str, answers: list[str]
++) -> dict[str, int]:
++    message = EMAIL.sub(" ", state.request)
++    mentioned = set(ORDER.findall(message))
++    by_order: dict[str, set[tuple[int | None, bool]]] = {}
++    for refund in state.refunds:
++        if refund.order_id is not None:
++            order_id = refund.order_id if refund.order_id in mentioned else None
++        elif refund.item:
++            order_id = _match_refund_item(refund.item, message, con, account_id)
++        else:
++            order_id = None
++        if order_id is None:
++            answers.append("Which order is this about? Please send the order number, for example O-1234.")
++            continue
++        by_order.setdefault(order_id, set()).add((refund.amount_cents, refund.clarify_amount))
++
++    planned = {}
++    for order_id, specs in by_order.items():
++        # One refund per order in this message. Never pick between conflicting amounts.
++        if len(specs) != 1:
++            answers.append(f"Please confirm a single refund amount for order {order_id}.")
++            continue
++        (amount, clarify), = specs
++        if clarify:
++            answers.append(f"What partial refund amount are you requesting for order {order_id}?")
++            continue
++        result = _check_refund(con, case_id, account_id, order_id, amount)
++        if isinstance(result, str):
++            answers.append(result)
++        else:
++            planned[order_id] = result
++    return planned
++
++
++def _submit_refund(ctx: NodeContext, order_id: str, amount: int) -> str | None:
++    c = ctx.context
++    r = call_refund_service(c.db_path, c.case_id, order_id, amount, "Customer request: refund", fault=c.fault)
+     if r.get("status") == "held_for_approval":
+-        return (
+-            f"Your refund of ${amount / 100:.2f} for order {order_id} is above $200, so a "
+-            "supervisor will review it within two business days."
+-        )
++        return None
+     if "error" in r:
+-        return f"The refund could not be made: {r['error']}"
++        return f"The refund for order {order_id} could not be made: {r['error']}"
+     return f"I refunded ${amount / 100:.2f} for order {order_id} (refund {r['refund_id']})."
+ 
+ 
+@@ -263,29 +286,68 @@
+ 
+ 
+ def handle(state: CodeCase, ctx: NodeContext) -> dict[str, Any]:
+-    """Run the request in code and write the reply. A retry after a lost refund reply runs
+-    this node again; the refund service returns the first receipt."""
+-    if state.kind == "policy":
+-        answer = " ".join(POLICY_ANSWERS[topic] for topic in dict.fromkeys(state.policy_topics))
+-        return {"answer": answer or "Which shop policy would you like to know about?", "next_step": "done"}
+-    email = EMAIL.search(state.request)
+-    orders = ORDER.findall(state.request)
+-    if email is None:
+-        return {"answer": "Please send the email address of your account."}
++    """Check each independent request, then apply and report its outcome."""
++    answers = [POLICY_ANSWERS[topic] for topic in dict.fromkeys(state.policy_topics)]
++
++    def done(message: str = "") -> dict[str, Any]:
++        return {"answer": " ".join([*answers, message]).strip(), "next_step": "done"}
++
++    has_changes = bool(state.refunds or state.address or state.settings)
++    if answers and not has_changes:
++        return done()
++    emails = EMAIL.findall(state.request)
++    if not emails:
++        return done("Please send the email address of your account.")
++    if has_changes and len({email.casefold() for email in emails}) != 1:
++        return done("Please confirm which email address identifies the account for these changes.")
+     con = connect(ctx.context.db_path)
+     try:
+         row = con.execute(
+-            "SELECT * FROM accounts WHERE lower(email) = lower(?)", (email.group(),)
++            "SELECT * FROM accounts WHERE lower(email) = lower(?)", (emails[0],)
+         ).fetchone()
++        if row is None:
++            return done("I cannot find an account with that email address.")
++        account = dict(row)
++        planned = _refund_plan(state, con, ctx.context.case_id, account["id"], answers)
+     finally:
+         con.close()
+-    if row is None:
+-        return {"answer": "I cannot find an account with that email address."}
+-    account = dict(row)
+-    if state.kind == "refund":
+-        return {"answer": _refund(state, ctx, account, orders)}
+-    if state.kind == "address":
+-        return {"answer": _address(state, ctx, account)}
+-    if state.kind == "preferences":
+-        return {"answer": _preferences(state, ctx, account)}
+-    return {"answer": "I have passed your message to a colleague, who will reply soon."}
++    if not has_changes:
++        return done("I have passed your message to a colleague, who will reply soon.")
++
++    pending = []
++    needs_review = any(amount > APPROVAL_LIMIT_CENTS for amount in planned.values())
++    for order_id, amount in planned.items():
++        if needs_review and amount <= APPROVAL_LIMIT_CENTS:
++            answers.append(f"I did not process the separate refund for {order_id} while submitting the supervisor request.")
++            continue
++        result = _submit_refund(ctx, order_id, amount)
++        if result is None:
++            pending.append(
++                f"A supervisor will review your refund of ${amount / 100:.2f} for "
++                f"order {order_id} within two business days."
++            )
++        else:
++            answers.append(result)
++
++    # The policy calls for no other changes when submitting a refund for review.
++    if state.address is not None:
++        if needs_review and account["status"] == "active":
++            answers.append("I did not change your address while submitting the supervisor request.")
++        else:
++            answers.append(_address(state, ctx, account))
++    if state.settings:
++        if needs_review:
++            answers.append("I did not change your account settings while submitting the supervisor request.")
++        else:
++            answers.append(_preferences(state, ctx, account))
++
++    if pending:
++        return {"answer": " ".join(pending + answers), "other_answer": " ".join(answers)}
++    return done()
++
++
++def reply_after_approval(state: CodeCase, ctx: NodeContext) -> dict[str, Any]:
++    result = approval_reply(state, ctx)
++    if state.held and state.other_answer:
++        result["reply"] += " " + state.other_answer
++    return result
+--- a/workflow.yaml
++++ b/workflow.yaml
+@@ -17,31 +17,30 @@
+     method: json_schema
+     output_schema: support_steps:Request
+     prompt: |
+-      Read this message to an online shop's customer support and fill in the fields.
+-      Use kind=policy for questions about what the shop allows, requires, or supports,
+-      including hypothetical scenarios and general eligibility questions. Select only
+-      the policy_topics needed to answer them. A customer can ask about policy even
+-      if they give an email or mention their account status.
+-      Do not treat a policy question as permission to make a change or issue a refund.
+-      A request to take action on a particular purchase or account is not a policy
+-      question, even if phrased politely as a question or missing an order number.
+-      Use kind=other for status checks on specific orders or past refunds: asking what
+-      happened is not a request to issue a refund. Leave policy_topics empty for
+-      non-policy requests.
+-      For a clear request to refund exactly one purchase without an order number,
+-      copy the identifying product name or phrase from the message into refund_item,
+-      retaining any details that distinguish the product. Do not infer a product, use
+-      a generic reference like "my order", or select among alternatives. Leave this
+-      field empty if the target is unclear, if the customer gives an order identifier,
+-      if the refund is conditional, or if only part of the price is requested and
+-      the amount is not stated. Always leave it empty for non-refund requests.
++      Extract every independent request in this customer message, not just the main one.
++      Fill address and settings only for changes the customer actually requests. Leave
++      missing address parts null; do not borrow details from another address.
++      Select policy_topics only for questions about what the shop allows, requires,
++      or supports, including hypothetical scenarios and general eligibility questions.
++      Policy questions, order or refund status checks, complaints without a requested
++      remedy, and mentions of previous refunds never authorize a write. A polite
++      question that clearly asks us to act on a particular purchase or account can
++      still be a request to act.
++
++      Add a refund entry only for a clear request to issue a refund now. Do not add
++      entries for withdrawn, negated, hypothetical, or conditional refund instructions.
++      Use one entry per requested purchase, keeping its target and amount together.
++      Copy the exact order ID for that refund if given. Otherwise copy the identifying
++      product phrase verbatim into item. Do not infer targets, use generic phrases like
++      "my order", select among alternatives, or borrow an ID or amount from another
++      request. If the target is unclear, leave both order_id and item null. Use null
++      for amount_cents for a full refund; if a partial refund is requested without a
++      clear amount, set clarify_amount to true instead of treating it as full.
+ 
+       {request}
+     writes:
+-      kind: kind
+       policy_topics: policy_topics
+-      amount_cents: amount_cents
+-      refund_item: refund_item
++      refunds: refunds
+       address: address
+       settings: settings
+   handle:
+@@ -61,7 +60,7 @@
+     retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
+   reply:
+     type: function
+-    ref: envs.custom.approval:reply
++    ref: support_steps:reply_after_approval
+ 
+ edges:
+   - [START, read]

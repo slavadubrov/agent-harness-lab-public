@@ -1,0 +1,63 @@
+--- a/support_steps.py
++++ b/support_steps.py
+@@ -31,6 +31,7 @@
+     "paperless_billing": {"on", "off"},
+     "language": {"en", "de", "fr", "es", "pl", "sv"},
+ }
++ACCOUNT_EMAIL_KEYS = {"account_email", "email", "email_address", "account_email_address"}
+ REFUND_WINDOW_DAYS = 30
+ 
+ PolicyTopic = Literal[
+@@ -111,7 +112,9 @@
+ class Setting(BaseModel):
+     key: str = Field(
+         description="marketing_emails, sms_notifications, paperless_billing or language if "
+-        "the request is one of these; otherwise the setting the customer names, in snake_case."
++        "the request is one of these. Use account_email for a request to replace the "
++        "account's email address (not to change email notifications). Otherwise use the "
++        "setting the customer names, in snake_case."
+     )
+     value: str = Field(description="on or off, or an ISO 639-1 code for language.")
+ 
+@@ -268,9 +271,9 @@
+     return f"Your {a.kind} address is now {a.line1}, {a.postal_code} {a.city}, {a.country}."
+ 
+ 
+-def _preferences(state: CodeCase, ctx: NodeContext, account: dict) -> str:
++def _preferences(settings: list[Setting], ctx: NodeContext, account: dict) -> str:
+     done, refused = [], []
+-    for s in state.settings:
++    for s in settings:
+         value = s.value.strip().lower()
+         if value in SETTINGS.get(s.key, set()):
+             set_preference.func(
+@@ -292,7 +295,14 @@
+     def done(message: str = "") -> dict[str, Any]:
+         return {"answer": " ".join([*answers, message]).strip(), "next_step": "done"}
+ 
+-    has_changes = bool(state.refunds or state.address or state.settings)
++    settings = [s for s in state.settings if s.key not in ACCOUNT_EMAIL_KEYS]
++    if len(settings) != len(state.settings):
++        answers.append(
++            "Changing your account email address isn't available here. "
++            "Please contact support for help with that change."
++        )
++    # Referring an email change needs no lookup; other requests still need unambiguous identity.
++    has_changes = bool(state.refunds or state.address or settings)
+     if answers and not has_changes:
+         return done()
+     emails = EMAIL.findall(state.request)
+@@ -335,11 +345,11 @@
+             answers.append("I did not change your address while submitting the supervisor request.")
+         else:
+             answers.append(_address(state, ctx, account))
+-    if state.settings:
++    if settings:
+         if needs_review:
+             answers.append("I did not change your account settings while submitting the supervisor request.")
+         else:
+-            answers.append(_preferences(state, ctx, account))
++            answers.append(_preferences(settings, ctx, account))
+ 
+     if pending:
+         return {"answer": " ".join(pending + answers), "other_answer": " ".join(answers)}

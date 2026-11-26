@@ -1,0 +1,38 @@
+{
+  "id": "001",
+  "parent": "000",
+  "decision": "",
+  "reasons": [],
+  "note": "Added a read-only route for shop-policy questions. The existing structured model call selects the relevant policy topics, and the harness answers from fixed policy text before any account lookup or refund processing. This should fix the policy failures where customers were asked for an email or order number instead of getting an answer about refund eligibility, limits, partial refunds, supported languages, or address changes after shipment. No model calls were added, and the existing write and approval paths are unchanged. The workflow was reviewed against the reference runner but not executed.\n",
+  "files": [
+    {
+      "path": "support_steps.py",
+      "added": 70,
+      "removed": 2
+    },
+    {
+      "path": "workflow.yaml",
+      "added": 20,
+      "removed": 2
+    }
+  ],
+  "tree": "7351adff6205",
+  "improver": {
+    "note": "",
+    "cost_usd": 0.123802,
+    "seconds": 69.05785749999995,
+    "model": "gpt-6.2-sol",
+    "denied": [],
+    "error": null
+  },
+  "dev": null,
+  "val": null,
+  "delta": null,
+  "eval": {
+    "episodes": 0,
+    "cost_usd": 0.0,
+    "unknown_cost": 0,
+    "seconds": 0.0
+  },
+  "at": "2026-11-26T15:38:12+00:00"
+}

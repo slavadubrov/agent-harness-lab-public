@@ -1,0 +1,102 @@
+# The support assistant with no agent. A structured call reads the main requests;
+# a read-only status classifier runs only on the generic handoff path.
+# A refund above $200 goes to the environment's approval steps.
+# Functions of this harness: support_steps.py, next to this file.
+kind: workflow
+name: support
+description: Structured request extraction, deterministic checks and writes, and a read-only status fallback.
+engine: {name: langgraph}
+state_schema: support_steps:CodeCase
+context_schema: envs.custom.tools:AccountContext
+
+nodes:
+  read:
+    type: structured
+    # The frozen model. Every model call of this harness must use exactly this block.
+    model: {provider: import, id: openai, ref: "harness.openai_model:chat"}
+    method: json_schema
+    output_schema: support_steps:Request
+    prompt: |
+      Extract every independent request in this customer message, not just the main one.
+      Fill address and settings only for changes the customer actually requests. Leave
+      missing address parts null; do not borrow details from another address.
+      Select policy_topics only for questions about what the shop allows, requires,
+      or supports, including hypothetical scenarios and general eligibility questions.
+      Policy questions, order or refund status checks, complaints without a requested
+      remedy, and mentions of previous refunds never authorize a write. A polite
+      question that clearly asks us to act on a particular purchase or account can
+      still be a request to act.
+
+      Add a refund entry only for a clear request to issue a refund now. Do not add
+      entries for withdrawn, negated, hypothetical, or conditional refund instructions.
+      Use one entry per requested purchase, keeping its target and amount together.
+      Copy the exact order ID for that refund if given. Otherwise copy the identifying
+      product phrase verbatim into item. Do not infer targets, use generic phrases like
+      "my order", select among alternatives, or borrow an ID or amount from another
+      request. If the target is unclear, leave both order_id and item null. Use null
+      for amount_cents for a full refund; if a partial refund is requested without a
+      clear amount, set clarify_amount to true instead of treating it as full.
+
+      {request}
+    writes:
+      policy_topics: policy_topics
+      refunds: refunds
+      address: address
+      settings: settings
+  handle:
+    type: function
+    ref: support_steps:handle
+    # Safe to retry: the refund service deduplicates by operation key.
+    retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
+  read_status:
+    type: structured
+    model: {provider: import, id: openai, ref: "harness.openai_model:chat"}
+    method: json_schema
+    output_schema: support_steps:StatusQuery
+    prompt: |
+      Classify a read-only inquiry about one existing order. Use order for a question
+      about shipment, delivery, or order status. Use refund for a question about whether
+      a prior refund went through or how much was already refunded. Use none for other
+      topics, policy questions, complaints without a status inquiry, or requests to take action.
+      For a clear target, copy the order number if given; otherwise copy only the product
+      name as written, without surrounding words. Use null if the target is unspecified
+      or ambiguous. Do not choose among alternatives or infer a product or number.
+
+      {request}
+    writes:
+      status_kind: status_kind
+      status_target: status_target
+  answer_status:
+    type: function
+    ref: support_steps:answer_status
+  find_held:
+    type: function
+    ref: envs.custom.approval:find_held
+  approval:
+    type: function
+    ref: envs.custom.approval:wait_for_supervisor
+  issue:
+    type: function
+    ref: envs.custom.approval:issue_approved
+    retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
+  reply:
+    type: function
+    ref: support_steps:reply_after_approval
+
+edges:
+  - [START, read]
+  - [read, handle]
+  - [read_status, answer_status]
+  - [answer_status, END]
+  - [approval, issue]
+  - [issue, reply]
+  - [reply, END]
+conditional_edges:
+  - source: handle
+    field: next_step
+    routes: {done: END, check_status: read_status}
+    default: find_held
+  - source: find_held
+    field: next_step
+    routes: {approval: approval}
+    default: END
