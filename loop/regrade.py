@@ -1,6 +1,6 @@
 """Replay a saved support campaign using only the public evaluation library.
 
-    python -m loop.regrade [reports/part-5/support-sign-test]
+    python -m loop.regrade [reports/part-5/support]
 
 The folder defaults to reports/part-5/support. For each candidate that reached validation
 it prints the recorded decision next to the decision under the current rule, with the

@@ -102,46 +102,27 @@ agent. A coding agent edits a copy of the workflow after reading its development
 The evaluator uses a separate validation set to decide whether to keep each change.
 The final workflow is scored on held-out test tasks.
 
-Part 5 has three campaign folders:
-
-- [`reports/part-5/support-sign-test/`](reports/part-5/support-sign-test/): a saved
-  campaign whose step rule used a sign test over tasks.
-- [`reports/part-5/support-task-level-rule/`](reports/part-5/support-task-level-rule/): a
-  saved campaign whose step rule used the success interval and the Wilcoxon signed-rank
-  test over tasks. It tried six candidates and kept two. On the 32 test tasks, success
-  rose from 0.44 to 0.81 (+0.375, interval +0.219 to +0.531; 12 tasks better, 0 worse).
-  The improver cost $0.72 and evaluation cost $3.06.
-- [`reports/part-5/support/`](reports/part-5/support/): the campaign under the current step
-  rule. It used OpenAI `gpt-6.2-sol`, tried six candidates and kept three: answers to
-  policy questions, finding an order by the product name, and several requests in one
-  message. On the 32 test tasks, success rose from 0.44 to 0.90 (+0.458, interval +0.292
-  to +0.625; 15 tasks better, 0 worse). `pass^3` is 0.875 and the release bar is 0.90.
-  The improver cost $0.88 and evaluation cost $3.13. `make part5-regrade` regrades it.
-
-The sign-test campaign used OpenAI `gpt-6.2-sol` and kept none of its three candidates.
-The improver cost $0.49 and evaluation cost $1.53. Regrade all 960 saved runs with uv
-and Python 3.12, without an API key:
+The saved campaign is in [`reports/part-5/support/`](reports/part-5/support/). It used
+OpenAI `gpt-6.2-sol`, tried six candidates and kept three. The improver cost $0.88 and
+evaluation cost $3.13. Regrade the saved runs with uv and Python 3.12, without an API key:
 
 ```bash
-make part5-regrade CAMPAIGN=reports/part-5/support-sign-test
+make part5-regrade
 ```
 
 This command installs only the pinned harness-evals library. After the first install,
-`UV_OFFLINE=1 make part5-regrade CAMPAIGN=...` runs without network access. It prints the
-scores for development, validation and test, the noise check, the candidate decisions
-and the development tasks that still fail. For each candidate that reached validation,
-it also prints the recorded decision, the decision under the current rule, the tasks
-better and worse, the largest loss of one task's pass rate, the broken tasks, the
-permutation p-value over runs, and the sign-test and Wilcoxon p-values over tasks. The
-saved
-[report](reports/part-5/support-sign-test/REPORT.md) and
-[ledger](reports/part-5/support-sign-test/ledger.jsonl) can also be read directly.
+`UV_OFFLINE=1 make part5-regrade` runs without network access. It prints the scores for
+development, validation and test, the noise check, the candidate decisions and the
+development tasks that still fail. For each candidate that reached validation, it also
+prints the recorded decision, the decision under the current rule, the tasks better and
+worse, the largest loss of one task's pass rate, the broken tasks and the permutation
+p-value over runs. The saved [report](reports/part-5/support/REPORT.md) and
+[ledger](reports/part-5/support/ledger.jsonl) can also be read directly.
 
-`make part5-report CAMPAIGN=...` rebuilds a campaign's Markdown report and figure, and
-`make part5-show CAMPAIGN=... CANDIDATE=001` prints a saved decision, note and diff.
-`CAMPAIGN` defaults to `reports/part-5/support`; while that folder holds no campaign,
-the three targets stop and name the saved ones. These targets, `make part5-loop` and the
-full test suite install the runner from the `loop` dependency group pinned in
+`make part5-report` rebuilds the campaign's Markdown report and figure, and
+`make part5-show CANDIDATE=001` prints a saved decision, note and diff. `CAMPAIGN=...`
+points the three targets at another campaign folder. These targets, `make part5-loop`
+and the full test suite install the runner from the `loop` dependency group pinned in
 [`pyproject.toml`](pyproject.toml).
 
 The campaign used support rubric `5-loop`. A handoff reply must state a transfer or direct
@@ -150,41 +131,24 @@ and an account language lookup must identify the stored language rather than lis
 [`loop/grading.py`](loop/grading.py) checks that the paired interval for the increase
 in average tokens per task stays within the 1,000-token guardrail.
 
-| Harness | Development, 48 tasks | Validation, 32 tasks | Test, 32 tasks |
-| --- | --- | --- | --- |
-| Start (`000`) | 0.54 | 0.47 (0.31–0.66) | 0.44 (0.25–0.59) |
-| Candidate 1, inconclusive | 0.71 | 0.65 (0.48–0.80) | not run |
-| Candidate 2, inconclusive | 0.65 | 0.59 (0.44–0.75) | not run |
-| Candidate 3, inconclusive | 0.69 | 0.59 (0.44–0.78) | not run |
+The step rule rejects a candidate if a task loses more runs than run noise explains (a
+one-sided Fisher exact test on that task's runs; with 3 runs on each side, only a fall
+from 3 of 3 to 0 of 3). It adopts a candidate only if a permutation test over the runs
+shows a gain larger than the difference between repeated runs. Each candidate is
+compared with the harness that was current when it was proposed.
 
-Each candidate improved both development and validation success. The adoption rule
-compares task pass rates across the three validation runs per task.
+| Candidate | Compared with | Validation success | Tasks better / worse | Permutation p | Decision |
+| --- | --- | --- | --- | --- | --- |
+| [1. Answer policy questions](reports/part-5/support/candidates/001/patch.diff) | start | 0.47 to 0.66 | 6 / 0 | 3.1e-08 | adopt |
+| [2. Find an order by product name](reports/part-5/support/candidates/002/patch.diff) | 1 | 0.66 to 0.74 | 3 / 1 | 0.0036 | adopt |
+| [3. Handle several requests](reports/part-5/support/candidates/003/patch.diff) | 2 | 0.74 to 0.92 | 6 / 0 | 1.3e-06 | adopt |
+| [4. Answer order and refund status questions](reports/part-5/support/candidates/004/patch.diff) | 3 | 0.92 to 0.94 | 2 / 1 | 0.63 | inconclusive |
+| [5. Hand off email-address changes](reports/part-5/support/candidates/005/patch.diff) | 3 | 0.92 to 0.82 | 1 / 5 | | reject: one broken task |
+| [6. A separate status check](reports/part-5/support/candidates/006/patch.diff) | 3 | 0.92 to 0.94 | 2 / 1 | 0.63 | inconclusive |
 
-| Candidate | Tasks better / worse | Why the workflow stayed unchanged |
-| --- | --- | --- |
-| [1. Answer policy questions](reports/part-5/support-sign-test/candidates/001/patch.diff) | 6 / 1 | Fixed all six policy tasks. One of three runs on a name-change request refused it instead of referring it to a person. The sign test gave p = 0.125. |
-| [2. Handle several requests](reports/part-5/support-sign-test/candidates/002/patch.diff) | 6 / 2 | Fixed all six multi-request tasks. The name-change and password-reset requests were classified as unsupported settings. The interval for the gain crossed zero. |
-| [3. Find an order by product name](reports/part-5/support-sign-test/candidates/003/patch.diff) | 4 / 0 | Improved three vague requests and one delivery question. The sign test gave p = 0.125. |
-
-The current step rule rejects a candidate if a task loses more runs than run noise
-explains (a one-sided Fisher exact test on that task's runs; with 3 runs on each side,
-only a fall from 3 of 3 to 0 of 3), and adopts it only if a permutation test over the runs shows a gain larger than the
-difference between repeated runs. Regrading the saved campaign under it gives these
-decisions; the ledger keeps the decisions taken at run time:
-
-| Candidate | Tasks better / worse | Largest task loss | Broken tasks | Permutation p | Recorded | Current rule |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | 6 / 1 | 0.33 | 0 | 8.8e-07 | inconclusive | adopt |
-| 2 | 6 / 2 | 1.00 | 2 | 0.0032 | inconclusive | reject |
-| 3 | 4 / 0 | 0 | 0 | 1.3e-05 | inconclusive | adopt |
-
-Under the current rule a campaign would have continued from candidate 1, so the saved
-campaign does not show what that rule does after the first step.
-
-The campaign stopped after three inconclusive candidates. The starting workflow
-remained in place and passed 44% of held-out runs. Its test `pass^k` was also 0.44
-with three runs per task. Both the policy and multi-request test categories passed
-0 of their 18 runs.
+The campaign stopped after three candidates in a row were not adopted. On the 32 test
+tasks, success rose from 0.44 to 0.90 (+0.458, interval +0.292 to +0.625; 15 tasks
+better, 0 worse). Test `pass^3` is 0.875 and the release bar is 0.90.
 
 - **The tasks.** The 48 tasks of Parts 2 to 4 are the development set, whose failures the
   improver reads. [`loop/tasks.py`](loop/tasks.py) adds 32 validation tasks, which decide
@@ -194,8 +158,8 @@ with three runs per task. Both the policy and multi-request test categories pass
   A candidate cannot change the model: every model call must go through a workflow node that
   names `harness.openai_model:chat`, and `loop/target.py` rejects a candidate that bypasses it.
 - **A new campaign.** `make part5-loop` needs `OPENAI_API_KEY` in the environment (or `.env`)
-  and uses `harness-loop`'s built-in `openai` backend. It writes to `reports/part-5/support`
-  and leaves the two saved campaigns as they are. `noise.json` in each campaign is the
+  and uses `harness-loop`'s built-in `openai` backend. It writes to `reports/part-5/support`;
+  pass `CAMPAIGN=...` to write a new campaign to another folder. `noise.json` in each campaign is the
   adoption rule's answer on the starting harness against itself, which has to be
   "inconclusive".
 
@@ -234,7 +198,7 @@ does not call the judge, whose saved verdicts cover the saved runs only.
 | [`examples/`](examples/) | The template for scoring your own harness |
 | [`reports/part-4/`](reports/part-4/) | The saved runs with their traces and judge verdicts, 60 labelled replies, the report and the plots |
 | [`loop/`](loop/) | Part 5: the harness an improver edits, the validation and test tasks, and the target for harness-loop |
-| [`reports/part-5/`](reports/part-5/) | The improvement campaigns: `support-sign-test/` and `support-task-level-rule/`, saved with every candidate's diff, note, runs and decision, and `support/` for a campaign under the current rule |
+| [`reports/part-5/`](reports/part-5/) | The improvement campaign in `support/`, saved with every candidate's diff, note, runs and decision |
 | [`harness/`](harness/) | `build_harness(spec)`, `build_workflow(spec)`, the spec schema, middleware, token and cost accounting |
 | [`harness/spec/`](harness/spec/) | The agent and workflow specs |
 | [`envs/custom/`](envs/custom/) | The support tasks, a SQLite database, the account tools, the refund service and the supervisor's approval steps |

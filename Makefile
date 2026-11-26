@@ -32,8 +32,7 @@ help:
 	@echo "make part5-regrade [CAMPAIGN=...]   regrade a Part 5 campaign using only public dependencies"
 	@echo "make part5-report [CAMPAIGN=...]    grade a Part 5 campaign again, write its REPORT.md and trajectory.svg"
 	@echo "make part5-show [CAMPAIGN=...] [CANDIDATE=003]   a campaign's ledger, or one candidate with its note and diff"
-	@echo "                        CAMPAIGN defaults to reports/part-5/support; the saved campaigns are"
-	@echo "                        CAMPAIGN=reports/part-5/support-sign-test and CAMPAIGN=reports/part-5/support-task-level-rule"
+	@echo "                        CAMPAIGN defaults to reports/part-5/support"
 	@echo "make test | fmt | lint"
 	@echo "paid, needs a key:"
 	@echo "make a1-custom          Part 2: run the 12 support tasks with SPEC (default base.yaml)"
@@ -153,9 +152,8 @@ part4-live: sync
 	$(UV) run python -m evaluator live --trials $(TRIALS) --split $(SPLIT) $(PART4_SPECS)
 
 
-# Part 5: the improvement loop on the workflow with no agent. Two saved campaigns are in
-# reports/part-5/support-sign-test and reports/part-5/support-task-level-rule. A campaign
-# under the current step rule goes to reports/part-5/support unless CAMPAIGN says otherwise.
+# Part 5: the improvement loop on the workflow with no agent. The saved campaign is in
+# reports/part-5/support; CAMPAIGN points the targets at another folder.
 CAMPAIGN ?= reports/part-5/support
 CANDIDATES ?= 8
 IMPROVER ?= gpt-6.2-sol
@@ -174,7 +172,7 @@ part5-show: part5-campaign sync
 	$(UV) run --group loop harness-loop show - '$(CAMPAIGN)' $(CANDIDATE)
 
 part5-campaign:
-	@test -f '$(CAMPAIGN)/campaign.json' || { echo "No campaign in $(CAMPAIGN). For a saved campaign, add CAMPAIGN=reports/part-5/support-sign-test or CAMPAIGN=reports/part-5/support-task-level-rule"; exit 1; }
+	@test -f '$(CAMPAIGN)/campaign.json' || { echo "No campaign in $(CAMPAIGN). The saved campaign is in reports/part-5/support"; exit 1; }
 
 # Needs OPENAI_API_KEY (default gpt-6.2-sol).
 part5-loop: sync
