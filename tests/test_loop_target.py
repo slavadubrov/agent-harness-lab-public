@@ -107,15 +107,22 @@ def test_regrade_of_all_saved_runs_reports_the_observed_results(capsys):
     assert "5-loop regraded with 5-loop" in output
     assert "Better on 6 tasks, worse on 1 task" in output
     assert "Better on 4 tasks, worse on 0 tasks" in output
-    # The campaign was decided with the sign test; the Wilcoxon rule adopts candidate 1.
+    # The campaign was decided with the sign test; the step rule over runs adopts
+    # candidates 1 and 3 and rejects candidate 2 for two broken tasks.
     assert (
-        "Recorded: inconclusive. Current rule: adopt. 6 better, 1 worse;"
-        " sign test p = 0.125, Wilcoxon p = 0.031." in output
+        "Recorded: inconclusive. Current rule: adopt. 6 better, 1 worse; largest task loss"
+        " 0.33, broken tasks 0; permutation p = 8.75e-07; sign test p = 0.125,"
+        " Wilcoxon p = 0.031." in output
     )
-    assert "6 better, 2 worse; sign test p = 0.289, Wilcoxon p = 0.289." in output
     assert (
-        "Recorded: inconclusive. Current rule: inconclusive. 4 better, 0 worse;"
-        " sign test p = 0.125, Wilcoxon p = 0.125." in output
+        "Recorded: inconclusive. Current rule: reject. 6 better, 2 worse; largest task loss"
+        " 1.00, broken tasks 2; permutation p = 0.00315; sign test p = 0.289,"
+        " Wilcoxon p = 0.289." in output
+    )
+    assert (
+        "Recorded: inconclusive. Current rule: adopt. 4 better, 0 worse; largest task loss"
+        " 0.00, broken tasks 0; permutation p = 1.25e-05; sign test p = 0.125,"
+        " Wilcoxon p = 0.125." in output
     )
     assert "policy: 0/18" in output
     assert "two-address-allowed-refund-refused" in output

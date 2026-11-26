@@ -32,8 +32,8 @@ help:
 	@echo "make part5-regrade [CAMPAIGN=...]   regrade a Part 5 campaign using only public dependencies"
 	@echo "make part5-report [CAMPAIGN=...]    grade a Part 5 campaign again, write its REPORT.md and trajectory.svg"
 	@echo "make part5-show [CAMPAIGN=...] [CANDIDATE=003]   a campaign's ledger, or one candidate with its note and diff"
-	@echo "                        CAMPAIGN defaults to reports/part-5/support; the saved sign-test campaign is"
-	@echo "                        CAMPAIGN=reports/part-5/support-sign-test"
+	@echo "                        CAMPAIGN defaults to reports/part-5/support; the saved campaigns are"
+	@echo "                        CAMPAIGN=reports/part-5/support-sign-test and CAMPAIGN=reports/part-5/support-task-level-rule"
 	@echo "make test | fmt | lint"
 	@echo "paid, needs a key:"
 	@echo "make a1-custom          Part 2: run the 12 support tasks with SPEC (default base.yaml)"
@@ -153,9 +153,9 @@ part4-live: sync
 	$(UV) run python -m evaluator live --trials $(TRIALS) --split $(SPLIT) $(PART4_SPECS)
 
 
-# Part 5: the improvement loop on the workflow with no agent. The campaign decided with
-# the sign test is in reports/part-5/support-sign-test. A campaign under the current rule
-# (the Wilcoxon signed-rank test) goes to reports/part-5/support unless CAMPAIGN says otherwise.
+# Part 5: the improvement loop on the workflow with no agent. Two saved campaigns are in
+# reports/part-5/support-sign-test and reports/part-5/support-task-level-rule. A campaign
+# under the current step rule goes to reports/part-5/support unless CAMPAIGN says otherwise.
 CAMPAIGN ?= reports/part-5/support
 CANDIDATES ?= 8
 IMPROVER ?= gpt-6.2-sol
@@ -163,7 +163,7 @@ LOOP_TRIALS ?= dev=2,val=3,test=3
 MAX_USD ?= 10
 
 # The episode regrade uses the same evaluator as the full project and installs no runner.
-REPLAY_EVALS ?= git+https://github.com/slavadubrov/harness-evals@d391e288d087671f94b09793d21dc5401e8b6296
+REPLAY_EVALS ?= git+https://github.com/slavadubrov/harness-evals@c11693c0ea7bdd29bb9854f3e5811116e1e76d31
 part5-regrade: part5-campaign
 	$(UV) run --no-project --with "$(REPLAY_EVALS)" python -m loop.regrade '$(CAMPAIGN)'
 
@@ -174,7 +174,7 @@ part5-show: part5-campaign sync
 	$(UV) run --group loop harness-loop show - '$(CAMPAIGN)' $(CANDIDATE)
 
 part5-campaign:
-	@test -f '$(CAMPAIGN)/campaign.json' || { echo "No campaign in $(CAMPAIGN). For the saved sign-test campaign, add CAMPAIGN=reports/part-5/support-sign-test"; exit 1; }
+	@test -f '$(CAMPAIGN)/campaign.json' || { echo "No campaign in $(CAMPAIGN). For a saved campaign, add CAMPAIGN=reports/part-5/support-sign-test or CAMPAIGN=reports/part-5/support-task-level-rule"; exit 1; }
 
 # Needs OPENAI_API_KEY (default gpt-6.2-sol).
 part5-loop: sync
