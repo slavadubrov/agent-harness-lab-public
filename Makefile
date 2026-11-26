@@ -19,7 +19,7 @@ TAU3_CONCURRENCY ?= 4
 CUSTOM_SPECS := harness/spec/base.yaml harness/spec/plain.yaml harness/spec/glm-5.3-flash.yaml harness/spec/mimo-v2.6-flash.yaml
 A2_SPECS := harness/spec/plain.yaml harness/spec/approval-agent.yaml harness/spec/workflows/refund-approval.yaml harness/spec/workflows/support-router.yaml harness/spec/workflows/support-code.yaml
 
-.PHONY: help sync test fmt lint mine show failures a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 part4-regrade part4-agreement part4-compare part4-live part5-report part5-regrade part5-show part5-loop part5-campaign
+.PHONY: help sync test fmt lint mine show failures a1-custom a1-custom-matrix a1-tau3 a1-tau3-matrix tau3-data report a2-custom a2-matrix a2-routes report-a2 part4-regrade part4-agreement part4-compare part4-live part5-report part5-regrade part5-show part5-loop loop-regrade loop-report loop-show loop-run part5-campaign
 
 help:
 	@echo "offline, no key:"
@@ -162,6 +162,12 @@ MAX_USD ?= 10
 
 # The episode regrade uses the same evaluator as the full project and installs no runner.
 REPLAY_EVALS ?= git+https://github.com/slavadubrov/harness-evals@df614932c37795cf7795bd58f374e858610e10cd
+# Names that do not depend on an article number.
+loop-regrade: part5-regrade
+loop-report: part5-report
+loop-show: part5-show
+loop-run: part5-loop
+
 part5-regrade: part5-campaign
 	$(UV) run --no-project --with "$(REPLAY_EVALS)" python -m loop.regrade '$(CAMPAIGN)'
 

@@ -107,8 +107,10 @@ OpenAI `gpt-6.2-sol`, tried six candidates and kept three. The improver cost $0.
 evaluation cost $3.13. Regrade the saved runs with uv and Python 3.12, without an API key:
 
 ```bash
-make part5-regrade
+make loop-regrade
 ```
+
+`make part5-regrade` is the same command under its older name; `loop-report`, `loop-show` and `loop-run` are the other three.
 
 This command installs only the pinned harness-evals library. After the first install,
 `UV_OFFLINE=1 make part5-regrade` runs without network access. It prints the scores for
