@@ -102,18 +102,17 @@ agent. A coding agent edits a copy of the workflow after reading its development
 The evaluator uses a separate validation set to decide whether to keep each change.
 The final workflow is scored on held-out test tasks.
 
-Part 5 has two campaign folders:
+Part 5 has three campaign folders:
 
-- [`reports/part-5/support-sign-test/`](reports/part-5/support-sign-test/) holds the saved
-  campaign. Its adoption rule used a sign test.
-- [`reports/part-5/support/`](reports/part-5/support/) holds the campaign under the current
-  rule, which uses the Wilcoxon signed-rank test. It used OpenAI `gpt-6.2-sol`, tried six
-  candidates and kept two: answers to policy questions (7 validation tasks better, 0 worse)
-  and handling of several requests in one message (6 better, 0 worse). On the 32 test
-  tasks, success rose from 0.44 to 0.81 (+0.375, interval +0.219 to +0.531; 12 tasks
-  better, 0 worse). The final harness still misses the release bar: `pass^3` is 0.81 and
-  the bar is 0.90. The improver cost $0.72 and evaluation cost $3.06. Regrade it with
-  `make part5-regrade`.
+- [`reports/part-5/support-sign-test/`](reports/part-5/support-sign-test/): a saved
+  campaign whose step rule used a sign test over tasks.
+- [`reports/part-5/support-task-level-rule/`](reports/part-5/support-task-level-rule/): a
+  saved campaign whose step rule used the success interval and the Wilcoxon signed-rank
+  test over tasks. It tried six candidates and kept two. On the 32 test tasks, success
+  rose from 0.44 to 0.81 (+0.375, interval +0.219 to +0.531; 12 tasks better, 0 worse).
+  The improver cost $0.72 and evaluation cost $3.06.
+- `reports/part-5/support/`: the place for a campaign under the current step rule: no
+  task may break, and the gain must be larger than the difference between repeated runs.
 
 The sign-test campaign used OpenAI `gpt-6.2-sol` and kept none of its three candidates.
 The improver cost $0.49 and evaluation cost $1.53. Regrade all 960 saved runs with uv
@@ -127,15 +126,17 @@ This command installs only the pinned harness-evals library. After the first ins
 `UV_OFFLINE=1 make part5-regrade CAMPAIGN=...` runs without network access. It prints the
 scores for development, validation and test, the noise check, the candidate decisions
 and the development tasks that still fail. For each candidate that reached validation,
-it also prints the recorded decision, the decision under the current rule, the task
-counts and the p-values of both tests. The saved
+it also prints the recorded decision, the decision under the current rule, the tasks
+better and worse, the largest loss of one task's pass rate, the broken tasks, the
+permutation p-value over runs, and the sign-test and Wilcoxon p-values over tasks. The
+saved
 [report](reports/part-5/support-sign-test/REPORT.md) and
 [ledger](reports/part-5/support-sign-test/ledger.jsonl) can also be read directly.
 
 `make part5-report CAMPAIGN=...` rebuilds a campaign's Markdown report and figure, and
 `make part5-show CAMPAIGN=... CANDIDATE=001` prints a saved decision, note and diff.
 `CAMPAIGN` defaults to `reports/part-5/support`; while that folder holds no campaign,
-the three targets stop and name the saved one. These targets, `make part5-loop` and the
+the three targets stop and name the saved ones. These targets, `make part5-loop` and the
 full test suite install the runner from the `loop` dependency group pinned in
 [`pyproject.toml`](pyproject.toml).
 
@@ -161,26 +162,20 @@ compares task pass rates across the three validation runs per task.
 | [2. Handle several requests](reports/part-5/support-sign-test/candidates/002/patch.diff) | 6 / 2 | Fixed all six multi-request tasks. The name-change and password-reset requests were classified as unsupported settings. The interval for the gain crossed zero. |
 | [3. Find an order by product name](reports/part-5/support-sign-test/candidates/003/patch.diff) | 4 / 0 | Improved three vague requests and one delivery question. The sign test gave p = 0.125. |
 
-The rule now uses the Wilcoxon signed-rank test instead of the sign test. The sign
-test counts a task that lost one run of three the same as a task that now fails every
-run. The Wilcoxon test ranks the changed tasks by the size of the change and compares
-the rank sum of the gains with the rank sum of the losses. Candidate 1 moved six tasks
-from 0 of 3 passed runs to 3 of 3 and lost one run of three on one task. Regrading the
-saved campaign under the current rule adopts it, while the ledger records the decision
-taken at run time:
+The current step rule rejects a candidate if a task loses more runs than run noise
+explains (a one-sided Fisher exact test on that task's runs; with 3 runs on each side,
+only a fall from 3 of 3 to 0 of 3), and adopts it only if a permutation test over the runs shows a gain larger than the
+difference between repeated runs. Regrading the saved campaign under it gives these
+decisions; the ledger keeps the decisions taken at run time:
 
-| Candidate | Tasks better / worse | Sign test p | Wilcoxon p | Recorded | Current rule |
-| --- | --- | --- | --- | --- | --- |
-| 1 | 6 / 1 | 0.125 | 0.031 | inconclusive | adopt |
-| 2 | 6 / 2 | 0.289 | 0.289 | inconclusive | inconclusive |
-| 3 | 4 / 0 | 0.125 | 0.125 | inconclusive | inconclusive |
+| Candidate | Tasks better / worse | Largest task loss | Broken tasks | Permutation p | Recorded | Current rule |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 6 / 1 | 0.33 | 0 | 8.8e-07 | inconclusive | adopt |
+| 2 | 6 / 2 | 1.00 | 2 | 0.0032 | inconclusive | reject |
+| 3 | 4 / 0 | 0 | 0 | 1.3e-05 | inconclusive | adopt |
 
 Under the current rule a campaign would have continued from candidate 1, so the saved
-campaign does not show what that rule does after the first step. At the 95% setting,
-when no task gets worse, at least six tasks must improve: five give p = 0.0625 and six
-give p = 0.03125. The paired gain and guardrails still have to pass. A focused fix can improve only the
-tasks where the current workflow has room to improve. For the vague-request category,
-only three of six validation tasks had any failing runs at the start.
+campaign does not show what that rule does after the first step.
 
 The campaign stopped after three inconclusive candidates. The starting workflow
 remained in place and passed 44% of held-out runs. Its test `pass^k` was also 0.44
@@ -196,7 +191,7 @@ with three runs per task. Both the policy and multi-request test categories pass
   names `harness.openai_model:chat`, and `loop/target.py` rejects a candidate that bypasses it.
 - **A new campaign.** `make part5-loop` needs `OPENAI_API_KEY` in the environment (or `.env`)
   and uses `harness-loop`'s built-in `openai` backend. It writes to `reports/part-5/support`
-  and leaves the saved sign-test campaign as it is. `noise.json` in each campaign is the
+  and leaves the two saved campaigns as they are. `noise.json` in each campaign is the
   adoption rule's answer on the starting harness against itself, which has to be
   "inconclusive".
 
@@ -235,7 +230,7 @@ does not call the judge, whose saved verdicts cover the saved runs only.
 | [`examples/`](examples/) | The template for scoring your own harness |
 | [`reports/part-4/`](reports/part-4/) | The saved runs with their traces and judge verdicts, 60 labelled replies, the report and the plots |
 | [`loop/`](loop/) | Part 5: the harness an improver edits, the validation and test tasks, and the target for harness-loop |
-| [`reports/part-5/`](reports/part-5/) | The improvement campaigns: `support-sign-test/`, saved with every candidate's diff, note, runs and decision, and `support/` for a campaign under the current rule |
+| [`reports/part-5/`](reports/part-5/) | The improvement campaigns: `support-sign-test/` and `support-task-level-rule/`, saved with every candidate's diff, note, runs and decision, and `support/` for a campaign under the current rule |
 | [`harness/`](harness/) | `build_harness(spec)`, `build_workflow(spec)`, the spec schema, middleware, token and cost accounting |
 | [`harness/spec/`](harness/spec/) | The agent and workflow specs |
 | [`envs/custom/`](envs/custom/) | The support tasks, a SQLite database, the account tools, the refund service and the supervisor's approval steps |

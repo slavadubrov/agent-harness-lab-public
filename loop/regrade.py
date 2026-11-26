@@ -4,7 +4,10 @@
 
 The folder defaults to reports/part-5/support. For each candidate that reached validation
 it prints the recorded decision next to the decision under the current rule, with the
-sign-test and Wilcoxon p-values, because the saved campaign was decided with the sign test.
+evidence the step rule reads: the tasks better and worse, the largest loss of one task's
+pass rate, the broken tasks (a loss that a one-sided Fisher exact test on the task's runs
+finds at the campaign's level) and the permutation p-value over runs. It
+also prints the sign-test and Wilcoxon p-values over tasks, which earlier campaigns used.
 """
 
 import json
@@ -17,12 +20,14 @@ from harness_evals import (
     comparison,
     failures,
     load,
+    run_permutation_test,
     sign_test,
     summarize,
     table,
     wilcoxon_test,
 )
-from harness_evals.metrics import task_rates
+from harness_evals.compare import _fisher_loss
+from harness_evals.metrics import by_task, task_rates
 
 from loop.grading import usecase
 
@@ -97,9 +102,18 @@ def main(saved: Path = REPORTS / "support") -> None:
         rb, rc = task_rates(groups[parent, "val"]), task_rates(groups[cid, "val"])
         diffs = [rc[t] - rb[t] for t in rb]
         better, worse = len(decision.better), len(decision.worse)
+        tb, tc = by_task(groups[parent, "val"]), by_task(groups[cid, "val"])
+        base_runs, cand_runs = ([[g.passed for g in runs[t]] for t in rb] for runs in (tb, tc))
+        p = run_permutation_test(base_runs, cand_runs)
+        broken = sum(
+            _fisher_loss(b, c) <= 1 - config["level"]
+            for b, c in zip(base_runs, cand_runs, strict=True)
+        )
         print(
             f"Recorded: {row['decision']}. Current rule: {decision.decision}."
-            f" {better} better, {worse} worse; sign test p = {sign_test(better, worse):.3f},"
+            f" {better} better, {worse} worse; largest task loss {max(0, -min(diffs)):.2f},"
+            f" broken tasks {broken}; permutation p = {p:.3g};"
+            f" sign test p = {sign_test(better, worse):.3f},"
             f" Wilcoxon p = {wilcoxon_test(diffs):.3f}."
         )
 
