@@ -1,0 +1,38 @@
+{
+  "id": "006",
+  "parent": "003",
+  "decision": "",
+  "reasons": [],
+  "note": "Added a read-only status check before the generic handoff for messages with an unambiguous account. A separate structured call identifies shipment and prior-refund questions, and the reply uses only records for an order on that account. This targets missing shipment-status and prior-refund-amount answers without changing refund issuance or approval. I reviewed the workflow wiring but did not run it.\n",
+  "files": [
+    {
+      "path": "support_steps.py",
+      "added": 59,
+      "removed": 5
+    },
+    {
+      "path": "workflow.yaml",
+      "added": 28,
+      "removed": 5
+    }
+  ],
+  "tree": "a3bc8afa1aab",
+  "improver": {
+    "note": "",
+    "cost_usd": 0.130761,
+    "seconds": 106.04551937499855,
+    "model": "gpt-6.2-sol",
+    "denied": [],
+    "error": null
+  },
+  "dev": null,
+  "val": null,
+  "delta": null,
+  "eval": {
+    "episodes": 0,
+    "cost_usd": 0.0,
+    "unknown_cost": 0,
+    "seconds": 0.0
+  },
+  "at": "2026-11-26T15:52:50+00:00"
+}

@@ -1,0 +1,153 @@
+--- a/support_steps.py
++++ b/support_steps.py
+@@ -18,7 +18,7 @@
+ 
+ from envs.custom.approval import CaseState
+ from envs.custom.db import TODAY, connect
+-from envs.custom.refunds import call_refund_service
++from envs.custom.refunds import APPROVAL_LIMIT_CENTS, call_refund_service
+ from envs.custom.tools import set_preference, update_address
+ from harness.workflow import NodeContext
+ 
+@@ -32,6 +32,67 @@
+ }
+ REFUND_WINDOW_DAYS = 30
+ 
++PolicyTopic = Literal[
++    "account_identification",
++    "refund_delivery_status",
++    "refund_window",
++    "refund_after_cancellation",
++    "refund_maximum_for_order",
++    "refund_supervisor_limit",
++    "refund_partial",
++    "refund_suspended_account",
++    "address_account_status",
++    "address_required_fields",
++    "address_kind",
++    "address_already_shipped",
++    "preference_options",
++    "language_options",
++]
++POLICY_ANSWERS: dict[PolicyTopic, str] = {
++    "account_identification": (
++        "For account-specific help, provide the email address or ID of your account. "
++        "We can only look up or act on that account."
++    ),
++    "refund_delivery_status": (
++        "An order must be delivered before we can issue a refund. "
++        "If your order is pending or has shipped but hasn't arrived, please wait for delivery."
++    ),
++    "refund_window": f"You can request a refund within {REFUND_WINDOW_DAYS} days of delivery.",
++    "refund_after_cancellation": (
++        "Cancelled orders are refunded automatically; you don't need to request a manual refund."
++    ),
++    "refund_maximum_for_order": (
++        "Total refunds cannot exceed the order total. Once an order is fully refunded, "
++        "it can't be refunded again."
++    ),
++    "refund_supervisor_limit": (
++        f"An agent can issue up to ${APPROVAL_LIMIT_CENTS / 100:,.2f} per order without approval. "
++        "A larger refund is held for supervisor review within two business days."
++    ),
++    "refund_partial": (
++        "Yes, you can request a partial refund for a missing or damaged part. "
++        "Tell us the amount you're requesting; the usual refund rules still apply."
++    ),
++    "refund_suspended_account": (
++        "Yes, a suspended account can still receive a refund if the order meets the refund rules."
++    ),
++    "address_account_status": (
++        "Only active accounts can change their addresses. If your account is suspended or closed, "
++        "please call support."
++    ),
++    "address_required_fields": "A new address needs a street address, city, postal code and country.",
++    "address_kind": (
++        "You can change your shipping or billing address. If you don't specify which one, "
++        "we update the shipping address."
++    ),
++    "address_already_shipped": "No, changing your account address won't reroute an order that has already shipped.",
++    "preference_options": (
++        "You can turn marketing emails, SMS notifications and paperless billing on or off, "
++        "and change your account language. Other preferences aren't supported."
++    ),
++    "language_options": "Account languages are English, German, French, Spanish, Polish and Swedish.",
++}
++
+ 
+ # -- the one model call: free text -> fields --------------------------------------------
+ 
+@@ -57,7 +118,10 @@
+ class Request(BaseModel):
+     """What the customer asks for. Leave a field empty when the message does not say it."""
+ 
+-    kind: Literal["refund", "address", "preferences", "other"]
++    kind: Literal["refund", "address", "preferences", "policy", "other"]
++    policy_topics: list[PolicyTopic] = Field(
++        default_factory=list, description="For policy only: the shop rules needed to answer the question."
++    )
+     amount_cents: int | None = Field(
+         None, description="Refund amount the customer states, in cents. Empty for the full amount."
+     )
+@@ -67,6 +131,7 @@
+ 
+ class CodeCase(CaseState):
+     kind: str = ""
++    policy_topics: list[PolicyTopic] = Field(default_factory=list)
+     amount_cents: int | None = None
+     address: Address | None = None
+     settings: list[Setting] = []
+@@ -157,6 +222,9 @@
+ def handle(state: CodeCase, ctx: NodeContext) -> dict[str, Any]:
+     """Run the request in code and write the reply. A retry after a lost refund reply runs
+     this node again; the refund service returns the first receipt."""
++    if state.kind == "policy":
++        answer = " ".join(POLICY_ANSWERS[topic] for topic in dict.fromkeys(state.policy_topics))
++        return {"answer": answer or "Which shop policy would you like to know about?", "next_step": "done"}
+     email = EMAIL.search(state.request)
+     orders = ORDER.findall(state.request)
+     if email is None:
+--- a/workflow.yaml
++++ b/workflow.yaml
+@@ -18,9 +18,24 @@
+     output_schema: support_steps:Request
+     prompt: |
+       Read this message to an online shop's customer support and fill in the fields.
++      Use kind=policy for questions about what the shop allows, requires, or supports,
++      including hypothetical scenarios and general eligibility questions. Select only
++      the policy_topics needed to answer them. A customer can ask about policy even
++      if they give an email or mention their account status.
++      Do not treat a policy question as permission to make a change or issue a refund.
++      A request to take action on a particular purchase or account is not a policy
++      question, even if phrased politely as a question or missing an order number.
++      Use kind=other for status checks on specific orders or past refunds: asking what
++      happened is not a request to issue a refund. Leave policy_topics empty for
++      non-policy requests.
+ 
+       {request}
+-    writes: {kind: kind, amount_cents: amount_cents, address: address, settings: settings}
++    writes:
++      kind: kind
++      policy_topics: policy_topics
++      amount_cents: amount_cents
++      address: address
++      settings: settings
+   handle:
+     type: function
+     ref: support_steps:handle
+@@ -43,11 +58,14 @@
+ edges:
+   - [START, read]
+   - [read, handle]
+-  - [handle, find_held]
+   - [approval, issue]
+   - [issue, reply]
+   - [reply, END]
+ conditional_edges:
++  - source: handle
++    field: next_step
++    routes: {done: END}
++    default: find_held
+   - source: find_held
+     field: next_step
+     routes: {approval: approval}

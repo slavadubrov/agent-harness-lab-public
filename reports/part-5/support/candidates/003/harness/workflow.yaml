@@ -1,0 +1,79 @@
+# The support assistant with no agent. One model call reads the message into typed
+# fields; code does the rest: regular expressions, the policy rules, the writes and a
+# template reply. A refund above $200 goes to the environment's approval steps.
+# Functions of this harness: support_steps.py, next to this file.
+kind: workflow
+name: support
+description: One structured model call, then code for the checks, the writes and the reply.
+engine: {name: langgraph}
+state_schema: support_steps:CodeCase
+context_schema: envs.custom.tools:AccountContext
+
+nodes:
+  read:
+    type: structured
+    # The frozen model. Every model call of this harness must use exactly this block.
+    model: {provider: import, id: openai, ref: "harness.openai_model:chat"}
+    method: json_schema
+    output_schema: support_steps:Request
+    prompt: |
+      Extract every independent request in this customer message, not just the main one.
+      Fill address and settings only for changes the customer actually requests. Leave
+      missing address parts null; do not borrow details from another address.
+      Select policy_topics only for questions about what the shop allows, requires,
+      or supports, including hypothetical scenarios and general eligibility questions.
+      Policy questions, order or refund status checks, complaints without a requested
+      remedy, and mentions of previous refunds never authorize a write. A polite
+      question that clearly asks us to act on a particular purchase or account can
+      still be a request to act.
+
+      Add a refund entry only for a clear request to issue a refund now. Do not add
+      entries for withdrawn, negated, hypothetical, or conditional refund instructions.
+      Use one entry per requested purchase, keeping its target and amount together.
+      Copy the exact order ID for that refund if given. Otherwise copy the identifying
+      product phrase verbatim into item. Do not infer targets, use generic phrases like
+      "my order", select among alternatives, or borrow an ID or amount from another
+      request. If the target is unclear, leave both order_id and item null. Use null
+      for amount_cents for a full refund; if a partial refund is requested without a
+      clear amount, set clarify_amount to true instead of treating it as full.
+
+      {request}
+    writes:
+      policy_topics: policy_topics
+      refunds: refunds
+      address: address
+      settings: settings
+  handle:
+    type: function
+    ref: support_steps:handle
+    # Safe to retry: the refund service deduplicates by operation key.
+    retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
+  find_held:
+    type: function
+    ref: envs.custom.approval:find_held
+  approval:
+    type: function
+    ref: envs.custom.approval:wait_for_supervisor
+  issue:
+    type: function
+    ref: envs.custom.approval:issue_approved
+    retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
+  reply:
+    type: function
+    ref: support_steps:reply_after_approval
+
+edges:
+  - [START, read]
+  - [read, handle]
+  - [approval, issue]
+  - [issue, reply]
+  - [reply, END]
+conditional_edges:
+  - source: handle
+    field: next_step
+    routes: {done: END}
+    default: find_held
+  - source: find_held
+    field: next_step
+    routes: {approval: approval}
+    default: END

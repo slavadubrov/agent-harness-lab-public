@@ -1,0 +1,221 @@
+--- a/support_steps.py
++++ b/support_steps.py
+@@ -25,6 +25,8 @@
+ 
+ EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+ ORDER = re.compile(r"\bO-\d{4}\b")
++ACCOUNT = re.compile(r"\bA-\d+\b")
++ASK_ORDER = "Which order is this about? Please send the order number, for example O-1234."
+ SETTINGS = {
+     "marketing_emails": {"on", "off"},
+     "sms_notifications": {"on", "off"},
+@@ -116,17 +118,25 @@
+     value: str = Field(description="on or off, or an ISO 639-1 code for language.")
+ 
+ 
+-class RefundRequest(BaseModel):
+-    order_id: str | None = Field(None, description="Exact order number for this refund, if given.")
+-    item: str | None = Field(None, description="Verbatim identifying product phrase if no order ID is given for this refund.")
++class OrderTarget(BaseModel):
++    order_id: str | None = Field(None, description="Exact order number for this request, if given.")
++    item: str | None = Field(None, description="Verbatim product name without surrounding sentence text, if no order ID is given.")
++
++
++class RefundRequest(OrderTarget):
+     amount_cents: int | None = Field(None, description="Amount stated for this refund, in cents. Null for full refunds.")
+     clarify_amount: bool = Field(False, description="True if only part of the price is requested but the amount is unclear.")
+ 
+ 
++class StatusCheck(OrderTarget):
++    kind: Literal["order", "refund"]
++
++
+ class Request(BaseModel):
+     """Independent requests in one message; leave unrequested actions empty."""
+ 
+     policy_topics: list[PolicyTopic] = Field(default_factory=list)
++    status_checks: list[StatusCheck] = Field(default_factory=list)
+     refunds: list[RefundRequest] = Field(default_factory=list)
+     address: Address | None = None
+     settings: list[Setting] = Field(default_factory=list)
+@@ -134,6 +144,7 @@
+ 
+ class CodeCase(CaseState):
+     policy_topics: list[PolicyTopic] = Field(default_factory=list)
++    status_checks: list[StatusCheck] = Field(default_factory=list)
+     refunds: list[RefundRequest] = Field(default_factory=list)
+     address: Address | None = None
+     settings: list[Setting] = Field(default_factory=list)
+@@ -151,19 +162,51 @@
+     return " ".join(re.findall(r"[^\W_]+", text.casefold()))
+ 
+ 
+-def _match_refund_item(item: str, message: str, con: Connection, account_id: str) -> str | None:
++def _match_order_item(item: str, message: str, con: Connection, account_id: str) -> str | None:
+     item = _words(item)
+     phrase = f" {item} "
+     if not item or phrase not in f" {_words(message)} ":
+         return None
+-    # Match the target before checking refund eligibility. An ineligible order must
+-    # still count as a match; otherwise eligibility could silently pick another order.
++    # Match across all of the customer's orders, regardless of status or eligibility.
+     matches = [
+         row["id"]
+         for row in con.execute("SELECT id, item FROM orders WHERE account_id = ?", (account_id,))
+         if phrase in f" {_words(row['item'])} "
+     ]
+     return matches[0] if len(matches) == 1 else None
++
++
++def _resolve_order(target: OrderTarget, message: str, con: Connection, account_id: str) -> str | None:
++    if target.order_id is not None:
++        return target.order_id if target.order_id in ORDER.findall(message) else None
++    if target.item:
++        return _match_order_item(target.item, message, con, account_id)
++    return None
++
++
++def _read_status(check: StatusCheck, message: str, con: Connection, account_id: str) -> str:
++    order_id = _resolve_order(check, message, con, account_id)
++    if order_id is None:
++        return ASK_ORDER
++    order = con.execute(
++        "SELECT status, delivered_at, total_cents FROM orders WHERE id = ? AND account_id = ?",
++        (order_id, account_id),
++    ).fetchone()
++    if order is None:
++        return f"I cannot find order {order_id} on your account."
++    if check.kind == "refund":
++        refunded = con.execute(
++            "SELECT COALESCE(SUM(amount_cents), 0) FROM refunds WHERE order_id = ?", (order_id,)
++        ).fetchone()[0]
++        if not refunded:
++            return f"Our records do not show an issued refund for order {order_id}."
++        extent = "full" if refunded == order["total_cents"] else "partial"
++        return f"Our records show a {extent} refund totaling ${refunded / 100:.2f} for order {order_id}."
++    if order["status"] == "delivered" and order["delivered_at"]:
++        return f"Order {order_id} was delivered on {order['delivered_at']}."
++    if order["status"] == "shipped":
++        return f"Order {order_id} has shipped. I don't have an estimated delivery date."
++    return f"Order {order_id} is marked as {order['status']}."
+ 
+ 
+ def _check_refund(
+@@ -204,20 +247,13 @@
+ 
+ 
+ def _refund_plan(
+-    state: CodeCase, con: Connection, case_id: str, account_id: str, answers: list[str]
++    state: CodeCase, message: str, con: Connection, case_id: str, account_id: str, answers: list[str]
+ ) -> dict[str, int]:
+-    message = EMAIL.sub(" ", state.request)
+-    mentioned = set(ORDER.findall(message))
+     by_order: dict[str, set[tuple[int | None, bool]]] = {}
+     for refund in state.refunds:
+-        if refund.order_id is not None:
+-            order_id = refund.order_id if refund.order_id in mentioned else None
+-        elif refund.item:
+-            order_id = _match_refund_item(refund.item, message, con, account_id)
+-        else:
+-            order_id = None
++        order_id = _resolve_order(refund, message, con, account_id)
+         if order_id is None:
+-            answers.append("Which order is this about? Please send the order number, for example O-1234.")
++            answers.append(ASK_ORDER)
+             continue
+         by_order.setdefault(order_id, set()).add((refund.amount_cents, refund.clarify_amount))
+ 
+@@ -293,26 +329,42 @@
+         return {"answer": " ".join([*answers, message]).strip(), "next_step": "done"}
+ 
+     has_changes = bool(state.refunds or state.address or state.settings)
+-    if answers and not has_changes:
++    has_status = bool(state.status_checks)
++    if answers and not has_changes and not has_status:
+         return done()
+     emails = EMAIL.findall(state.request)
+-    if not emails:
++    message = EMAIL.sub(" ", state.request)
++    # An account ID can identify a status-only lookup, but does not relax write routing.
++    account_ids = set(ACCOUNT.findall(message)) if has_status and not has_changes else set()
++    if not emails and not account_ids:
++        if has_status and not has_changes:
++            return done("Please send the email address or ID of your account.")
+         return done("Please send the email address of your account.")
+     if has_changes and len({email.casefold() for email in emails}) != 1:
+         return done("Please confirm which email address identifies the account for these changes.")
++    if has_status and (len({email.casefold() for email in emails}) > 1 or len(account_ids) > 1):
++        return done("Please confirm which account you want me to check.")
+     con = connect(ctx.context.db_path)
+     try:
+-        row = con.execute(
+-            "SELECT * FROM accounts WHERE lower(email) = lower(?)", (emails[0],)
+-        ).fetchone()
+-        if row is None:
+-            return done("I cannot find an account with that email address.")
++        if emails:
++            row = con.execute(
++                "SELECT * FROM accounts WHERE lower(email) = lower(?)", (emails[0],)
++            ).fetchone()
++            if row is None:
++                return done("I cannot find an account with that email address.")
++            if account_ids and row["id"] not in account_ids:
++                return done("Please confirm which account you want me to check.")
++        else:
++            row = con.execute("SELECT * FROM accounts WHERE id = ?", (next(iter(account_ids)),)).fetchone()
++            if row is None:
++                return done("I cannot find an account with that ID.")
+         account = dict(row)
+-        planned = _refund_plan(state, con, ctx.context.case_id, account["id"], answers)
++        answers.extend(_read_status(check, message, con, account["id"]) for check in state.status_checks)
++        planned = _refund_plan(state, message, con, ctx.context.case_id, account["id"], answers)
+     finally:
+         con.close()
+     if not has_changes:
+-        return done("I have passed your message to a colleague, who will reply soon.")
++        return done() if has_status else done("I have passed your message to a colleague, who will reply soon.")
+ 
+     pending = []
+     needs_review = any(amount > APPROVAL_LIMIT_CENTS for amount in planned.values())
+--- a/workflow.yaml
++++ b/workflow.yaml
+@@ -22,24 +22,29 @@
+       missing address parts null; do not borrow details from another address.
+       Select policy_topics only for questions about what the shop allows, requires,
+       or supports, including hypothetical scenarios and general eligibility questions.
+-      Policy questions, order or refund status checks, complaints without a requested
+-      remedy, and mentions of previous refunds never authorize a write. A polite
+-      question that clearly asks us to act on a particular purchase or account can
+-      still be a request to act.
++      Add status_checks only for questions about a specific customer's orders:
++      kind order for shipping or delivery status, kind refund to check whether or
++      how much was already refunded. These are read-only. Policy questions, status
++      checks, complaints without a requested remedy, and mentions of previous
++      refunds never authorize a write. A polite question that clearly asks us to
++      act on a particular purchase or account can still be a request to act.
+ 
+       Add a refund entry only for a clear request to issue a refund now. Do not add
+       entries for withdrawn, negated, hypothetical, or conditional refund instructions.
+       Use one entry per requested purchase, keeping its target and amount together.
+-      Copy the exact order ID for that refund if given. Otherwise copy the identifying
+-      product phrase verbatim into item. Do not infer targets, use generic phrases like
+-      "my order", select among alternatives, or borrow an ID or amount from another
+-      request. If the target is unclear, leave both order_id and item null. Use null
+-      for amount_cents for a full refund; if a partial refund is requested without a
+-      clear amount, set clarify_amount to true instead of treating it as full.
++      For each refund and status check, copy its exact order ID if given. Otherwise
++      copy only the identifying product name verbatim into item, keeping identifying
++      modifiers but omitting articles, possessives, and descriptions of the purchase
++      or problem. Do not infer targets, use generic phrases like "my order", select
++      among alternatives, or borrow an ID or amount from another request. If the
++      target is unclear, leave both order_id and item null. Use null for amount_cents
++      for a full refund; if a partial refund is requested without a clear amount,
++      set clarify_amount to true instead of treating it as full.
+ 
+       {request}
+     writes:
+       policy_topics: policy_topics
++      status_checks: status_checks
+       refunds: refunds
+       address: address
+       settings: settings

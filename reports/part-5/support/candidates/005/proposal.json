@@ -1,0 +1,33 @@
+{
+  "id": "005",
+  "parent": "003",
+  "decision": "",
+  "reasons": [],
+  "note": "Account email changes are now handled as unsupported requests: the assistant directs the customer to support before attempting an account lookup, rather than mistaking the replacement address for a second account identifier. Other requests in the same message still go through the existing identity checks. This targets the email-change handoff failure without adding a model call or changing refund logic. The workflow was reviewed but not run.\n",
+  "files": [
+    {
+      "path": "support_steps.py",
+      "added": 16,
+      "removed": 6
+    }
+  ],
+  "tree": "cd7407a68b64",
+  "improver": {
+    "note": "",
+    "cost_usd": 0.076612,
+    "seconds": 53.961326332999306,
+    "model": "gpt-6.2-sol",
+    "denied": [],
+    "error": null
+  },
+  "dev": null,
+  "val": null,
+  "delta": null,
+  "eval": {
+    "episodes": 0,
+    "cost_usd": 0.0,
+    "unknown_cost": 0,
+    "seconds": 0.0
+  },
+  "at": "2026-11-26T15:50:55+00:00"
+}

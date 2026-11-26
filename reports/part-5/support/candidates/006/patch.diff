@@ -1,0 +1,175 @@
+--- a/support_steps.py
++++ b/support_steps.py
+@@ -1,7 +1,8 @@
+ """The support assistant as a workflow with no agent: the harness the loop improves.
+ 
+-One model call reads the customer's message into typed fields (``Request``). Everything
+-else is code: account and order lookups use identifiers or a unique item match, the policy rules
++The main model call reads the customer's message into typed fields (``Request``).
++A separate read-only status classifier is used only before a generic handoff. In code,
++account and order lookups use identifiers or a unique item match, the policy rules
+ are ``if`` statements, the writes go through the environment's tools and refund service,
+ and the reply comes from a template. A refund above $200 is held by the refund service,
+ and the environment's approval steps take over (``workflow.yaml``).
+@@ -132,12 +133,20 @@
+     settings: list[Setting] = Field(default_factory=list)
+ 
+ 
++class StatusQuery(BaseModel):
++    status_kind: Literal["none", "order", "refund"]
++    status_target: str | None = Field(description="One verbatim order number or product name, or null.")
++
++
+ class CodeCase(CaseState):
+     policy_topics: list[PolicyTopic] = Field(default_factory=list)
+     refunds: list[RefundRequest] = Field(default_factory=list)
+     address: Address | None = None
+     settings: list[Setting] = Field(default_factory=list)
+     other_answer: str = ""  # results to keep when the pending refund notices are replaced
++    status_account: str | None = None  # set by the account lookup, never by the model
++    status_kind: Literal["none", "order", "refund"] = "none"
++    status_target: str | None = None
+ 
+ 
+ # -- code: checks, writes and replies ---------------------------------------------------
+@@ -151,7 +160,7 @@
+     return " ".join(re.findall(r"[^\W_]+", text.casefold()))
+ 
+ 
+-def _match_refund_item(item: str, message: str, con: Connection, account_id: str) -> str | None:
++def _match_order_item(item: str, message: str, con: Connection, account_id: str) -> str | None:
+     item = _words(item)
+     phrase = f" {item} "
+     if not item or phrase not in f" {_words(message)} ":
+@@ -213,7 +222,7 @@
+         if refund.order_id is not None:
+             order_id = refund.order_id if refund.order_id in mentioned else None
+         elif refund.item:
+-            order_id = _match_refund_item(refund.item, message, con, account_id)
++            order_id = _match_order_item(refund.item, message, con, account_id)
+         else:
+             order_id = None
+         if order_id is None:
+@@ -312,7 +321,13 @@
+     finally:
+         con.close()
+     if not has_changes:
+-        return done("I have passed your message to a colleague, who will reply soon.")
++        handoff = done("I have passed your message to a colleague, who will reply soon.")
++        account_ids = set(re.findall(r"\bA-\d+\b", EMAIL.sub(" ", state.request), re.IGNORECASE))
++        if len({email.casefold() for email in emails}) == 1 and all(
++            identifier.upper() == account["id"].upper() for identifier in account_ids
++        ):
++            return {**handoff, "next_step": "check_status", "status_account": account["id"]}
++        return handoff
+ 
+     pending = []
+     needs_review = any(amount > APPROVAL_LIMIT_CENTS for amount in planned.values())
+@@ -346,6 +361,45 @@
+     return done()
+ 
+ 
++def answer_status(state: CodeCase, ctx: NodeContext) -> dict[str, Any]:
++    """Answer read-only status questions; leave the original handoff for other requests."""
++    result = {"next_step": "done"}
++    account_id = state.status_account
++    if state.status_kind == "none" or account_id is None:
++        return result
++
++    message = EMAIL.sub(" ", state.request)
++    mentioned = set(ORDER.findall(message))
++    target = state.status_target
++    clarify = "Which order would you like me to check? Please send the order number."
++    if not target or len(mentioned) > 1 or (mentioned and target not in mentioned):
++        return {**result, "answer": clarify}
++
++    con = connect(ctx.context.db_path)
++    try:
++        order_id = target if mentioned else _match_order_item(target, message, con, account_id)
++        if order_id is None:
++            return {**result, "answer": clarify}
++        order = con.execute(
++            "SELECT status FROM orders WHERE id = ? AND account_id = ?", (order_id, account_id)
++        ).fetchone()
++        if order is None:
++            return {**result, "answer": f"I cannot find order {order_id} on your account."}
++        if state.status_kind == "order":
++            answer = f"Order {order_id} is marked as {order['status']}."
++        else:
++            cents = con.execute(
++                "SELECT COALESCE(SUM(amount_cents), 0) FROM refunds WHERE order_id = ?", (order_id,)
++            ).fetchone()[0]
++            answer = (
++                f"Our records show ${cents / 100:,.2f} refunded in total for order {order_id}."
++                if cents else f"Our records do not show an issued refund for order {order_id}."
++            )
++        return {**result, "answer": answer}
++    finally:
++        con.close()
++
++
+ def reply_after_approval(state: CodeCase, ctx: NodeContext) -> dict[str, Any]:
+     result = approval_reply(state, ctx)
+     if state.held and state.other_answer:
+--- a/workflow.yaml
++++ b/workflow.yaml
+@@ -1,10 +1,10 @@
+-# The support assistant with no agent. One model call reads the message into typed
+-# fields; code does the rest: regular expressions, the policy rules, the writes and a
+-# template reply. A refund above $200 goes to the environment's approval steps.
++# The support assistant with no agent. A structured call reads the main requests;
++# a read-only status classifier runs only on the generic handoff path.
++# A refund above $200 goes to the environment's approval steps.
+ # Functions of this harness: support_steps.py, next to this file.
+ kind: workflow
+ name: support
+-description: One structured model call, then code for the checks, the writes and the reply.
++description: Structured request extraction, deterministic checks and writes, and a read-only status fallback.
+ engine: {name: langgraph}
+ state_schema: support_steps:CodeCase
+ context_schema: envs.custom.tools:AccountContext
+@@ -48,6 +48,27 @@
+     ref: support_steps:handle
+     # Safe to retry: the refund service deduplicates by operation key.
+     retry: {max_attempts: 3, initial_interval: 0.5, retry_on: ["builtins:ConnectionError"]}
++  read_status:
++    type: structured
++    model: {provider: import, id: openai, ref: "harness.openai_model:chat"}
++    method: json_schema
++    output_schema: support_steps:StatusQuery
++    prompt: |
++      Classify a read-only inquiry about one existing order. Use order for a question
++      about shipment, delivery, or order status. Use refund for a question about whether
++      a prior refund went through or how much was already refunded. Use none for other
++      topics, policy questions, complaints without a status inquiry, or requests to take action.
++      For a clear target, copy the order number if given; otherwise copy only the product
++      name as written, without surrounding words. Use null if the target is unspecified
++      or ambiguous. Do not choose among alternatives or infer a product or number.
++
++      {request}
++    writes:
++      status_kind: status_kind
++      status_target: status_target
++  answer_status:
++    type: function
++    ref: support_steps:answer_status
+   find_held:
+     type: function
+     ref: envs.custom.approval:find_held
+@@ -65,13 +86,15 @@
+ edges:
+   - [START, read]
+   - [read, handle]
++  - [read_status, answer_status]
++  - [answer_status, END]
+   - [approval, issue]
+   - [issue, reply]
+   - [reply, END]
+ conditional_edges:
+   - source: handle
+     field: next_step
+-    routes: {done: END}
++    routes: {done: END, check_status: read_status}
+     default: find_held
+   - source: find_held
+     field: next_step

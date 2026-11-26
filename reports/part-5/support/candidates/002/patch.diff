@@ -1,0 +1,147 @@
+--- a/support_steps.py
++++ b/support_steps.py
+@@ -1,7 +1,7 @@
+ """The support assistant as a workflow with no agent: the harness the loop improves.
+ 
+ One model call reads the customer's message into typed fields (``Request``). Everything
+-else is code: regular expressions find the email and the order number, the policy rules
++else is code: account and order lookups use identifiers or a unique item match, the policy rules
+ are ``if`` statements, the writes go through the environment's tools and refund service,
+ and the reply comes from a template. A refund above $200 is held by the refund service,
+ and the environment's approval steps take over (``workflow.yaml``).
+@@ -11,6 +11,7 @@
+ 
+ import re
+ from datetime import date
++from sqlite3 import Connection
+ from types import SimpleNamespace
+ from typing import Any, Literal
+ 
+@@ -125,6 +126,9 @@
+     amount_cents: int | None = Field(
+         None, description="Refund amount the customer states, in cents. Empty for the full amount."
+     )
++    refund_item: str | None = Field(
++        None, description="Verbatim product phrase for one unambiguous refund without an order number."
++    )
+     address: Address | None = None
+     settings: list[Setting] = []
+ 
+@@ -133,6 +137,7 @@
+     kind: str = ""
+     policy_topics: list[PolicyTopic] = Field(default_factory=list)
+     amount_cents: int | None = None
++    refund_item: str | None = None
+     address: Address | None = None
+     settings: list[Setting] = []
+ 
+@@ -144,19 +149,56 @@
+     return SimpleNamespace(context=ctx.context)  # the tools read only runtime.context
+ 
+ 
+-def _refund(state: CodeCase, ctx: NodeContext, account: dict, order_id: str | None) -> str:
+-    if order_id is None:
+-        return "Which order is this about? Please send the order number, for example O-1234."
+-    con = connect(ctx.context.db_path)
++def _words(text: str) -> str:
++    return " ".join(re.findall(r"[^\W_]+", text.casefold()))
++
++
++def _match_refund_item(state: CodeCase, con: Connection, account_id: str) -> str | None:
++    if not state.refund_item or len(set(e.casefold() for e in EMAIL.findall(state.request))) != 1:
++        return None
++    item = _words(state.refund_item)
++    phrase = f" {item} "
++    if not item or phrase not in f" {_words(EMAIL.sub(' ', state.request))} ":
++        return None
++    # Match the target before checking refund eligibility. An ineligible order must
++    # still count as a match; otherwise eligibility could silently pick another order.
++    matches = [
++        row["id"]
++        for row in con.execute("SELECT id, item FROM orders WHERE account_id = ?", (account_id,))
++        if phrase in f" {_words(row['item'])} "
++    ]
++    return matches[0] if len(matches) == 1 else None
++
++
++def _refund(state: CodeCase, ctx: NodeContext, account: dict, orders: list[str]) -> str:
++    c = ctx.context
++    con = connect(c.db_path)
+     try:
+-        order = con.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
++        order_id = orders[0] if len(orders) == 1 else None
++        if not orders:
++            order_id = _match_refund_item(state, con, account["id"])
++        if order_id is None:
++            return "Which order is this about? Please send the order number, for example O-1234."
++        order = con.execute(
++            "SELECT * FROM orders WHERE id = ? AND account_id = ?", (order_id, account["id"])
++        ).fetchone()
++        if order is None:
++            return f"I cannot find order {order_id} on your account, so I cannot refund it."
++        # A lost response may leave no refundable balance. Return the receipt for
++        # this case rather than treating our own previous write as an older refund.
++        issued = con.execute(
++            "SELECT amount_cents, refund_id FROM refund_operations "
++            "WHERE case_id = ? AND order_id = ? AND status = 'issued'",
++            (c.case_id, order_id),
++        ).fetchone()
++        if issued is not None:
++            return (f"I refunded ${issued['amount_cents'] / 100:.2f} for order {order_id} "
++                    f"(refund {issued['refund_id']}).")
+         refunded = con.execute(
+             "SELECT COALESCE(SUM(amount_cents), 0) FROM refunds WHERE order_id = ?", (order_id,)
+         ).fetchone()[0]
+     finally:
+         con.close()
+-    if order is None or order["account_id"] != account["id"]:
+-        return f"I cannot find order {order_id} on your account, so I cannot refund it."
+     if order["status"] == "cancelled":
+         return f"Order {order_id} was cancelled, so it is refunded automatically."
+     if order["status"] != "delivered":
+@@ -166,10 +208,11 @@
+     remaining = order["total_cents"] - refunded
+     if remaining <= 0:
+         return f"Order {order_id} has already been refunded in full."
+-    amount = state.amount_cents or remaining
++    amount = remaining if state.amount_cents is None else state.amount_cents
++    if amount <= 0:
++        return "Please specify a positive refund amount."
+     if amount > remaining:
+         return f"I can refund at most ${remaining / 100:.2f} on order {order_id}."
+-    c = ctx.context
+     r = call_refund_service(
+         c.db_path, c.case_id, order_id, amount, f"Customer request: {state.kind}", fault=c.fault
+     )
+@@ -240,7 +283,7 @@
+         return {"answer": "I cannot find an account with that email address."}
+     account = dict(row)
+     if state.kind == "refund":
+-        return {"answer": _refund(state, ctx, account, orders[0] if len(orders) == 1 else None)}
++        return {"answer": _refund(state, ctx, account, orders)}
+     if state.kind == "address":
+         return {"answer": _address(state, ctx, account)}
+     if state.kind == "preferences":
+--- a/workflow.yaml
++++ b/workflow.yaml
+@@ -28,12 +28,20 @@
+       Use kind=other for status checks on specific orders or past refunds: asking what
+       happened is not a request to issue a refund. Leave policy_topics empty for
+       non-policy requests.
++      For a clear request to refund exactly one purchase without an order number,
++      copy the identifying product name or phrase from the message into refund_item,
++      retaining any details that distinguish the product. Do not infer a product, use
++      a generic reference like "my order", or select among alternatives. Leave this
++      field empty if the target is unclear, if the customer gives an order identifier,
++      if the refund is conditional, or if only part of the price is requested and
++      the amount is not stated. Always leave it empty for non-refund requests.
+ 
+       {request}
+     writes:
+       kind: kind
+       policy_topics: policy_topics
+       amount_cents: amount_cents
++      refund_item: refund_item
+       address: address
+       settings: settings
+   handle:
