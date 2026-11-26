@@ -102,30 +102,26 @@ def test_malformed_yaml_is_reported_as_invalid(candidate):
 def test_regrade_of_all_saved_runs_reports_the_observed_results(capsys):
     from loop.regrade import REPORTS, main
 
-    main(REPORTS / "support-sign-test")
+    main(REPORTS / "support")
     output = capsys.readouterr().out
     assert "5-loop regraded with 5-loop" in output
-    assert "Better on 6 tasks, worse on 1 task" in output
-    assert "Better on 4 tasks, worse on 0 tasks" in output
-    # The campaign was decided with the sign test; the step rule over runs adopts
-    # candidates 1 and 3 and rejects candidate 2 for two broken tasks.
+    assert "Better on 3 tasks, worse on 1 task" in output
+    assert "Better on 15 tasks, worse on 0 tasks" in output
+    # Candidates 1 to 3 were adopted; 4 and 6 stay within run noise; 5 broke a task.
     assert (
-        "Recorded: inconclusive. Current rule: adopt. 6 better, 1 worse; largest task loss"
-        " 0.33, broken tasks 0; permutation p = 8.75e-07; sign test p = 0.125,"
-        " Wilcoxon p = 0.031." in output
+        "Recorded: adopt. Current rule: adopt. 3 better, 1 worse; largest task loss"
+        " 0.33, broken tasks 0; permutation p = 0.00363;" in output
     )
     assert (
-        "Recorded: inconclusive. Current rule: reject. 6 better, 2 worse; largest task loss"
-        " 1.00, broken tasks 2; permutation p = 0.00315; sign test p = 0.289,"
-        " Wilcoxon p = 0.289." in output
+        "Recorded: inconclusive. Current rule: inconclusive. 2 better, 1 worse; largest task"
+        " loss 0.67, broken tasks 0; permutation p = 0.63;" in output
     )
     assert (
-        "Recorded: inconclusive. Current rule: adopt. 4 better, 0 worse; largest task loss"
-        " 0.00, broken tasks 0; permutation p = 1.25e-05; sign test p = 0.125,"
-        " Wilcoxon p = 0.125." in output
+        "Recorded: reject. Current rule: reject. 1 better, 5 worse; largest task loss"
+        " 1.00, broken tasks 1;" in output
     )
     assert "policy: 0/18" in output
-    assert "two-address-allowed-refund-refused" in output
+    assert "unusual-change-email" in output
 
 
 def test_regrade_skips_validation_decisions_on_a_development_tie(capsys, monkeypatch):
@@ -137,6 +133,6 @@ def test_regrade_skips_validation_decisions_on_a_development_tie(capsys, monkeyp
     monkeypatch.setattr(
         regrade, "usecase", lambda: replace(uc, tasks=[replace(t, checks=()) for t in uc.tasks])
     )
-    regrade.main(regrade.REPORTS / "support-sign-test")
+    regrade.main(regrade.REPORTS / "support")
     output = capsys.readouterr().out
-    assert output.count("Screened on development") == 3
+    assert output.count("Screened on development") == 6

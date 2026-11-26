@@ -9,7 +9,7 @@
   held fixed for every candidate.
 
     uv run --group loop harness-loop run loop.target:TARGET reports/part-5/support
-    uv run --group loop harness-loop report loop.target:TARGET reports/part-5/support-sign-test   # offline
+    uv run --group loop harness-loop report loop.target:TARGET reports/part-5/support   # offline
 """
 
 from __future__ import annotations
