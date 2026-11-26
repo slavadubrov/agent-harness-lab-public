@@ -162,8 +162,9 @@ compares task pass rates across the three validation runs per task.
 | [2. Handle several requests](reports/part-5/support-sign-test/candidates/002/patch.diff) | 6 / 2 | Fixed all six multi-request tasks. The name-change and password-reset requests were classified as unsupported settings. The interval for the gain crossed zero. |
 | [3. Find an order by product name](reports/part-5/support-sign-test/candidates/003/patch.diff) | 4 / 0 | Improved three vague requests and one delivery question. The sign test gave p = 0.125. |
 
-The current step rule rejects a candidate if a task's pass rate falls by more than 0.5,
-and adopts it only if a permutation test over the runs shows a gain larger than the
+The current step rule rejects a candidate if a task loses more runs than run noise
+explains (a one-sided Fisher exact test on that task's runs; with 3 runs on each side,
+only a fall from 3 of 3 to 0 of 3), and adopts it only if a permutation test over the runs shows a gain larger than the
 difference between repeated runs. Regrading the saved campaign under it gives these
 decisions; the ledger keeps the decisions taken at run time:
 
