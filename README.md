@@ -133,18 +133,20 @@ in average tokens per task stays within the 1,000-token guardrail.
 
 The step rule rejects a candidate if a task loses more runs than run noise explains (a
 one-sided Fisher exact test on that task's runs; with 3 runs on each side, only a fall
-from 3 of 3 to 0 of 3). It adopts a candidate only if a permutation test over the runs
-shows a gain larger than the difference between repeated runs. Each candidate is
+from 3 of 3 to 0 of 3). It adopts a candidate only if a one-sided permutation test over
+the runs shows a gain larger than the difference between repeated runs: p is how often
+an edit that changes nothing gives the candidate at least as many passed runs. Each
+candidate is
 compared with the harness that was current when it was proposed.
 
 | Candidate | Compared with | Validation success | Tasks better / worse | Permutation p | Decision |
 | --- | --- | --- | --- | --- | --- |
-| [1. Answer policy questions](reports/part-5/support/candidates/001/patch.diff) | start | 0.47 to 0.66 | 6 / 0 | 3.1e-08 | adopt |
-| [2. Find an order by product name](reports/part-5/support/candidates/002/patch.diff) | 1 | 0.66 to 0.74 | 3 / 1 | 0.0036 | adopt |
-| [3. Handle several requests](reports/part-5/support/candidates/003/patch.diff) | 2 | 0.74 to 0.92 | 6 / 0 | 1.3e-06 | adopt |
-| [4. Answer order and refund status questions](reports/part-5/support/candidates/004/patch.diff) | 3 | 0.92 to 0.94 | 2 / 1 | 0.63 | inconclusive |
+| [1. Answer policy questions](reports/part-5/support/candidates/001/patch.diff) | start | 0.47 to 0.66 | 6 / 0 | 1.6e-08 | adopt |
+| [2. Find an order by product name](reports/part-5/support/candidates/002/patch.diff) | 1 | 0.66 to 0.74 | 3 / 1 | 0.0018 | adopt |
+| [3. Handle several requests](reports/part-5/support/candidates/003/patch.diff) | 2 | 0.74 to 0.92 | 6 / 0 | 6.5e-07 | adopt |
+| [4. Answer order and refund status questions](reports/part-5/support/candidates/004/patch.diff) | 3 | 0.92 to 0.94 | 2 / 1 | 0.32 | inconclusive |
 | [5. Hand off email-address changes](reports/part-5/support/candidates/005/patch.diff) | 3 | 0.92 to 0.82 | 1 / 5 | | reject: one broken task |
-| [6. A separate status check](reports/part-5/support/candidates/006/patch.diff) | 3 | 0.92 to 0.94 | 2 / 1 | 0.63 | inconclusive |
+| [6. A separate status check](reports/part-5/support/candidates/006/patch.diff) | 3 | 0.92 to 0.94 | 2 / 1 | 0.32 | inconclusive |
 
 The campaign stopped after three candidates in a row were not adopted. On the 32 test
 tasks, success rose from 0.44 to 0.90 (+0.458, interval +0.292 to +0.625; 15 tasks

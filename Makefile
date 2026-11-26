@@ -161,7 +161,7 @@ LOOP_TRIALS ?= dev=2,val=3,test=3
 MAX_USD ?= 10
 
 # The episode regrade uses the same evaluator as the full project and installs no runner.
-REPLAY_EVALS ?= git+https://github.com/slavadubrov/harness-evals@9f67256961ee5d08155ea1f3158c393b361fdd88
+REPLAY_EVALS ?= git+https://github.com/slavadubrov/harness-evals@df614932c37795cf7795bd58f374e858610e10cd
 part5-regrade: part5-campaign
 	$(UV) run --no-project --with "$(REPLAY_EVALS)" python -m loop.regrade '$(CAMPAIGN)'
 
